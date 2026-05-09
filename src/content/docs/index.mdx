@@ -1,0 +1,58 @@
+---
+title: Browy
+description: AI agent in your browser. Drives tabs, reads pages, writes code.
+template: splash
+hero:
+  tagline: An AI agent that lives in your browser. Drives tabs, reads pages, writes code — using your own GitHub Copilot subscription.
+  image:
+    file: ../../assets/logo.png
+  actions:
+    - text: Install Browy
+      link: /docs/install/
+      icon: right-arrow
+    - text: View on GitHub
+      link: https://github.com/BrowyHQ
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Why Browy?
+
+<CardGrid stagger>
+  <Card title="Lives in your browser" icon="laptop">
+    Browy is a Chrome side panel + a small native helper. It uses the
+    Chrome DevTools Protocol to see and act on pages — no separate
+    browser, no headless instance.
+  </Card>
+  <Card title="Your Copilot, your machine" icon="seti:github">
+    All LLM traffic flows through your GitHub Copilot subscription via
+    a local CLI. Browy itself runs no server and collects no telemetry.
+  </Card>
+  <Card title="Real tools, not just clicks" icon="setting">
+    The agent can read DOM, take screenshots, run arbitrary JavaScript
+    in the page, capture network logs, save scratch files, and remember
+    things across chats.
+  </Card>
+  <Card title="Open source" icon="open-book">
+    Browy is open source under Apache 2.0. Audit the agent loop,
+    inspect the redaction list, build it yourself.
+  </Card>
+</CardGrid>
+
+## Get started
+
+Install on Windows:
+
+```powershell
+irm https://github.com/BrowyHQ/browy/releases/latest/download/install.ps1 | iex
+```
+
+Then load the unpacked extension from `~/Downloads/Browy-Extension/`
+in `chrome://extensions` (Developer Mode → "Load unpacked").
+
+See the [install guide](/docs/install/) for full instructions, the
+[first-chat walkthrough](/docs/first-chat/), and the
+[permissions reference](/docs/permissions/) explaining what the
+extension does and does not access.
