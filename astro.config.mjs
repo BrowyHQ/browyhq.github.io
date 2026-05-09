@@ -51,6 +51,7 @@ export default defineConfig({
         {
           label: 'Project',
           items: [
+            { label: 'FAQ', slug: 'faq' },
             { label: 'Changelog', slug: 'changelog' },
             { label: 'Roadmap & contributing', slug: 'roadmap' },
           ],
