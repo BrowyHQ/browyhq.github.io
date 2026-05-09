@@ -6,9 +6,11 @@ description: Every tool Browy exposes to the LLM — and the ones it deliberatel
 import { CardGrid, Card, LinkCard, Aside, Badge, Tabs, TabItem } from '@astrojs/starlight/components';
 
 Browy ships with the **browser-driving tools enabled by default**.
-Power-user tools that touch your host (shell, filesystem, arbitrary
-HTTP) come from the GitHub Copilot SDK and are **off by default** —
-flip them on per-tool in **Settings → Tools** when you need them.
+You can turn off any individual tool in **Settings → Tools** — handy
+for running in stricter modes (read-only, no JS-eval, etc.).
+Host-touching tools (`read_file`, `bash`, `web_fetch`) are **only
+available** through the headless terminal CLI ([`browy run`](#host-tools-terminal-cli)),
+never inside the browser surfaces.
 
 <Aside type="note">
 The authoritative list lives in
@@ -91,33 +93,58 @@ context.
 </TabItem>
 </Tabs>
 
-## Configurable safety defaults
+## Configurable per-tool toggles
 
-The Copilot SDK ships with `read_file` / `write_file` / `bash` /
-`web_fetch` tools that operate on your **host** machine and arbitrary
-URLs. Browy keeps these **off by default** and exposes them as
-per-tool toggles in **Settings → Tools**.
+Every built-in browser tool can be turned off individually in
+**Settings → Tools** (right-click the Browy toolbar icon → Options).
+Toggles are grouped by category — _inspect_, _navigate_, _interact_,
+_devtools_ — and persist in `chrome.storage.local`. Disabled tools are
+stripped from the SDK's allowlist **and** from the function-definition
+list sent to the model, so the agent never sees they exist.
+
+Common reasons to disable a tool:
 
 <CardGrid>
-  <Card title="Host filesystem" icon="seti:folder">
-    `read_file` / `write_file` against your real filesystem. Off by
-    default; enable when you want the agent to edit files outside the
-    sandboxed `~/.browy/data/` scratch.
+  <Card title="Stricter sandbox" icon="seti:lock">
+    Turn off `evaluate_js` and `run_script` if you don't want the agent
+    running arbitrary JavaScript inside the inspected page (it'll still
+    use the structured tools — `click_index`, `fill_form`, etc.).
   </Card>
-  <Card title="Host shell" icon="seti:shell">
-    `bash` runs commands on your machine. Off by default; enable when
-    you want a true coding agent / build / test loop.
+  <Card title="Read-only mode" icon="seti:eye">
+    Disable everything in _interact_ and _navigate_; keep _inspect_ on.
+    The agent can answer questions about pages but can't change them.
   </Card>
-  <Card title="Arbitrary HTTP" icon="seti:json">
-    `web_fetch` calls any URL directly (not via a navigated page).
-    Off by default; enable for API calls, doc lookups, etc.
+  <Card title="No file I/O" icon="seti:folder">
+    Disable `download_file` / `upload_file` if you never want the agent
+    triggering picker dialogs.
   </Card>
 </CardGrid>
 
-The toggle state lives in `chrome.storage.local` and is read by the
-native host on every connect. The relevant code is in
-[`src/agent/loop.ts`](https://github.com/BrowyHQ/browy/blob/main/src/agent/loop.ts) —
-search for `availableTools`.
+Click **enable all** in the toolbar to undo every override at once.
+Changes apply on the next chat (or after `/clear`).
+
+## Host tools (terminal CLI)
+
+The Copilot SDK ships `read_file` / `write_file` / `bash` / `grep` /
+`glob` / `web_fetch` for true coding-agent workflows. These touch your
+**host machine**, so Browy's browser surfaces (side panel, DevTools
+panel) **never** expose them — only the browser tools above are
+available there.
+
+To use the host toolset, run the headless terminal CLI:
+
+```bash
+browy run "summarize the diff staged in this repo"
+browy run "find every TODO in src/ and group them by file"
+browy run                                  # interactive REPL
+browy run --resume <session-id>            # pick up where you left off
+```
+
+`browy run` is scoped to your current directory by default
+(`--cwd <path>` to override). Sessions are stored under
+`~/.browy/cli-sessions/`, isolated from both Browy's browser sessions
+and your own `copilot` CLI sessions. See
+[**DevTools CLI →**](/docs/devtools-cli/) for the full surface.
 
 ## See also
 
