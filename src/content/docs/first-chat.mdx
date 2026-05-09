@@ -1,0 +1,101 @@
+---
+title: Your first chat
+description: A two-minute walkthrough of what Browy can actually do.
+---
+
+import { Card, CardGrid, LinkCard, Aside, Steps, Badge } from '@astrojs/starlight/components';
+import placeholder from '../../assets/screenshot-placeholder.svg';
+import { Image } from 'astro:assets';
+
+Once Browy is [installed](/docs/install/) and signed in, click the Browy
+icon to open the side panel. Try one of these.
+
+<Image src={placeholder} alt="The Browy side panel after a fresh install, with the prompt input focused" />
+
+## "Summarize this page" <Badge text="vision" />
+
+Open a long article or doc page. In the Browy side panel:
+
+> Summarize this page in 5 bullets.
+
+<Aside type="tip" title="What's happening under the hood">
+Browy calls its `snapshot` tool to capture the active tab's accessibility
+tree (the same tree screen readers see — fast, structural, no rendering),
+sends it to GitHub Copilot, and streams the summary back into the chat.
+No copy-paste; no screenshot needed.
+</Aside>
+
+<Image src={placeholder} alt="Browy summarizing a Wikipedia article in 5 bullets" />
+
+## "Fill out this form for me" <Badge text="actions" variant="success" />
+
+Open a form (sign-up page, survey, settings page). Tell Browy what you
+want filled in:
+
+> My name is Alex Doe, my email is alex@example.com. Fill out this form
+> with that info — leave the password field for me. Don't submit.
+
+Browy clicks fields by their **accessibility index** — no brittle CSS
+selectors — types the values, and stops before submit so you can review.
+
+<Aside type="caution" title="Don't paste secrets into the chat">
+Page content the agent sees is filtered for common secret shapes
+([see the redaction list](/docs/privacy/#secret-redaction)), but text
+*you* type into the chat goes through verbatim. Don't paste passwords,
+API keys, or one-time codes.
+</Aside>
+
+## "Find the cheapest flight" <Badge text="multi-step" variant="note" />
+
+Open google.com:
+
+> Search for flights from SFO to JFK on the 15th, sort by price, and
+> tell me the cheapest one.
+
+Browy will navigate, type the query, click through, read the results,
+and report back. Multi-step automation in plain English.
+
+<Image src={placeholder} alt="Browy clicking through a flight-search results page" />
+
+## "Inspect the network" <Badge text="devtools" />
+
+Open any web app:
+
+> What's the slowest API call on this page when I refresh? Show me the
+> URL, status code, and time.
+
+Browy reads the network log via the Chrome DevTools Protocol and answers
+from data you don't have to open DevTools to see. Secrets in URLs and
+headers are redacted at capture time — see
+[Privacy → Secret redaction](/docs/privacy/#secret-redaction).
+
+## "Run this in the page" <Badge text="evaluate_js" variant="success" />
+
+For deeper inspection, the agent can evaluate arbitrary JavaScript in the
+page context:
+
+> Find every `<button>` on the page that has no `aria-label` and tell me
+> what it says.
+
+The `evaluate_js` tool runs your request as JS in the page and returns
+the result. Top-level `await` works.
+
+## Slash commands
+
+Type `/` in the chat to see them all.
+
+| Command | What it does |
+|---|---|
+| `/login` | Re-trigger the GitHub Copilot device-flow sign-in |
+| `/clear` | Wipe the current chat (the persistent memory survives) |
+| `/chats` | Open the past-chats panel |
+| `/help` | Show this list |
+
+## What's next?
+
+<CardGrid>
+  <LinkCard title="Tools the agent has" href="/docs/tools/" description="Full reference of every tool Browy exposes to the LLM — vision, click/type, network, persistent disk, more." />
+  <LinkCard title="Permissions" href="/docs/permissions/" description="What the extension can and cannot access in your browser." />
+  <LinkCard title="Privacy & data" href="/docs/privacy/" description="What leaves your machine, and what doesn't." />
+  <LinkCard title="Roadmap" href="/docs/roadmap/" description="What's planned next: macOS/Linux, DevTools panel REPL, vision verify, more." />
+</CardGrid>

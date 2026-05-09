@@ -1,31 +1,45 @@
 ---
 title: Install
-description: Install Browy on your machine.
+description: Set up the native host + the browser extension. Takes about 5 minutes.
 ---
 
-import { Tabs, TabItem, Steps, Aside } from '@astrojs/starlight/components';
+import { Tabs, TabItem, Steps, Aside, Badge, LinkCard, CardGrid, Card } from '@astrojs/starlight/components';
+import placeholder from '../../assets/screenshot-placeholder.svg';
+import { Image } from 'astro:assets';
 
 Browy is two pieces:
 
-1. **The native host** — a small Node.js helper that runs on your
-   machine and talks to GitHub Copilot.
+1. **The native host** — a small Node.js helper that runs on your machine
+   and talks to GitHub Copilot.
 2. **The browser extension** — a Chrome side panel that talks to the
    native host.
 
 The installer below sets up both.
 
-<Aside type="caution">
-Browy is in early access. Today the only supported channel is the
-GitHub release. The Chrome Web Store listing is in review.
+<Aside type="caution" title="Early access">
+Today the only supported install channel is the GitHub release. The
+Chrome Web Store listing is in review — once approved, you'll be able
+to install with one click.
 </Aside>
 
 ## Requirements
 
-- Windows 10/11 (macOS and Linux coming soon — see [Roadmap](/docs/roadmap/))
-- A Chromium browser: Chrome, Edge, or Brave
-- A [GitHub Copilot](https://github.com/features/copilot) subscription
+<CardGrid>
+  <Card title="Operating system" icon="laptop">
+    Windows 10 / 11 today.<br/>
+    macOS and Linux coming soon — see the [roadmap](/docs/roadmap/).
+  </Card>
+  <Card title="Browser" icon="seti:html">
+    A Chromium browser:<br/>
+    Chrome 114+, Edge 114+, or Brave.
+  </Card>
+  <Card title="LLM access" icon="seti:github">
+    A [GitHub Copilot](https://github.com/features/copilot) subscription.<br/>
+    Browy uses your existing Copilot, not its own backend.
+  </Card>
+</CardGrid>
 
-## Install the native host
+## Step 1 — install the native host
 
 <Tabs>
 <TabItem label="Windows" icon="seti:windows">
@@ -38,57 +52,118 @@ irm https://github.com/BrowyHQ/browy/releases/latest/download/install.ps1 | iex
 
 The installer will:
 
-- Download the latest Browy release (~130 MB)
-- Install the native host to `%LOCALAPPDATA%\Browy\app\`
-- Register `com.browy.host` with Chrome / Edge / Brave
-- Copy the unpacked extension to `%USERPROFILE%\Downloads\Browy-Extension\`
-- Open the extension folder in Explorer when it's done
+<Steps>
+1. Download the latest Browy release (~130 MB)
+2. Install the native host to `%LOCALAPPDATA%\Browy\app\`
+3. Register `com.browy.host` with Chrome / Edge / Brave
+4. Copy the unpacked extension to `%USERPROFILE%\Downloads\Browy-Extension\`
+5. Open the extension folder in Explorer when it's done
+</Steps>
 
 </TabItem>
-<TabItem label="macOS / Linux" icon="seti:apple">
+<TabItem label="macOS" icon="seti:apple">
 
-Coming soon. Track [the cross-platform issue](https://github.com/BrowyHQ/browy/issues)
-on GitHub.
+<Aside type="note">
+macOS support is on the roadmap. Subscribe to
+[BrowyHQ/browy issues](https://github.com/BrowyHQ/browy/issues) to get
+notified.
+</Aside>
+
+</TabItem>
+<TabItem label="Linux" icon="linux">
+
+<Aside type="note">
+Linux support is on the roadmap. Subscribe to
+[BrowyHQ/browy issues](https://github.com/BrowyHQ/browy/issues) to get
+notified.
+</Aside>
 
 </TabItem>
 </Tabs>
 
-## Load the extension
+## Step 2 — load the extension
+
+<Image src={placeholder} alt="chrome://extensions/ with the Browy extension loaded and pinned" />
 
 <Steps>
 1. Open `chrome://extensions/` (or `edge://extensions/`, `brave://extensions/`)
-2. Toggle **Developer mode** on (top-right)
+2. Toggle **Developer mode** on (top-right of the page)
 3. Click **Load unpacked**
 4. Select `~/Downloads/Browy-Extension/`
-5. Pin the Browy icon to your toolbar
+5. Pin the Browy icon to your toolbar so the side panel is one click away
 </Steps>
 
-## Sign in to Copilot
+<Aside type="tip" title="Why developer mode?">
+Until the Chrome Web Store listing is approved, the extension isn't
+signed by Google and has to be loaded as an "unpacked" extension. That
+flag is the only thing developer mode actually toggles for our use case.
+Once we ship to the Web Store, this step disappears.
+</Aside>
+
+## Step 3 — sign in to Copilot
 
 Click the Browy icon to open the side panel. The first time you use it,
-Browy will prompt you to sign in. A terminal window opens with the
-GitHub Copilot device-flow link — paste the code into the URL it shows,
-authorize Browy in your browser, and the terminal closes itself.
+Browy will prompt you to sign in.
 
-You're done. Try [your first chat](/docs/first-chat/).
+<Image src={placeholder} alt="The Browy side panel with the 'Sign in to GitHub Copilot' button visible" />
+
+A terminal window opens with the GitHub Copilot **device-flow link**.
+Paste the code into the URL it shows, authorize Browy in your browser,
+and the terminal closes itself.
+
+You're done. Try [your first chat →](/docs/first-chat/)
 
 ## Updating
 
-Re-run the installer:
+Re-run the installer. It detects your existing install and updates in
+place.
 
 ```powershell
 irm https://github.com/BrowyHQ/browy/releases/latest/download/install.ps1 | iex
 ```
 
-Then reload the extension in `chrome://extensions/` (click the circular
-↻ icon on the Browy card).
+Then **reload** the extension in `chrome://extensions/` (the circular ↻
+icon on the Browy card).
 
 ## Uninstall
 
+<Steps>
 1. Remove the extension from `chrome://extensions/`
 2. Delete `%LOCALAPPDATA%\Browy\` and `%USERPROFILE%\.browy\`
-3. Delete the Native Messaging Host registration:
+3. Delete the native messaging host registration:
    `%LOCALAPPDATA%\Google\Chrome\User Data\NativeMessagingHosts\com.browy.host.json`
    (and the equivalent under Edge / Brave folders)
+</Steps>
 
 A scripted uninstaller is on [the roadmap](/docs/roadmap/).
+
+## Troubleshooting
+
+<Aside type="caution" title="“Host disconnected — reconnecting…”">
+The side panel can't reach the native host. The most common causes are:
+the native host failed to install (re-run the installer), Chrome was
+opened before the host was registered (restart Chrome), or your
+antivirus quarantined `node.exe` (allow `%LOCALAPPDATA%\Browy\` in your
+AV exclusions).
+</Aside>
+
+<Aside type="caution" title="“Host unreachable — reinstall →”">
+The reconnect attempts gave up. Click the **Reinstall host** link in
+the banner — it points at the same `install.ps1` you used the first
+time. Your chats and settings are preserved across reinstalls.
+</Aside>
+
+<Aside type="caution" title="“Browy started debugging this browser”">
+This is Chrome's standard yellow banner — it's non-removable and shown
+whenever any extension uses `chrome.debugger`. It's how Browy
+sees and acts on the page; closing it disconnects the agent. See
+[Permissions → debugger](/docs/permissions/) for why this is required.
+</Aside>
+
+## Next
+
+<CardGrid>
+  <LinkCard title="Your first chat" href="/docs/first-chat/" description="Five prompts that show what Browy can actually do." />
+  <LinkCard title="Permissions" href="/docs/permissions/" description="What each Chrome permission does." />
+  <LinkCard title="Privacy & data" href="/docs/privacy/" description="What leaves your machine, and what doesn't." />
+</CardGrid>

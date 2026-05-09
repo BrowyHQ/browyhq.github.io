@@ -1,0 +1,85 @@
+---
+title: Security
+description: How to report a vulnerability and what we do about it.
+---
+
+import { Aside, CardGrid, Card, LinkCard, Badge } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Please don't open a public issue for security bugs">
+Report privately via
+[GitHub Security Advisories](https://github.com/BrowyHQ/browy/security/advisories/new).
+This sends a private message to the maintainers and lets us coordinate
+a fix and disclosure.
+</Aside>
+
+<CardGrid>
+  <LinkCard title="Report a vulnerability" href="https://github.com/BrowyHQ/browy/security/advisories/new" description="GitHub Security Advisory — private, preferred channel for anything sensitive." />
+</CardGrid>
+
+**Acknowledgement target:** 7 days.<br/>
+**Patch target:** depends on severity.
+
+## In scope
+
+Anything that lets an attacker:
+
+- Read or exfiltrate data outside the agent's sandbox (`~/.browy/data/`)
+- Execute arbitrary code on the user's machine via prompt injection
+- Bypass the tool allowlist to call SDK builtins (`bash`, host
+  `read_file`, etc.)
+- Defeat the [secret-redaction filter](/docs/privacy/#secret-redaction)
+  for log files or chat history
+- Persist state on the user's machine that survives uninstall
+- Connect to a host other than the locally-registered native messaging
+  host
+
+## Out of scope
+
+<Aside type="note" title="Prompt injection on visited pages">
+Any prompt-injection attack on a visited page can affect the agent's
+behavior — that's an inherent property of all page-driving agents, and
+the threat model assumes it. The mitigation is the **strict tool
+allowlist** ([no host shell, no host file system, no arbitrary network
+egress](/docs/tools/#what-the-agent-cant-do)).
+</Aside>
+
+Issues in third-party software Browy depends on (Playwright, Chrome,
+the GitHub Copilot CLI) — please report those upstream.
+
+## What we do
+
+<CardGrid>
+  <Card title="Patch + ship" icon="rocket">
+    A security release goes out as soon as the fix lands.
+  </Card>
+  <Card title="Add a regression test" icon="approve-check">
+    If the issue is reproducible, it gets a test so it can't come back.
+  </Card>
+  <Card title="Credit the reporter" icon="seti:github">
+    Acknowledged in the [changelog](/docs/changelog/) (with permission).
+  </Card>
+  <Card title="Backport if severe" icon="warning">
+    If the previous minor is still in wide use and the issue is severe,
+    we backport.
+  </Card>
+</CardGrid>
+
+## Defense-in-depth notes
+
+For users:
+
+<CardGrid>
+  <Card title="Don't paste secrets into chat" icon="warning">
+    Page content the agent sees is filtered, but text *you* type into
+    the chat goes through verbatim.
+  </Card>
+  <Card title="Don't run untrusted scripts" icon="warning">
+    Don't ask the agent to `run_script` with code from a source you
+    don't trust.
+  </Card>
+  <Card title="Trust the yellow banner" icon="warning">
+    Chrome's *"Browy started debugging…"* banner is your reminder that
+    a session is live. If you see it when you don't expect to,
+    disconnect.
+  </Card>
+</CardGrid>

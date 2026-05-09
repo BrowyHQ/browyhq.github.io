@@ -1,0 +1,127 @@
+---
+title: Tools the agent has
+description: Every tool Browy exposes to the LLM — and the ones it deliberately doesn't.
+---
+
+import { CardGrid, Card, LinkCard, Aside, Badge, Tabs, TabItem } from '@astrojs/starlight/components';
+
+Browy locks the GitHub Copilot SDK to a strict allowlist of
+**browser-only tools**. The SDK's built-in file-system and shell tools
+(`read_file`, `write_file`, `bash`) are blocked — see
+[Privacy & data](/docs/privacy/) for why.
+
+<Aside type="note">
+The authoritative list lives in
+[`src/agent/tools/browser.ts`](https://github.com/BrowyHQ/browy/blob/main/src/agent/tools/browser.ts) —
+search for `register({` to see every tool.
+</Aside>
+
+## Categories
+
+<Tabs>
+<TabItem label="Vision">
+
+| Tool | What it does |
+|---|---|
+| `snapshot` | Take an indexed accessibility-tree snapshot of the active tab. The agent uses these `[N]` indexes to click and type without brittle CSS. |
+| `screenshot` | Capture a PNG of the visible viewport (or full page). |
+| `read_visible` | Return the visible text of the page. |
+
+</TabItem>
+<TabItem label="Click / type / nav">
+
+| Tool | What it does |
+|---|---|
+| `click(index)` | Click an element by its snapshot index. |
+| `type(index, text)` | Focus an input by index and type into it. |
+| `key(key)` | Press a keyboard key (`Enter`, `Escape`, `Tab`, …). |
+| `scroll(direction, px?)` | Scroll the page or a scroll container. |
+| `navigate(url)` | Open a URL (in a new tab by default). |
+
+</TabItem>
+<TabItem label="Tabs">
+
+| Tool | What it does |
+|---|---|
+| `list_tabs` | List all open tabs (title, URL, id). |
+| `switch_tab(id)` | Bring a tab to the foreground. |
+| `new_tab(url?)` | Open a new tab. |
+| `close_tab(id)` | Close a tab. |
+
+</TabItem>
+<TabItem label="Power tools">
+
+| Tool | What it does |
+|---|---|
+| `evaluate_js(code)` | Run arbitrary JavaScript in the page (top-level `await` OK). For shadow-DOM walks, custom waits, structured extraction, framework-specific APIs. |
+| `run_script(code)` | Run a Node.js script on **your** machine for file I/O / shell. Sandboxed and asks before running. |
+| `query_dom(selector)` | CSS selector fallback when the indexed tools can't express what you need. |
+
+</TabItem>
+<TabItem label="Network & console">
+
+| Tool | What it does |
+|---|---|
+| `network_log` | Recent network requests (URL, method, status, timing). Secrets [redacted](/docs/privacy/#secret-redaction). |
+| `console_log` | Recent console messages and exceptions. Secrets redacted. |
+
+</TabItem>
+<TabItem label="Disk + memory">
+
+Sandboxed at `~/.browy/data/`:
+
+| Tool | What it does |
+|---|---|
+| `save_file(filename, content)`, `read_file`, `list_files`, `delete_file` | Scratch disk for cached scrapes, intermediate work. Paths are relative to the data root; you can't escape it. |
+| `note_set(key, value, category?)`, `note_get`, `note_list`, `note_delete` | Persistent key-value memory that survives across **different chats** (user preferences, long-lived facts). |
+
+<Aside type="caution" title="Notes vs conversation history">
+`note_*` is **not** the agent's conversation history — that's automatic
+and the agent always has it. Empty `note_list` does not mean empty
+context.
+</Aside>
+
+</TabItem>
+<TabItem label="Human-in-loop">
+
+| Tool | What it does |
+|---|---|
+| `await_user(message)` | Pause and ask you to do something yourself (solve a CAPTCHA, click a confirmation, choose between two options). |
+
+</TabItem>
+</Tabs>
+
+## What the agent *can't* do
+
+The Copilot SDK ships with built-in `read_file` / `write_file` / `bash`
+/ `grep` / `glob` / `web_fetch` tools that operate on your **host**
+filesystem and arbitrary URLs. Browy blocks all of these.
+
+<CardGrid>
+  <Card title="No host file access" icon="error">
+    The `read_file` / `save_file` tools the agent has are sandboxed to
+    `~/.browy/data/`. The host file system is unreachable from the
+    agent.
+  </Card>
+  <Card title="No host shell" icon="error">
+    The SDK's `bash` tool is disabled. The `run_script` tool runs
+    Node.js code with explicit user confirmation.
+  </Card>
+  <Card title="No arbitrary HTTP" icon="error">
+    The SDK's `web_fetch` is disabled. All network access goes through
+    pages you've navigated to.
+  </Card>
+</CardGrid>
+
+The lock-down lives in
+[`src/agent/loop.ts`](https://github.com/BrowyHQ/browy/blob/main/src/agent/loop.ts) —
+search for `availableTools`. The strict allowlist is passed to both
+`createSession` and `resumeSession` so nothing slips through on a reload.
+
+## See also
+
+<CardGrid>
+  <LinkCard title="Permissions" href="/docs/permissions/" description="Why the extension asks for the Chrome permissions it does." />
+  <LinkCard title="Privacy & data" href="/docs/privacy/" description="What leaves your machine, and what doesn't." />
+  <LinkCard title="Security" href="/docs/security/" description="How to report a vulnerability." />
+</CardGrid>

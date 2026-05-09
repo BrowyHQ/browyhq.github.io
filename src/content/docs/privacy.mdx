@@ -1,0 +1,153 @@
+---
+title: Privacy & data
+description: What Browy collects, where it goes, and what we never see.
+---
+
+import { Aside, CardGrid, Card, LinkCard, Badge, Tabs, TabItem } from '@astrojs/starlight/components';
+
+<Badge text="Last updated 2026-05-09" variant="note" />
+
+Browy is a desktop application: a Chromium browser extension plus a
+small native messaging host that runs on your machine.
+
+<Aside type="tip" title="The headline">
+**Browy operates no servers.** The Browy organization (BrowyHQ) does
+not receive, store, log, or analyze any data about your usage. All
+LLM traffic flows directly between your machine and **GitHub Copilot**,
+via the locally-installed [GitHub Copilot CLI](https://docs.github.com/copilot/concepts/agents/about-copilot-cli).
+</Aside>
+
+This page is the privacy policy referenced in the Browy Chrome Web
+Store and Microsoft Edge Add-ons listings.
+
+## What Browy sends, and to whom
+
+<Tabs>
+<TabItem label="To GitHub Copilot">
+
+| Data | Why |
+|---|---|
+| **Page content** the agent inspects (DOM snapshots, screenshots, console / network logs, JS evaluation results) | The LLM needs to see what's on screen to act. Same data path as if you ran `gh copilot` in a terminal. |
+| **Your chat messages** | This is the prompt to the model. |
+| **Tool-call results** (e.g. "navigated to X", "clicked element 7") | The model needs feedback to plan the next step. |
+
+GitHub's handling of Copilot data is governed by the
+[GitHub Copilot Privacy Statement](https://github.com/customer-terms/github-copilot-product-specific-terms)
+and your Copilot subscription terms. Browy does not modify, intercept,
+or proxy these requests.
+
+</TabItem>
+<TabItem label="To BrowyHQ">
+
+| Data | What we receive |
+|---|---|
+| Telemetry | **Nothing.** |
+| Analytics | **Nothing.** |
+| Error reports | **Nothing.** |
+| Usage stats | **Nothing.** |
+
+Browy does not collect telemetry. There is no analytics SDK in the
+extension or the host. There is no Browy backend to receive any of this.
+
+</TabItem>
+<TabItem label="To anyone else">
+
+Nothing. Browy does not call any third-party service except the local
+Copilot CLI. The extension does not load any third-party scripts.
+
+</TabItem>
+</Tabs>
+
+## What Browy stores locally
+
+| Data | Where | Lifetime |
+|---|---|---|
+| Chat history | `chrome.storage.local` (per-profile extension storage) | Until you clear it from the side panel or uninstall |
+| Settings (model, reasoning effort, theme, last tab) | `chrome.storage.local` | Same |
+| Native host log | `~/.browy/host/host.log` (single rotating 5 MB file) | Overwritten on rotation; deleted on uninstall |
+| Agent scratch disk + key-value memory | `~/.browy/data/files/` and `~/.browy/data/notes.json` | Until you delete them; survives across chats |
+| GitHub Copilot session state | `~/.copilot/` (managed by the Copilot CLI, not Browy) | Per Copilot CLI's behavior |
+
+<Aside type="note">
+Nothing in this list leaves your machine unless you initiate it (e.g.
+asking the agent to "open this in a new tab" causes a navigation, or
+asking it to "save this to my Downloads" calls `chrome.downloads`).
+</Aside>
+
+## Secret redaction
+
+Page content the agent sees is filtered for common secret shapes
+**at the moment of capture** — before it reaches the LLM, the log file,
+or the conversation history.
+
+<CardGrid>
+  <Card title="Tokens" icon="approve-check">
+    JWTs (`eyJ…`), GitHub tokens (`ghp_`, `ghs_`, `gho_`, `ghu_`,
+    `ghr_`, `github_pat_`), OpenAI / Stripe / Anthropic-style
+    keys (`sk-`, `sk_live_`, `pk_live_`, `rk_live_`).
+  </Card>
+  <Card title="Cloud keys" icon="approve-check">
+    AWS access keys (`AKIA…`).
+  </Card>
+  <Card title="Headers" icon="approve-check">
+    `Authorization`, `Cookie`, `Set-Cookie`, `x-api-key`. `Bearer …`
+    token values.
+  </Card>
+  <Card title="OAuth params" icon="approve-check">
+    Query and URL-fragment params: `token`, `access_token`,
+    `refresh_token`, `id_token`, `api_key`, `password`, `secret`,
+    `client_secret`, `jwt`, `signature`, `code`.
+  </Card>
+</CardGrid>
+
+<Aside type="caution">
+Redaction is best-effort and not a substitute for not pasting secrets
+into the browser. If you'd like additional patterns covered,
+[open an issue](https://github.com/BrowyHQ/browy/issues).
+</Aside>
+
+## What Browy never does
+
+<CardGrid>
+  <Card title="No data exfiltration" icon="error">
+    Send any data to a Browy-operated server. There is none.
+  </Card>
+  <Card title="No background activity" icon="error">
+    Run continuously in the background. The agent acts only when you
+    send a message in the side panel.
+  </Card>
+  <Card title="No silent crawling" icon="error">
+    Crawl, prefetch, or scrape pages you haven't asked it to operate on.
+  </Card>
+  <Card title="No host shell access" icon="error">
+    Expose the GitHub Copilot CLI's built-in file-system or shell tools
+    to the LLM — the SDK is locked to a strict browser-tools allowlist.
+  </Card>
+  <Card title="No phone-home" icon="error">
+    Updates ship via Chrome Web Store / Edge Add-ons (extension) or
+    GitHub Releases (native host CLI). No automatic update checks
+    against a Browy server.
+  </Card>
+  <Card title="No third-party scripts" icon="error">
+    The extension loads zero external scripts. Everything in the
+    side panel is bundled.
+  </Card>
+</CardGrid>
+
+## Children
+
+Browy is not directed to children under 13 and we do not knowingly
+collect any data from anyone, including children.
+
+## Changes to this policy
+
+When this policy changes, the *Last updated* badge at the top of this
+page changes. Material changes are also called out in the
+[changelog](/docs/changelog/).
+
+## Contact
+
+<CardGrid>
+  <LinkCard title="Report a security issue" href="https://github.com/BrowyHQ/browy/security/advisories/new" description="Private GitHub Security Advisory — preferred for anything sensitive." />
+  <LinkCard title="Privacy questions or general issues" href="https://github.com/BrowyHQ/browy/issues" description="Open a public issue on the main repo." />
+</CardGrid>

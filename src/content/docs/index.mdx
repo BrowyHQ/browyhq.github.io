@@ -17,43 +17,75 @@ hero:
       variant: minimal
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Card, CardGrid, LinkCard, Aside, Badge } from '@astrojs/starlight/components';
+import placeholder from '../../assets/screenshot-placeholder.svg';
+import { Image } from 'astro:assets';
 
-## Why Browy?
+## What Browy is
+
+Browy is a Chrome side-panel agent. You chat with it in plain English; it
+sees your active tab, clicks through pages, fills forms, runs JS, captures
+screenshots, and remembers things across sessions. It uses **your own GitHub
+Copilot subscription** as the LLM — there is no Browy server.
+
+<Image src={placeholder} alt="Browy side panel chatting about the active tab" />
+
+## Why Browy
 
 <CardGrid stagger>
   <Card title="Lives in your browser" icon="laptop">
-    Browy is a Chrome side panel + a small native helper. It uses the
-    Chrome DevTools Protocol to see and act on pages — no separate
-    browser, no headless instance.
+    A Chrome side panel + a small native helper. No headless instance, no
+    second profile, no cloud browser. The agent works on the tabs you
+    already have open.
   </Card>
   <Card title="Your Copilot, your machine" icon="seti:github">
-    All LLM traffic flows through your GitHub Copilot subscription via
-    a local CLI. Browy itself runs no server and collects no telemetry.
+    All LLM traffic flows through your GitHub Copilot subscription via a
+    local CLI. Browy itself runs no server and collects no telemetry.
   </Card>
-  <Card title="Real tools, not just clicks" icon="setting">
-    The agent can read DOM, take screenshots, run arbitrary JavaScript
-    in the page, capture network logs, save scratch files, and remember
-    things across chats.
+  <Card title="Sees pages, not pixels" icon="setting">
+    Snapshots the accessibility tree and acts by index — no brittle CSS
+    selectors. Falls back to JS evaluation when the snapshot can't
+    express what you need.
   </Card>
   <Card title="Open source" icon="open-book">
-    Browy is open source under Apache 2.0. Audit the agent loop,
-    inspect the redaction list, build it yourself.
+    Apache 2.0. Audit the agent loop, inspect the redaction list, build
+    it yourself. The tool surface is locked to a strict allowlist —
+    no host shell, no host file system.
   </Card>
+</CardGrid>
+
+## What you can do
+
+<CardGrid>
+  <LinkCard title='"Summarize this page in 5 bullets"' href="/docs/first-chat/#summarize-this-page" description="Browy reads the article and writes the summary back into the chat. No copy-paste." />
+  <LinkCard title='"Fill out this form for me"' href="/docs/first-chat/#fill-out-this-form-for-me" description="Multi-field form filling by accessibility index. Stops before submit so you can review." />
+  <LinkCard title='"Find the cheapest flight"' href="/docs/first-chat/#find-the-cheapest-flight" description="Multi-step automation in plain English. Navigates, queries, parses, reports back." />
+  <LinkCard title="What's the slowest API call?" href="/docs/first-chat/#inspect-the-network" description="Reads the network log via CDP. Answers questions you'd otherwise need DevTools open for." />
 </CardGrid>
 
 ## Get started
 
-Install on Windows:
+<Aside type="tip" title="Install in one line">
+On Windows, open PowerShell and run:
 
 ```powershell
 irm https://github.com/BrowyHQ/browy/releases/latest/download/install.ps1 | iex
 ```
 
-Then load the unpacked extension from `~/Downloads/Browy-Extension/`
-in `chrome://extensions` (Developer Mode → "Load unpacked").
+Then load the unpacked extension from `~/Downloads/Browy-Extension/` in
+`chrome://extensions` (Developer Mode → "Load unpacked").
+</Aside>
 
-See the [install guide](/docs/install/) for full instructions, the
-[first-chat walkthrough](/docs/first-chat/), and the
-[permissions reference](/docs/permissions/) explaining what the
-extension does and does not access.
+<CardGrid>
+  <LinkCard title="Install" href="/docs/install/" description="Native host + extension. ~5 minutes." />
+  <LinkCard title="Your first chat" href="/docs/first-chat/" description="Five example prompts that show what Browy can do." />
+  <LinkCard title="Permissions" href="/docs/permissions/" description="Why Browy asks for each Chrome permission, and what it does (and doesn't) with them." />
+  <LinkCard title="Privacy & data" href="/docs/privacy/" description="What we send, what we store, what we never see." />
+</CardGrid>
+
+## Status <Badge text="Early access" variant="caution" />
+
+Browy is in early access. The native host installer ships from
+[GitHub Releases](https://github.com/BrowyHQ/browy/releases). The Chrome
+Web Store and Edge Add-ons listings are in review — you'll be able to
+install with one click once they're approved.

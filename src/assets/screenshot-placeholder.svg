@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" role="img" aria-label="Screenshot placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1d1f29"/>
+      <stop offset="1" stop-color="#0f1117"/>
+    </linearGradient>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#3a3f55" opacity="0.4"/>
+    </pattern>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <rect width="1280" height="720" fill="url(#dots)"/>
+  <rect x="40" y="40" width="1200" height="640" rx="16" fill="none" stroke="#4a5072" stroke-width="2" stroke-dasharray="8 8"/>
+  <g transform="translate(640 340)" text-anchor="middle" font-family="ui-sans-serif,system-ui,Inter,Arial" fill="#aab0c8">
+    <circle cx="0" cy="-60" r="36" fill="none" stroke="#6c7396" stroke-width="3"/>
+    <path d="M -14 -68 L -14 -52 L 18 -60 Z" fill="#6c7396"/>
+    <text y="20" font-size="34" font-weight="600" fill="#dde1f0">Screenshot coming soon</text>
+    <text y="58" font-size="20" fill="#8a92b2">A real capture of the Browy side panel will land here</text>
+  </g>
+</svg>

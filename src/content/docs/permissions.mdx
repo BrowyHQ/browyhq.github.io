@@ -1,0 +1,137 @@
+---
+title: Permissions
+description: Why Browy asks for each Chrome permission, and what it does (and doesn't) with them.
+---
+
+import { Aside, CardGrid, Card, LinkCard, Badge } from '@astrojs/starlight/components';
+
+Browy is a browser-automation agent. The side panel runs a chat UI; a
+companion native messaging host (a small Node.js process you install
+separately) runs the GitHub Copilot CLI as the LLM backend and returns
+tool calls that the extension executes against your browser.
+
+This page explains why each permission in `extension/manifest.json` is
+required. The same text is the basis for the Chrome Web Store listing's
+permission justification.
+
+<Aside type="tip" title="TL;DR">
+Browy needs broad permissions because it's a *general-purpose* browser
+agent — you might point it at any site you can visit. **It only acts on
+tabs you explicitly target via the side panel**, and it ships with the
+SDK's host file-system / shell tools **disabled**.
+</Aside>
+
+## Permissions
+
+### `sidePanel` <Badge text="UI" variant="success" />
+
+Browy's primary UI is the Chrome side panel (chat, history, settings).
+Required to register `sidepanel.html`.
+
+### `debugger` <Badge text="Core" variant="caution" />
+
+The agent uses the **Chrome DevTools Protocol** (via
+`chrome.debugger.attach`) to take page snapshots, click and type by
+accessibility index, evaluate JavaScript in the page, capture
+network and console events, and take screenshots. This is what makes
+Browy able to "see" and "act on" pages reliably without brittle CSS
+selectors.
+
+<Aside type="caution" title="The yellow banner is non-removable by design">
+You will see Chrome's standard yellow *"Browy started debugging this
+browser"* banner whenever a session is active. It's Chrome's
+mandatory disclosure that an extension is using the DevTools Protocol —
+no extension can hide it. Browy attaches only to tabs you direct it at,
+and you can detach at any time.
+</Aside>
+
+### `tabs` <Badge text="Core" />
+
+Read tab titles and URLs to populate the agent's context (`list_tabs`,
+`switch_tab`), open new tabs (`new_tab`, `navigate`), and route the
+agent to the correct tab when you ask it to operate on "this page".
+
+### `activeTab` <Badge text="Core" />
+
+Used in addition to `tabs` so the side panel can identify the currently
+focused tab without prompting on every action.
+
+### `scripting` <Badge text="Core" />
+
+Inject content scripts when the agent needs to evaluate JS in the page
+context (the `evaluate_js` tool) or extract structured data the
+snapshot can't express.
+
+### `storage` <Badge text="Local" variant="success" />
+
+Persist chat history, user settings (model, reasoning effort, theme),
+and last-used tab. All storage is local (`chrome.storage.local`);
+**nothing is uploaded**.
+
+### `nativeMessaging` <Badge text="Core" />
+
+Connect to the locally-installed Browy native host (`com.browy.host`),
+which runs the GitHub Copilot CLI on your machine. All LLM traffic
+flows through your own Copilot subscription, **not a Browy server**.
+
+### `notifications` <Badge text="UX" />
+
+Surface "host disconnected", "sign-in required", and other actionable
+status messages outside the side panel so you don't miss them while
+working in another tab.
+
+### `downloads` <Badge text="Optional" />
+
+Save artifacts the agent produces (e.g. exported scrapes, generated
+files) to your Downloads folder via `chrome.downloads.download`.
+
+### `alarms` <Badge text="Internal" />
+
+Periodic keep-alive pings for the background service worker. Chrome
+aggressively suspends MV3 service workers; alarms keep the native
+messaging port responsive without a busy loop.
+
+## `host_permissions`
+
+### `<all_urls>` <Badge text="Required" variant="caution" />
+
+Browy is a *general-purpose* browser agent — you might ask it to
+operate on any site you can visit. Restricting host permissions to a
+fixed list would prevent Browy from working on the next site you ask
+about.
+
+<Aside type="note" title="What this does NOT mean">
+`<all_urls>` lets the extension *attach* to any tab you tell it to.
+It does **not** mean Browy is reading every page in the background —
+the agent only acts on tabs you explicitly target via the side panel.
+There is no background crawler, no prefetch, no scraping.
+</Aside>
+
+## What Browy does *not* do
+
+<CardGrid>
+  <Card title="No Browy server" icon="error">
+    There is no Browy backend. Page content goes to **GitHub Copilot**
+    via the local CLI — exactly as if you ran `gh copilot` from a
+    terminal.
+  </Card>
+  <Card title="No background activity" icon="error">
+    The agent only acts when you send a message in the side panel.
+  </Card>
+  <Card title="No host file system / shell" icon="error">
+    The Copilot SDK's built-in `read_file` / `write_file` / `bash` tools
+    are **disabled**. Browy locks the SDK to a strict allowlist of
+    browser-only tools.
+  </Card>
+  <Card title="No telemetry" icon="error">
+    There is no analytics SDK in the extension or the native host.
+  </Card>
+</CardGrid>
+
+## See also
+
+<CardGrid>
+  <LinkCard title="Privacy & data" href="/docs/privacy/" description="The full data-handling summary, including the secret-redaction list." />
+  <LinkCard title="Tools the agent has" href="/docs/tools/" description="Every tool the agent can call, what it does, and what it can't reach." />
+  <LinkCard title="Security" href="/docs/security/" description="How to report a vulnerability." />
+</CardGrid>
