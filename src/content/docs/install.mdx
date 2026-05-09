@@ -5,6 +5,7 @@ description: Set up the native host + the browser extension. Takes about 5 minut
 
 import { Tabs, TabItem, Steps, Aside, Badge, LinkCard, CardGrid, Card } from '@astrojs/starlight/components';
 import placeholder from '../../assets/screenshot-placeholder.svg';
+import panelSignin from '../../assets/screenshots/panel-signin.png';
 import { Image } from 'astro:assets';
 
 Browy is two pieces:
@@ -105,7 +106,7 @@ Once we ship to the Web Store, this step disappears.
 Click the Browy icon to open the side panel. The first time you use it,
 Browy will prompt you to sign in.
 
-<Image src={placeholder} alt="The Browy side panel with the 'Sign in to GitHub Copilot' button visible" />
+<Image src={panelSignin} alt="The Browy side panel with the 'Sign in to GitHub Copilot' button visible" />
 
 A terminal window opens with the GitHub Copilot **device-flow link**.
 Paste the code into the URL it shows, authorize Browy in your browser,

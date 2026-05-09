@@ -5,12 +5,17 @@ description: A two-minute walkthrough of what Browy can actually do.
 
 import { Card, CardGrid, LinkCard, Aside, Steps, Badge } from '@astrojs/starlight/components';
 import placeholder from '../../assets/screenshot-placeholder.svg';
+import panelEmpty from '../../assets/screenshots/panel-empty.png';
+import panelSummarize from '../../assets/screenshots/panel-summarize.png';
+import panelFillForm from '../../assets/screenshots/panel-fillform.png';
+import panelNetwork from '../../assets/screenshots/panel-network.png';
+import panelEvaluate from '../../assets/screenshots/panel-evaluate.png';
 import { Image } from 'astro:assets';
 
 Once Browy is [installed](/docs/install/) and signed in, click the Browy
 icon to open the side panel. Try one of these.
 
-<Image src={placeholder} alt="The Browy side panel after a fresh install, with the prompt input focused" />
+<Image src={panelEmpty} alt="The Browy side panel after a fresh install, with the prompt input focused" />
 
 ## "Summarize this page" <Badge text="vision" />
 
@@ -25,7 +30,7 @@ sends it to GitHub Copilot, and streams the summary back into the chat.
 No copy-paste; no screenshot needed.
 </Aside>
 
-<Image src={placeholder} alt="Browy summarizing a Wikipedia article in 5 bullets" />
+<Image src={panelSummarize} alt="Browy summarizing a Wikipedia article in 5 bullets" />
 
 ## "Fill out this form for me" <Badge text="actions" variant="success" />
 
@@ -37,6 +42,8 @@ want filled in:
 
 Browy clicks fields by their **accessibility index** — no brittle CSS
 selectors — types the values, and stops before submit so you can review.
+
+<Image src={panelFillForm} alt="Browy filling a sign-up form for the user, leaving the password field blank" />
 
 <Aside type="caution" title="Don't paste secrets into the chat">
 Page content the agent sees is filtered for common secret shapes
@@ -55,8 +62,6 @@ Open google.com:
 Browy will navigate, type the query, click through, read the results,
 and report back. Multi-step automation in plain English.
 
-<Image src={placeholder} alt="Browy clicking through a flight-search results page" />
-
 ## "Inspect the network" <Badge text="devtools" />
 
 Open any web app:
@@ -69,6 +74,8 @@ from data you don't have to open DevTools to see. Secrets in URLs and
 headers are redacted at capture time — see
 [Privacy → Secret redaction](/docs/privacy/#secret-redaction).
 
+<Image src={panelNetwork} alt="Browy reporting the slowest API call on a dashboard page" />
+
 ## "Run this in the page" <Badge text="evaluate_js" variant="success" />
 
 For deeper inspection, the agent can evaluate arbitrary JavaScript in the
@@ -79,6 +86,8 @@ page context:
 
 The `evaluate_js` tool runs your request as JS in the page and returns
 the result. Top-level `await` works.
+
+<Image src={panelEvaluate} alt="Browy listing buttons that are missing aria-labels" />
 
 ## Slash commands
 
