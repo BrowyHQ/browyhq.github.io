@@ -84,15 +84,30 @@
    Affects: in-content links, primary CTA buttons, sidebar "current page"
    indicator, focus rings. Does NOT touch inline code, card chrome,
    borders, asides, or any other UI surface — those keep Starlight defaults.
+
+   The two greens are NOT arbitrary — they're literally the mascot's main
+   body colors, lifted from extension/icons/icon.svg (the 80×80 pixel-art
+   sprite). Light theme uses the head-bezel green; dark theme uses the
+   antenna green. Recognizable as "Browy" once you've seen the mascot.
    ────────────────────────────────────────────────────────────────────────── */
 :root {
   --sl-color-accent-low:  #d1fae5;   /* hover bg tint, very light green */
-  --sl-color-accent:      #15803d;   /* link / button fill — dark green for AA on white */
+  --sl-color-accent:      #15803d;   /* mascot head bezel — AA on white */
   --sl-color-accent-high: #14532d;   /* hover state */
 }
 [data-theme='dark'] {
   --sl-color-accent-low:  #14532d;
-  --sl-color-accent:      #4ade80;   /* brighter green for AA on dark bg */
+  --sl-color-accent:      #4ade80;   /* mascot antenna bulb — AA on dark */
   --sl-color-accent-high: #86efac;
+
+  /* Dark-mode page backgrounds: use the mascot's actual backdrop color
+     (#0a1f12 — near-black with a faint green tint) instead of Starlight's
+     generic charcoal. Subtle but pairs unmistakably with the mascot.
+     Only the page + sidebar bg shift; text/border colors keep defaults. */
+  --sl-color-bg:         #0a1f12;
+  --sl-color-bg-nav:     #081a0f;
+  --sl-color-bg-sidebar: #081a0f;
+  --sl-color-bg-inline-code: #102818;
 }
+
 
