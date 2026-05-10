@@ -1,74 +1,13 @@
 /* ──────────────────────────────────────────────────────────────────────────
-   Browy docs — custom theme
-   Brand greens, screenshot framing, hero polish, card hover, typography.
+   Browy docs — minimal customizations
+   Only adds:
+     1. Screenshot framing utilities (.browy-frame, .browy-pair) — purely
+        layout, used explicitly by authors. No theme color overrides.
+     2. Pixel-perfect rendering for the mascot in the hero (image-rendering).
+   Everything else uses Starlight's default theme. Branding lives in the
+   logo, the mascot, and the content — not in painting every chrome
+   element green.
    ────────────────────────────────────────────────────────────────────────── */
-
-/* ── Brand color palette ─────────────────────────────────────────────────── */
-:root {
-  /* Browy panel greens, accessibility-tuned for light theme */
-  --browy-green:        #16a34a;   /* primary accent (links, buttons) */
-  --browy-green-strong: #15803d;
-  --browy-lime:         #4d7c0f;
-  --browy-bg-tint:      #f3faf6;   /* pale green for card hovers */
-  --browy-panel-bg:     #0d1310;   /* matches actual side panel */
-
-  /* Override Starlight accent ramp so links / buttons / "selected" sidebar
-     entry use Browy green instead of default blue. */
-  --sl-color-accent-low:  #d1fae5;
-  --sl-color-accent:      var(--browy-green);
-  --sl-color-accent-high: var(--browy-green-strong);
-  --sl-color-text-accent: var(--browy-green);
-
-  /* Slightly chunkier headings for marketing feel */
-  --sl-text-h1: 2.75rem;
-  --sl-text-h2: 1.875rem;
-  --sl-text-h3: 1.375rem;
-
-  --sl-line-height-headings: 1.15;
-
-  /* Wider content max so framed screenshots have room beside text on huge
-     monitors without making text columns ridiculous. */
-  --sl-content-width: 50rem;
-}
-
-[data-theme='dark'] {
-  --browy-green:        #4ade80;
-  --browy-green-strong: #86efac;
-  --browy-bg-tint:      rgba(74, 222, 128, 0.06);
-
-  --sl-color-accent-low:  rgba(74, 222, 128, 0.15);
-  --sl-color-accent:      var(--browy-green);
-  --sl-color-accent-high: var(--browy-green-strong);
-  --sl-color-text-accent: var(--browy-green);
-}
-
-/* ── Typography ──────────────────────────────────────────────────────────── */
-.sl-markdown-content h1 {
-  letter-spacing: -0.02em;
-  font-weight: 700;
-}
-.sl-markdown-content h2 {
-  letter-spacing: -0.015em;
-  margin-top: 2.75rem;
-  font-weight: 700;
-}
-.sl-markdown-content h3 {
-  margin-top: 2rem;
-  font-weight: 650;
-}
-
-/* In-text inline code — green-tinted to match Browy brand */
-.sl-markdown-content :not(pre) > code {
-  background: var(--sl-color-accent-low);
-  color: var(--sl-color-text-accent);
-  border: 1px solid rgba(22, 163, 74, 0.18);
-  padding: 0.08em 0.45em;
-  border-radius: 4px;
-  font-size: 0.92em;
-}
-[data-theme='dark'] .sl-markdown-content :not(pre) > code {
-  border-color: rgba(74, 222, 128, 0.2);
-}
 
 /* ── Screenshot framing ──────────────────────────────────────────────────────
    The actual Browy side panel is ~400px wide. When rendered at 100% in
@@ -83,27 +22,17 @@
   padding: 0;
   border-radius: 14px;
   overflow: hidden;
-  background: var(--browy-panel-bg);
+  background: var(--sl-color-bg-sidebar);
   box-shadow:
     0 1px 2px rgba(0, 0, 0, 0.06),
     0 8px 24px -8px rgba(0, 0, 0, 0.18),
     0 24px 48px -16px rgba(0, 0, 0, 0.18);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  border: 1px solid var(--sl-color-hairline);
 }
 [data-theme='dark'] .browy-frame {
-  border-color: rgba(255, 255, 255, 0.08);
   box-shadow:
     0 1px 2px rgba(0, 0, 0, 0.4),
-    0 8px 24px -8px rgba(0, 0, 0, 0.5),
-    0 24px 48px -16px rgba(74, 222, 128, 0.08);
-}
-.browy-frame:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.08),
-    0 12px 32px -8px rgba(0, 0, 0, 0.22),
-    0 32px 56px -16px rgba(22, 163, 74, 0.18);
+    0 8px 24px -8px rgba(0, 0, 0, 0.5);
 }
 .browy-frame img {
   display: block;
@@ -141,106 +70,10 @@
 /* Wide variant for non-panel images (e.g., chrome://extensions screen) */
 .browy-frame.wide { max-width: 100%; }
 
-/* ── Hero polish ─────────────────────────────────────────────────────────── */
-/* Starlight hero is .hero (a grid). Don't fight its layout, just enhance. */
-.hero h1 {
-  font-size: clamp(3rem, 6vw, 4.5rem) !important;
-  letter-spacing: -0.03em;
-  line-height: 1.02;
-  font-weight: 800;
-}
-.hero .tagline {
-  font-size: 1.2rem;
-  line-height: 1.55;
-  color: var(--sl-color-gray-2);
-  max-width: 38rem;
-  margin-top: 0.4rem;
-}
-[data-theme='dark'] .hero .tagline { color: var(--sl-color-gray-3); }
-
-/* Mascot in hero — pixel-perfect rendering + soft green glow halo */
+/* ── Mascot pixel-perfect rendering ──────────────────────────────────────── */
+/* Browy's mascot is a pixel-art sprite. Without crisp-edges hint, browsers
+   smooth-scale it and it looks blurry. Scoped to the hero only. */
 .hero > img {
   image-rendering: pixelated;
   image-rendering: crisp-edges;
-  filter:
-    drop-shadow(0 0 24px rgba(74, 222, 128, 0.35))
-    drop-shadow(0 8px 16px rgba(0, 0, 0, 0.15));
-  transition: transform 0.3s ease;
 }
-.hero > img:hover {
-  transform: translateY(-4px) scale(1.02);
-}
-
-/* Tighter button group */
-.hero .actions {
-  margin-top: 1.5rem;
-  gap: 0.75rem;
-}
-
-/* ── Card hover — lift + accent border ───────────────────────────────────── */
-.sl-link-card,
-.card {
-  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
-}
-.sl-link-card:hover,
-.card:hover {
-  transform: translateY(-2px);
-  border-color: var(--sl-color-accent) !important;
-  box-shadow: 0 8px 24px -8px rgba(22, 163, 74, 0.22);
-}
-[data-theme='dark'] .sl-link-card:hover,
-[data-theme='dark'] .card:hover {
-  box-shadow: 0 8px 24px -8px rgba(74, 222, 128, 0.18);
-}
-
-/* Card icons — colored accent so the grid feels alive */
-.card .icon,
-.sl-link-card .icon {
-  color: var(--sl-color-text-accent);
-}
-
-/* ── CTA button group polish (hero install/github buttons) ───────────────── */
-.sl-flex.actions a.button {
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  padding: 0.65rem 1.1rem;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-.sl-flex.actions a.button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px -6px rgba(22, 163, 74, 0.4);
-}
-
-/* ── Aside polish — slightly chunkier border, tip uses brand green ───── */
-.starlight-aside {
-  border-inline-start-width: 3px;
-  border-radius: 6px;
-}
-.starlight-aside--tip {
-  --sl-color-asides-text-accent: var(--browy-green-strong);
-  --sl-color-asides-border: var(--browy-green);
-  background-color: var(--browy-bg-tint);
-}
-[data-theme='dark'] .starlight-aside--tip {
-  --sl-color-asides-text-accent: var(--browy-green);
-  background-color: rgba(74, 222, 128, 0.06);
-}
-
-/* ── Status pill in hero (Badge inside heading) ──────────────────────────── */
-.sl-markdown-content h1 .sl-badge,
-.sl-markdown-content h2 .sl-badge,
-.sl-markdown-content h3 .sl-badge {
-  vertical-align: middle;
-  margin-left: 0.5em;
-  font-size: 0.55em;
-  letter-spacing: 0.04em;
-}
-
-/* ── Subtle accent under H2s for hierarchy ──────────────────────────────── */
-.sl-markdown-content h2 {
-  position: relative;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--sl-color-hairline-light);
-}
-
-/* ── Splash hero — kept simple. Starlight's own grid handles layout. ───── */
