@@ -1,0 +1,416 @@
+---
+import { Image } from 'astro:assets';
+import { LinkButton } from '@astrojs/starlight/components';
+const PAGE_TITLE_ID = '_top';
+
+const { data } = Astro.locals.starlightRoute.entry;
+const { title = data.title, tagline, image, actions = [] } = data.hero || {};
+
+const imageAttrs = {
+	loading: 'eager' as const,
+	decoding: 'async' as const,
+	width: 240,
+	height: 240,
+	alt: image?.alt || '',
+};
+
+let darkImage: any;
+let lightImage: any;
+let rawHtml: string | undefined;
+if (image) {
+	if ('file' in image) {
+		darkImage = image.file;
+	} else if ('dark' in image) {
+		darkImage = image.dark;
+		lightImage = image.light;
+	} else {
+		rawHtml = image.html;
+	}
+}
+
+const hasFileImage = Boolean(darkImage);
+---
+
+<div class="hero">
+	{
+		hasFileImage ? (
+			<div class="mascot-slot">
+				<svg
+					class="browy-mascot"
+					id="browy-hero-mascot"
+					data-pose="idle"
+					viewBox="0 0 80 80"
+					xmlns="http://www.w3.org/2000/svg"
+					shape-rendering="crispEdges"
+					role="img"
+					aria-label={image?.alt || 'Browy mascot'}
+				>
+					<g class="ant">
+						<rect x="28" y="4" width="24" height="6" fill="rgba(74,222,128,0.18)" class="ant-glow"/>
+						<rect x="30" y="2" width="20" height="2" fill="rgba(74,222,128,0.12)" class="ant-glow"/>
+						<rect x="30" y="10" width="20" height="2" fill="rgba(74,222,128,0.12)" class="ant-glow"/>
+						<rect x="34" y="2" width="12" height="2" fill="#4ade80" class="ant-ball"/>
+						<rect x="32" y="4" width="16" height="6" fill="#4ade80" class="ant-ball"/>
+						<rect x="34" y="10" width="12" height="2" fill="#4ade80" class="ant-ball"/>
+						<rect x="34" y="4" width="4" height="2" fill="#a3f3b8"/>
+						<rect x="32" y="6" width="2" height="2" fill="#a3f3b8"/>
+						<rect x="42" y="8" width="4" height="2" fill="#15803d"/>
+						<rect x="38" y="12" width="4" height="2" fill="#22c55e"/>
+						<rect x="38" y="14" width="4" height="2" fill="#15803d"/>
+						<rect x="38" y="16" width="4" height="2" fill="#1f3826"/>
+					</g>
+
+					<rect x="14" y="18" width="52" height="2" fill="#22c55e"/>
+					<rect x="12" y="20" width="56" height="2" fill="#22c55e"/>
+					<rect x="10" y="22" width="60" height="42" fill="#15803d"/>
+					<rect x="12" y="64" width="56" height="2" fill="#15803d"/>
+					<rect x="14" y="66" width="52" height="2" fill="#15803d"/>
+					<rect x="16" y="68" width="48" height="2" fill="#1f3826"/>
+					<rect x="12" y="22" width="56" height="2" fill="#22c55e"/>
+					<rect x="10" y="22" width="2" height="42" fill="#22c55e" opacity="0.45"/>
+					<rect x="68" y="22" width="2" height="42" fill="#0a1f12" opacity="0.35"/>
+
+					<rect x="8" y="32" width="2" height="6" fill="#1f3826"/>
+					<rect x="6" y="33" width="2" height="4" fill="#1f3826"/>
+					<rect x="8" y="42" width="2" height="6" fill="#1f3826"/>
+					<rect x="6" y="43" width="2" height="4" fill="#1f3826"/>
+					<rect x="70" y="32" width="2" height="6" fill="#1f3826"/>
+					<rect x="72" y="33" width="2" height="4" fill="#1f3826"/>
+					<rect x="70" y="42" width="2" height="6" fill="#1f3826"/>
+					<rect x="72" y="43" width="2" height="4" fill="#1f3826"/>
+
+					<rect x="12" y="22" width="2" height="2" fill="#0a1f12"/>
+					<rect x="66" y="22" width="2" height="2" fill="#0a1f12"/>
+					<rect x="12" y="62" width="2" height="2" fill="#0a1f12"/>
+					<rect x="66" y="62" width="2" height="2" fill="#0a1f12"/>
+
+					<rect x="15" y="25" width="50" height="40" fill="#0a1f12"/>
+					<rect x="15" y="25" width="50" height="1" fill="#1f3826"/>
+					<rect x="15" y="64" width="50" height="1" fill="#1f3826"/>
+					<rect x="15" y="25" width="1" height="40" fill="#1f3826"/>
+					<rect x="64" y="25" width="1" height="40" fill="#1f3826"/>
+					<rect x="15" y="32" width="50" height="1" fill="rgba(74,222,128,0.07)"/>
+					<rect x="15" y="42" width="50" height="1" fill="rgba(74,222,128,0.07)"/>
+					<rect x="15" y="52" width="50" height="1" fill="rgba(74,222,128,0.07)"/>
+					<rect x="16" y="26" width="8" height="1" fill="rgba(165,243,184,0.22)"/>
+					<rect x="16" y="27" width="3" height="1" fill="rgba(165,243,184,0.15)"/>
+
+					<rect x="22" y="66" width="36" height="1" fill="#0a1f12"/>
+					<rect x="60" y="66" width="2" height="1" fill="#c5f04b"/>
+
+					<g class="pose pose-idle">
+						<rect x="22" y="35" width="12" height="10" fill="#d8e3d8"/>
+						<rect x="46" y="35" width="12" height="10" fill="#d8e3d8"/>
+						<rect x="26" y="38" width="4" height="4" fill="#0a1f12"/>
+						<rect x="50" y="38" width="4" height="4" fill="#0a1f12"/>
+						<rect x="34" y="55" width="12" height="2" fill="#4ade80"/>
+					</g>
+
+					<g class="pose pose-left">
+						<rect x="22" y="35" width="12" height="10" fill="#d8e3d8"/>
+						<rect x="46" y="35" width="12" height="10" fill="#d8e3d8"/>
+						<rect x="22" y="38" width="4" height="4" fill="#0a1f12"/>
+						<rect x="46" y="38" width="4" height="4" fill="#0a1f12"/>
+						<rect x="34" y="55" width="12" height="2" fill="#4ade80"/>
+					</g>
+
+					<g class="pose pose-right">
+						<rect x="22" y="35" width="12" height="10" fill="#d8e3d8"/>
+						<rect x="46" y="35" width="12" height="10" fill="#d8e3d8"/>
+						<rect x="30" y="38" width="4" height="4" fill="#0a1f12"/>
+						<rect x="54" y="38" width="4" height="4" fill="#0a1f12"/>
+						<rect x="34" y="55" width="12" height="2" fill="#4ade80"/>
+					</g>
+
+					<g class="pose pose-up">
+						<rect x="22" y="35" width="12" height="10" fill="#d8e3d8"/>
+						<rect x="46" y="35" width="12" height="10" fill="#d8e3d8"/>
+						<rect x="26" y="35" width="4" height="4" fill="#0a1f12"/>
+						<rect x="50" y="35" width="4" height="4" fill="#0a1f12"/>
+						<rect x="34" y="55" width="12" height="2" fill="#4ade80"/>
+					</g>
+
+					<g class="pose pose-blink">
+						<rect x="22" y="40" width="12" height="2" fill="#4ade80"/>
+						<rect x="46" y="40" width="12" height="2" fill="#4ade80"/>
+						<rect x="34" y="55" width="12" height="2" fill="#4ade80"/>
+					</g>
+
+					<g class="pose pose-happy">
+						<rect x="24" y="40" width="2" height="2" fill="#4ade80"/>
+						<rect x="26" y="38" width="6" height="2" fill="#4ade80"/>
+						<rect x="32" y="40" width="2" height="2" fill="#4ade80"/>
+						<rect x="48" y="40" width="2" height="2" fill="#4ade80"/>
+						<rect x="50" y="38" width="6" height="2" fill="#4ade80"/>
+						<rect x="56" y="40" width="2" height="2" fill="#4ade80"/>
+						<rect x="30" y="54" width="20" height="2" fill="#c5f04b"/>
+						<rect x="28" y="52" width="2" height="2" fill="#c5f04b"/>
+						<rect x="50" y="52" width="2" height="2" fill="#c5f04b"/>
+					</g>
+
+					<g class="pose pose-think">
+						<rect x="22" y="35" width="12" height="10" fill="#d8e3d8"/>
+						<rect x="46" y="35" width="12" height="10" fill="#d8e3d8"/>
+						<rect x="28" y="35" width="4" height="4" fill="#0a1f12"/>
+						<rect x="52" y="35" width="4" height="4" fill="#0a1f12"/>
+						<rect x="34" y="55" width="12" height="2" fill="#4ade80"/>
+						<rect x="30" y="60" width="3" height="3" fill="#c5f04b"/>
+						<rect x="38" y="60" width="3" height="3" fill="#c5f04b"/>
+						<rect x="46" y="60" width="3" height="3" fill="#c5f04b"/>
+					</g>
+
+					<g class="pose pose-work">
+						<rect x="22" y="35" width="12" height="10" fill="#d8e3d8"/>
+						<rect x="46" y="35" width="12" height="10" fill="#d8e3d8"/>
+						<rect x="26" y="38" width="4" height="4" fill="#0a1f12"/>
+						<rect x="50" y="38" width="4" height="4" fill="#0a1f12"/>
+						<rect x="36" y="55" width="8" height="2" fill="#c5f04b"/>
+						<rect x="52" y="60" width="2" height="2" fill="#c5f04b"/>
+						<rect x="56" y="60" width="2" height="2" fill="#c5f04b"/>
+						<rect x="54" y="58" width="2" height="2" fill="#c5f04b"/>
+						<rect x="54" y="62" width="2" height="2" fill="#c5f04b"/>
+					</g>
+
+					<g class="pose pose-sleep">
+						<rect x="22" y="40" width="12" height="2" fill="#4ade80"/>
+						<rect x="46" y="40" width="12" height="2" fill="#4ade80"/>
+						<rect x="34" y="55" width="12" height="2" fill="#1f3826"/>
+						<rect x="58" y="28" width="6" height="2" fill="#c5f04b"/>
+						<rect x="62" y="30" width="2" height="2" fill="#c5f04b"/>
+						<rect x="60" y="32" width="2" height="2" fill="#c5f04b"/>
+						<rect x="58" y="34" width="6" height="2" fill="#c5f04b"/>
+					</g>
+
+					<g class="pose pose-love">
+						<rect x="24" y="36" width="2" height="2" fill="#f87171"/>
+						<rect x="30" y="36" width="2" height="2" fill="#f87171"/>
+						<rect x="22" y="38" width="12" height="2" fill="#f87171"/>
+						<rect x="22" y="40" width="12" height="2" fill="#f87171"/>
+						<rect x="24" y="42" width="8" height="2" fill="#f87171"/>
+						<rect x="26" y="44" width="4" height="2" fill="#f87171"/>
+						<rect x="48" y="36" width="2" height="2" fill="#f87171"/>
+						<rect x="54" y="36" width="2" height="2" fill="#f87171"/>
+						<rect x="46" y="38" width="12" height="2" fill="#f87171"/>
+						<rect x="46" y="40" width="12" height="2" fill="#f87171"/>
+						<rect x="48" y="42" width="8" height="2" fill="#f87171"/>
+						<rect x="50" y="44" width="4" height="2" fill="#f87171"/>
+						<rect x="30" y="54" width="20" height="2" fill="#c5f04b"/>
+					</g>
+
+					<g class="pose pose-wow">
+						<rect x="20" y="33" width="14" height="14" fill="#d8e3d8"/>
+						<rect x="46" y="33" width="14" height="14" fill="#d8e3d8"/>
+						<rect x="24" y="37" width="6" height="6" fill="#0a1f12"/>
+						<rect x="50" y="37" width="6" height="6" fill="#0a1f12"/>
+						<rect x="36" y="54" width="8" height="2" fill="#0a1f12"/>
+						<rect x="34" y="56" width="2" height="4" fill="#0a1f12"/>
+						<rect x="44" y="56" width="2" height="4" fill="#0a1f12"/>
+						<rect x="36" y="60" width="8" height="2" fill="#0a1f12"/>
+					</g>
+
+					<g class="arms">
+						<rect class="arm-l" x="6" y="50" width="2" height="6" fill="#1f3826"/>
+						<rect class="arm-r" x="72" y="50" width="2" height="6" fill="#1f3826"/>
+						<rect class="arm-l-hand" x="6" y="54" width="2" height="2" fill="#15803d"/>
+						<rect class="arm-r-hand" x="72" y="54" width="2" height="2" fill="#15803d"/>
+					</g>
+
+					<rect x="36" y="70" width="8" height="2" fill="#1f3826"/>
+					<rect x="32" y="72" width="16" height="2" fill="#15803d"/>
+					<rect x="32" y="72" width="16" height="1" fill="#22c55e"/>
+
+					<rect x="22" y="74" width="10" height="4" fill="#1f3826"/>
+					<rect x="48" y="74" width="10" height="4" fill="#1f3826"/>
+					<rect x="22" y="74" width="10" height="1" fill="#15803d"/>
+					<rect x="48" y="74" width="10" height="1" fill="#15803d"/>
+
+					<rect x="20" y="78" width="2" height="1" fill="rgba(0,0,0,0.35)"/>
+					<rect x="24" y="78" width="6" height="1" fill="rgba(0,0,0,0.4)"/>
+					<rect x="32" y="78" width="16" height="1" fill="rgba(0,0,0,0.45)"/>
+					<rect x="50" y="78" width="6" height="1" fill="rgba(0,0,0,0.4)"/>
+					<rect x="58" y="78" width="2" height="1" fill="rgba(0,0,0,0.35)"/>
+				</svg>
+			</div>
+		) : (
+			<>
+				{lightImage && <Image src={lightImage} {...imageAttrs} class="dark:sl-hidden" />}
+				{rawHtml && <div class="hero-html sl-flex" set:html={rawHtml} />}
+			</>
+		)
+	}
+	<div class="sl-flex stack">
+		<div class="sl-flex copy">
+			<h1 id={PAGE_TITLE_ID} data-page-title set:html={title} />
+			{tagline && <div class="tagline" set:html={tagline} />}
+		</div>
+		{
+			actions.length > 0 && (
+				<div class="sl-flex actions">
+					{actions.map(
+						({ attrs: { class: className, ...attrs } = {}, icon, link: href, text, variant }: any) => (
+							<LinkButton {href} {variant} icon={icon?.name} class:list={[className]} {...attrs}>
+								{text}
+								{icon?.html && <Fragment set:html={icon.html} />}
+							</LinkButton>
+						)
+					)}
+				</div>
+			)
+		}
+	</div>
+</div>
+
+<script is:inline>
+	(() => {
+		const POSES = ['idle', 'blink', 'idle', 'happy', 'idle', 'think', 'work', 'idle', 'left', 'right', 'up', 'wow', 'idle', 'love', 'sleep'];
+		const start = () => {
+			const el = document.getElementById('browy-hero-mascot');
+			if (!el) return;
+			let i = 0;
+			const tick = () => {
+				i = (i + 1) % POSES.length;
+				el.dataset.pose = POSES[i];
+			};
+			setInterval(tick, 2400);
+		};
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', start, { once: true });
+		} else {
+			start();
+		}
+	})();
+</script>
+
+<style>
+	@layer starlight.core {
+		.hero {
+			display: grid;
+			grid-template-columns: 100%;
+			align-items: center;
+			gap: 1rem;
+			padding-bottom: 1rem;
+		}
+
+		.hero > .mascot-slot,
+		.hero > img,
+		.hero > .hero-html {
+			object-fit: contain;
+			width: min(50%, 14rem);
+			height: auto;
+			margin-inline: auto;
+		}
+
+		.stack {
+			flex-direction: column;
+			gap: clamp(1.5rem, calc(1.5rem + 1vw), 2rem);
+			text-align: center;
+		}
+
+		.copy {
+			flex-direction: column;
+			gap: 1rem;
+			align-items: center;
+		}
+
+		.copy > * {
+			max-width: 50ch;
+		}
+
+		h1 {
+			font-size: clamp(var(--sl-text-3xl), calc(0.25rem + 5vw), var(--sl-text-6xl));
+			line-height: var(--sl-line-height-headings);
+			font-weight: 600;
+			color: var(--sl-color-white);
+		}
+
+		.tagline {
+			font-size: clamp(var(--sl-text-base), calc(0.0625rem + 2vw), var(--sl-text-xl));
+			color: var(--sl-color-gray-2);
+		}
+
+		.actions {
+			gap: 1rem 2rem;
+			flex-wrap: wrap;
+			justify-content: center;
+		}
+
+		@media (min-width: 50rem) {
+			.hero {
+				grid-template-columns: 7fr 4fr;
+				gap: 3%;
+				padding-block: clamp(2.5rem, calc(1rem + 10vmin), 10rem);
+			}
+
+			.hero > .mascot-slot,
+			.hero > img,
+			.hero > .hero-html {
+				order: 2;
+				width: min(100%, 14rem);
+			}
+
+			.stack {
+				text-align: start;
+			}
+
+			.copy {
+				align-items: flex-start;
+			}
+
+			.actions {
+				justify-content: flex-start;
+			}
+		}
+
+		.browy-mascot {
+			width: 100%;
+			height: auto;
+			image-rendering: pixelated;
+			image-rendering: crisp-edges;
+			display: block;
+			animation: heroBreathe 2.4s steps(2) infinite;
+			transform-origin: 40px 78px;
+			transition: transform 0.3s ease;
+		}
+		.browy-mascot:hover { transform: translateY(-4px); }
+		@keyframes heroBreathe {
+			0%, 49% { transform: translateY(0); }
+			50%, 100% { transform: translateY(-1px); }
+		}
+
+		.browy-mascot g.pose { display: none; }
+		.browy-mascot[data-pose="idle"]  g.pose-idle  { display: block; }
+		.browy-mascot[data-pose="left"]  g.pose-left  { display: block; }
+		.browy-mascot[data-pose="right"] g.pose-right { display: block; }
+		.browy-mascot[data-pose="up"]    g.pose-up    { display: block; }
+		.browy-mascot[data-pose="blink"] g.pose-blink { display: block; }
+		.browy-mascot[data-pose="happy"] g.pose-happy { display: block; }
+		.browy-mascot[data-pose="think"] g.pose-think { display: block; }
+		.browy-mascot[data-pose="work"]  g.pose-work  { display: block; }
+		.browy-mascot[data-pose="sleep"] g.pose-sleep { display: block; }
+		.browy-mascot[data-pose="love"]  g.pose-love  { display: block; }
+		.browy-mascot[data-pose="wow"]   g.pose-wow   { display: block; }
+
+		.browy-mascot .ant-ball { animation: heroBallPulse 1.6s steps(2) infinite; }
+		@keyframes heroBallPulse { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0.65; } }
+		.browy-mascot[data-pose="think"] .ant-ball { animation: heroBallPulse 0.5s steps(2) infinite; }
+		.browy-mascot[data-pose="work"]  .ant-ball { animation: heroBallPulse 0.3s steps(2) infinite; fill: #c5f04b; }
+		.browy-mascot[data-pose="sleep"] .ant-ball { animation: heroBallPulse 3s steps(2) infinite; opacity: 0.5; }
+		.browy-mascot[data-pose="love"]  .ant-ball { fill: #f87171; }
+
+		.browy-mascot .arm-l, .browy-mascot .arm-l-hand { transform-origin: 8px 50px; }
+		.browy-mascot .arm-r, .browy-mascot .arm-r-hand { transform-origin: 72px 50px; }
+		.browy-mascot[data-pose="happy"] .arm-l,
+		.browy-mascot[data-pose="happy"] .arm-l-hand { transform: rotate(-30deg); }
+		.browy-mascot[data-pose="happy"] .arm-r,
+		.browy-mascot[data-pose="happy"] .arm-r-hand { transform: rotate(30deg); }
+		.browy-mascot[data-pose="wow"] .arm-l,
+		.browy-mascot[data-pose="wow"] .arm-l-hand { transform: rotate(-15deg) translateX(-2px); }
+		.browy-mascot[data-pose="wow"] .arm-r,
+		.browy-mascot[data-pose="wow"] .arm-r-hand { transform: rotate(15deg) translateX(2px); }
+
+		@media (prefers-reduced-motion: reduce) {
+			.browy-mascot { animation: none; }
+			.browy-mascot .ant-ball { animation: none; }
+		}
+	}
+</style>

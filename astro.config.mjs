@@ -14,6 +14,9 @@ export default defineConfig({
       description: 'AI agent in your browser. Drives tabs, reads pages, writes code.',
       logo: { src: './src/assets/logo.png', replacesTitle: false },
       customCss: ['./src/styles/custom.css'],
+      components: {
+        Hero: './src/components/Hero.astro',
+      },
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/BrowyHQ' },
       ],
