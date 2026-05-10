@@ -8,9 +8,13 @@ hero:
     file: ../../assets/logo.png
     alt: Browy mascot
   actions:
-    - text: Install Browy
+    - text: Add to Chrome
+      link: https://chromewebstore.google.com/detail/iondecjdokngnlkfpipgolgkfegpmjca
+      icon: external
+    - text: Install guide
       link: /docs/install/
       icon: right-arrow
+      variant: minimal
     - text: View on GitHub
       link: https://github.com/BrowyHQ
       icon: external
@@ -67,19 +71,24 @@ screenshots, and remembers things across sessions.
 
 ## Get started
 
-<Aside type="tip" title="Install in one line">
-On Windows, open PowerShell and run:
+<Aside type="tip" title="Install in two steps">
+**1.** [Add Browy from the Chrome Web Store](https://chromewebstore.google.com/detail/iondecjdokngnlkfpipgolgkfegpmjca) (one click).
+
+**2.** Install the native host. On Windows, open PowerShell:
 
 ```powershell
 irm https://github.com/BrowyHQ/browy/releases/latest/download/install.ps1 | iex
 ```
 
-Then load the unpacked extension from `~/Downloads/Browy-Extension/` in
-`chrome://extensions` (Developer Mode → "Load unpacked").
+On macOS / Linux:
+
+```bash
+curl -fsSL https://github.com/BrowyHQ/browy/releases/latest/download/install.sh | bash
+```
 </Aside>
 
 <CardGrid>
-  <LinkCard title="Install" href="/docs/install/" description="Native host plus extension. About 5 minutes." />
+  <LinkCard title="Install" href="/docs/install/" description="Extension plus native host. About 2 minutes." />
   <LinkCard title="Your first chat" href="/docs/first-chat/" description="Five example prompts to try in the side panel." />
   <LinkCard title="Permissions" href="/docs/permissions/" description="What each Chrome permission is for." />
   <LinkCard title="Privacy & data" href="/docs/privacy/" description="What stays on your machine and what leaves." />
@@ -88,6 +97,7 @@ Then load the unpacked extension from `~/Downloads/Browy-Extension/` in
 ## Status <Badge text="Early access" variant="caution" />
 
 The native host installer ships from
-[GitHub Releases](https://github.com/BrowyHQ/browy/releases). Chrome Web
-Store and Edge Add-ons listings are pending review; one-click install
-will land once they're approved.
+[GitHub Releases](https://github.com/BrowyHQ/browy/releases). The
+extension is published on the
+[Chrome Web Store](https://chromewebstore.google.com/detail/iondecjdokngnlkfpipgolgkfegpmjca);
+the same listing is reused by Edge and Brave.

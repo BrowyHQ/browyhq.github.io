@@ -1,6 +1,6 @@
 ---
 title: Install
-description: Set up the native host + the browser extension. Takes about 5 minutes.
+description: Set up the browser extension + the native host. Takes about 2 minutes.
 ---
 
 import { Tabs, TabItem, Steps, Aside, Badge, LinkCard, CardGrid, Card } from '@astrojs/starlight/components';
@@ -10,12 +10,12 @@ import { Image } from 'astro:assets';
 
 Browy is two pieces:
 
-1. **The native host**: a small Node.js helper that runs on your
+1. **The browser extension**: a Chromium side panel + DevTools panel.
+2. **The native host**: a small Node.js helper that runs on your
    machine and talks to GitHub Copilot.
-2. **The browser extension**: a Chrome side panel that talks to the
-   native host.
 
-The installer below sets up both.
+Install the extension from the Chrome Web Store, then run the
+one-line installer for the native host.
 
 ## Requirements
 
@@ -34,7 +34,28 @@ The installer below sets up both.
   </Card>
 </CardGrid>
 
-## Step 1: install the native host
+## Step 1: install the extension
+
+<LinkCard
+  title="Add Browy to Chrome / Edge / Brave"
+  href="https://chromewebstore.google.com/detail/iondecjdokngnlkfpipgolgkfegpmjca"
+  description="One click on the Chrome Web Store. Same listing covers Chrome, Edge, and Brave."
+/>
+
+Pin the Browy toolbar icon so the side panel is one click away.
+
+<Aside type="note" title="Web Store listing in review">
+The Chrome Web Store link above is live the moment Google approves the
+listing. Until then, the native-host installer below also stages an
+unpacked copy of the extension at `~/Downloads/Browy-Extension/` (or
+`%USERPROFILE%\Downloads\Browy-Extension\` on Windows). Open
+`chrome://extensions/`, toggle **Developer mode** on, click **Load
+unpacked**, and select that folder. The native host pre-approves both
+extension IDs, so you can switch to the Web Store install later
+without re-running anything.
+</Aside>
+
+## Step 2: install the native host
 
 <Tabs syncKey="os">
 <TabItem label="Windows" icon="seti:windows">
@@ -50,9 +71,8 @@ The installer will:
 <Steps>
 1. Download the latest Browy release (~130 MB)
 2. Install the native host to `%LOCALAPPDATA%\Browy\app\`
-3. Register `com.browy.host` with Chrome / Edge / Brave
-4. Copy the unpacked extension to `%USERPROFILE%\Downloads\Browy-Extension\`
-5. Open the extension folder in Explorer when it's done
+3. Register `com.browy.host` with Chrome / Edge / Brave (pre-approves both the Web Store and unpacked extension IDs)
+4. Stage an unpacked extension copy at `%USERPROFILE%\Downloads\Browy-Extension\` for sideload installs
 </Steps>
 
 </TabItem>
@@ -69,9 +89,8 @@ The installer will:
 <Steps>
 1. Detect your architecture (Apple Silicon or Intel) and download the matching tarball (~125 MB)
 2. Install the native host to `~/.browy/app/`
-3. Register `com.browy.host` with Chrome / Edge / Brave
-4. Copy the unpacked extension to `~/Downloads/Browy-Extension/`
-5. Open the extension folder in Finder and `chrome://extensions` for you
+3. Register `com.browy.host` with Chrome / Edge / Brave (pre-approves both the Web Store and unpacked extension IDs)
+4. Stage an unpacked extension copy at `~/Downloads/Browy-Extension/` for sideload installs
 </Steps>
 
 </TabItem>
@@ -88,35 +107,12 @@ The installer will:
 <Steps>
 1. Detect your architecture (`x86_64` or `aarch64`) and download the matching tarball (~133 MB)
 2. Install the native host to `~/.browy/app/`
-3. Register `com.browy.host` with Chrome / Edge / Brave (writes to `~/.config/<browser>/NativeMessagingHosts/`)
-4. Copy the unpacked extension to `~/Downloads/Browy-Extension/`
-5. Open the extension folder + `chrome://extensions` (if `xdg-open` is available)
+3. Register `com.browy.host` with Chrome / Edge / Brave (writes to `~/.config/<browser>/NativeMessagingHosts/`, pre-approves both extension IDs)
+4. Stage an unpacked extension copy at `~/Downloads/Browy-Extension/` for sideload installs
 </Steps>
 
 </TabItem>
 </Tabs>
-
-## Step 2: load the extension
-
-<figure class="browy-frame wide">
-  <Image src={placeholder} alt="chrome://extensions/ with the Browy extension loaded and pinned" />
-  <figcaption>chrome://extensions with Developer mode on and the Browy folder loaded.</figcaption>
-</figure>
-
-<Steps>
-1. Open `chrome://extensions/` (or `edge://extensions/`, `brave://extensions/`)
-2. Toggle **Developer mode** on (top-right of the page)
-3. Click **Load unpacked**
-4. Select the `Browy-Extension` folder in your Downloads (Windows: `%USERPROFILE%\Downloads\Browy-Extension\`; macOS / Linux: `~/Downloads/Browy-Extension/`)
-5. Pin the Browy icon to your toolbar so the side panel is one click away
-</Steps>
-
-<Aside type="tip" title="Why developer mode?">
-You're loading the extension from a folder rather than the Chrome Web
-Store, so Chrome needs Developer mode on. Once you've loaded it once,
-you can leave Developer mode on or off, and the extension keeps working
-either way.
-</Aside>
 
 ## Step 3: sign in to Copilot
 
@@ -132,7 +128,7 @@ A terminal window opens with the GitHub Copilot **device-flow link**.
 Paste the code into the URL it shows, authorize Browy in your browser,
 and the terminal closes itself.
 
-You're done. Try [your first chat →](/docs/first-chat/)
+You're done. Try [your first chat](/docs/first-chat/).
 
 ## Updating
 
