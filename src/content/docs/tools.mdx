@@ -1,6 +1,6 @@
 ---
 title: Tools the agent has
-description: Every tool Browy exposes to the LLM, and the ones it deliberately doesn't.
+description: Every tool Browy exposes to the LLM, plus the host tools you can opt into.
 ---
 
 import { CardGrid, Card, LinkCard, Aside, Badge, Tabs, TabItem } from '@astrojs/starlight/components';
@@ -163,22 +163,24 @@ Common reasons to disable a tool:
   </Card>
 </CardGrid>
 
-Click **enable all** in the toolbar to undo every override at once.
-Changes apply on the next chat (or after `/clear`).
+Click **reset defaults** in the toolbar to undo every override at once
+(browser tools back on, host tools back off). Changes apply on the
+next chat (or after `/clear`).
 
-## What about host shell, filesystem, web_fetch?
+## Host tools (opt-in)
 
-The Copilot SDK includes `bash`, `read_file`, `write_file`,
-`web_fetch`, `grep`, and `glob` as standard tools — they're how the
-`copilot` CLI does coding work in a terminal. Browy's browser surfaces
-do **not** expose any of them, by design. The native host registers a
-strict allowlist when it opens a Copilot session, so even if a model
-tried to call `bash` in response to a prompt-injected page, the SDK
-would reject it. There is no Settings toggle to turn them on, and no
-in-browser path to opt in.
+The Copilot SDK includes `bash`, `read_file`, `write_file`, `grep`,
+`glob`, and `web_fetch` as standard tools — the same ones the `copilot`
+CLI uses for coding work in a terminal. They reach your machine's
+filesystem and shell, so Browy keeps them off by default.
 
-If you need a terminal coding agent, use the
-[GitHub Copilot CLI](https://docs.github.com/en/copilot/github-copilot-in-the-cli)
+To enable one, open Settings → Tools and scroll to the **host
+(advanced)** group. Each tool is a separate toggle. The native host
+keeps an allowlist of accepted names, so a compromised extension
+can't quietly enable anything outside this set.
+
+If you need a terminal coding agent without the browser side at all,
+use the [GitHub Copilot CLI](https://docs.github.com/en/copilot/github-copilot-in-the-cli)
 directly.
 
 ## See also

@@ -11,7 +11,7 @@ Common questions. Don't see yours? [Open an issue](https://github.com/BrowyHQ/br
 
 **Yes.** Browy is open source under Apache-2.0. The code, the host, and the extension are free.
 
-You bring your own [GitHub Copilot](https://github.com/features/copilot) subscription for the LLM. If you already have Copilot (free tier or paid), Browy adds zero per-task cost: no API keys, no per-token billing, no Browy server fees.
+You bring your own [GitHub Copilot](https://github.com/features/copilot) subscription for the LLM. If you already have Copilot (free tier or paid), Browy adds nothing on top — the same Copilot quota you already use in your editor or in the terminal.
 
 ## How does Browy compare to Browser-Use?
 
@@ -25,7 +25,7 @@ Both are open-source browser-automation agents. Different deployment model:
 | UI | Side panel chat + DevTools CLI | Programmatic |
 | Best for | Day-to-day tab automation, "do this with my logged-in account" tasks | Headless scraping, batch jobs, CI |
 
-Browy's killer feature is **session reuse**: your cookies, your logins, your password manager, your other extensions. You don't re-auth into Gmail, Slack, or GitHub for every task.
+Browy's main draw is **session reuse**: your cookies, your logins, your password manager, your other extensions. You don't re-auth into Gmail, Slack, or GitHub for every task.
 
 ## How does Browy compare to Skyvern?
 
@@ -57,11 +57,11 @@ Any model your Copilot subscription exposes — currently Claude Opus 4.7, Sonne
 - Tool calls (clicks, typed text, evaluated JS) → executed locally in your browser via `chrome.debugger`
 - Session history → stored locally in `chrome.storage.local` (extension) and `~/.browy/host/` (native host logs)
 
-There is no Browy server. No telemetry. No analytics. Full detail at [Privacy & Data](/docs/privacy/).
+Browy itself runs no server and collects no analytics. Full detail at [Privacy & Data](/docs/privacy/).
 
 ## Can I disable specific tools?
 
-**Yes.** Open the extension Settings page → Tools section. Every browser tool can be toggled individually; disabled tools are stripped from the prompt, so the model can't see or call them. See [Tools](/docs/tools/).
+**Yes.** Open the extension Settings → Tools. Every browser tool is on by default and can be toggled off; the disabled ones are stripped from the prompt the model sees. Host tools (`bash`, `read_file`, `write_file`, `grep`, `glob`, `web_fetch`) are off by default and can be opted into per-tool. See [Tools](/docs/tools/).
 
 ## Can I run Browy without opening a browser tab?
 

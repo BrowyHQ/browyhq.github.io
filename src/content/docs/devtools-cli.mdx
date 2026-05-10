@@ -11,8 +11,8 @@ import { Image } from 'astro:assets';
 
 The Browy extension registers a **DevTools panel** that hosts a
 terminal-style REPL for the agent. Open Chrome DevTools on any page,
-click the **Browy** tab, and you have the same agent that runs in the
-side panel — only with a CLI surface that power users tend to prefer.
+click the **Browy** tab, and you get the same agent that runs in the
+side panel, with a CLI instead of a chat bubble.
 
 <figure class="browy-frame">
   <Image src={devtoolsPanel} alt="The Browy DevTools panel: a green-on-black REPL with /help, /model picker, and a status bar showing the active model and inspected page" />
@@ -23,20 +23,20 @@ side panel — only with a CLI surface that power users tend to prefer.
 
 <CardGrid>
   <Card title="Where you already are" icon="seti:html">
-    Inspect the DOM, read the network panel, then ask the agent a
-    question without leaving DevTools.
+    Inspect the DOM, check the network panel, then ask the agent
+    something — without leaving DevTools.
   </Card>
   <Card title="Terminal feel" icon="seti:shell">
     Slash commands, history, autocomplete, `Ctrl+L` to clear, `Esc`
-    to cancel. Familiar if you use `gh copilot` or `claude code`.
+    to cancel. If you've used `gh copilot` it'll feel obvious.
   </Card>
   <Card title="Per-tab session" icon="approve-check">
-    Each DevTools panel is bound to its inspected target. Open one per
-    tab, run an agent per app, no cross-talk.
+    Each DevTools panel is tied to the tab it was opened on. Open one
+    per tab to run separate agents in parallel.
   </Card>
   <Card title="Same agent" icon="rocket">
-    The DevTools CLI uses the same backend, tools, and session store
-    as the side panel. Snapshots, clicks, network log, all of it.
+    Same backend, same tools, same session store as the side panel —
+    including the page snapshots, click/type tools, and network log.
   </Card>
 </CardGrid>
 
@@ -68,8 +68,7 @@ Type `/` to autocomplete. Aliases: `/?` → `/help`, `/models` → `/model`.
 
 ### Page introspection (no agent turn)
 
-These commands talk straight to the inspected page via the DevTools
-runtime — no LLM call, no token cost.
+These run locally in DevTools and don't go through the model.
 
 | Command | What it does |
 |---|---|
