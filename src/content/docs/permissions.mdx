@@ -15,11 +15,10 @@ required. The same text is the basis for the Chrome Web Store listing's
 permission justification.
 
 <Aside type="tip" title="Summary">
-Browy needs broad permissions because it's a *general-purpose* browser
-agent — you might point it at any site you visit. It only acts on tabs
-you target through the side panel, and the host-touching tools (shell,
-filesystem, arbitrary HTTP) are off by default — you opt in per-tool
-under Settings → Tools if you want them.
+Browy is a general-purpose browser agent, so the permissions cover any
+site you might point it at. It only acts on tabs you target from the
+side panel. Host-touching tools (shell, filesystem, HTTP) are off until
+you opt in under Settings → Tools.
 </Aside>
 
 ## Permissions
@@ -33,17 +32,14 @@ Required to register `sidepanel.html`.
 
 The agent uses the **Chrome DevTools Protocol** (via
 `chrome.debugger.attach`) to take page snapshots, click and type by
-accessibility index, evaluate JavaScript in the page, capture
-network and console events, and take screenshots. This is what makes
-Browy able to "see" and "act on" pages reliably without brittle CSS
-selectors.
+accessibility index, evaluate JavaScript, and capture network and
+console events. It's how Browy reads and drives pages without brittle
+CSS selectors.
 
-<Aside type="caution" title="The debugging banner is non-removable by design">
-While a session is active, Chrome shows its standard *"Browy started
-debugging this browser"* banner across the top of the window. It's
-Chrome's mandatory disclosure that an extension is using the DevTools
-Protocol — no extension can hide it. Browy attaches only to tabs you
-direct it at, and you can detach at any time.
+<Aside type="note" title="“Browy started debugging this browser”">
+Chrome shows its standard debugging banner while a session is active.
+Chrome requires it for any extension using the DevTools Protocol;
+detach the session and the banner goes away.
 </Aside>
 
 ### `tabs` <Badge text="Core" />
@@ -96,17 +92,10 @@ messaging port responsive without a busy loop.
 
 ### `<all_urls>` <Badge text="Required" variant="caution" />
 
-Browy is a *general-purpose* browser agent — you might ask it to
-operate on any site you can visit. Restricting host permissions to a
-fixed list would prevent Browy from working on the next site you ask
-about.
-
-<Aside type="note" title="What this does NOT mean">
-`<all_urls>` lets the extension *attach* to any tab you tell it to.
-It does **not** mean Browy is reading every page in the background —
-the agent only acts on tabs you explicitly target via the side panel.
-There is no background crawler, no prefetch, no scraping.
-</Aside>
+You'll point Browy at any site you visit, so the extension declares
+permission for all URLs. The agent only attaches to tabs you target
+from the side panel — `<all_urls>` is the gate, not a license to
+crawl in the background.
 
 ## How Browy is architected
 

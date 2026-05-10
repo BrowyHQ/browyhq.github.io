@@ -5,17 +5,14 @@ description: Every tool Browy exposes to the LLM, plus the host tools you can op
 
 import { CardGrid, Card, LinkCard, Aside, Badge, Tabs, TabItem } from '@astrojs/starlight/components';
 
-Browy ships with the browser-driving tools enabled by default. Any
-individual tool can be turned off in **Settings → Tools** for stricter
-modes (read-only, no JS evaluation, and so on).
+Browy ships with the browser-driving tools on. Turn any of them off in
+**Settings → Tools** if you want a stricter setup (read-only, no JS
+evaluation, and so on).
 
-Browy also exposes a small set of **host tools** from the Copilot SDK
-(`bash`, `read_file`, `write_file`, `grep`, `glob`, `web_fetch`). These
-reach your **machine's filesystem and shell**, not just the browser
-tab — so they're **off by default** and protected by a strict allowlist.
-You can opt in to any of them per-tool in Settings if you trust the
-sites you visit. (See [Security model](/docs/security) for the
-threat-model details.)
+The Copilot SDK also exposes a set of **host tools** (`bash`,
+`read_file`, `write_file`, `grep`, `glob`, `web_fetch`) that reach your
+machine's filesystem and shell. Those are off until you opt in
+per-tool in Settings.
 
 <Aside type="note">
 The authoritative list lives in
@@ -31,11 +28,6 @@ in [`src/agent/loop.ts`](https://github.com/BrowyHQ/browy/blob/main/src/agent/lo
 |---|---|---|---|
 | **Browser tools** (everything below) | ON | The active tab via CDP | Disable per-tool in Settings |
 | **Host tools** (`bash`, `read_file`, `write_file`, `grep`, `glob`, `web_fetch`) | OFF | Your machine, with your user privileges | Enable per-tool in Settings → Tools → host (advanced) |
-
-Host tools are gated because a prompt-injection on a visited page could
-otherwise read `~/.ssh`, run shell commands, or fetch from internal
-URLs. Leave them off unless you actively need agentic file/shell work
-and you're driving the agent on pages you trust.
 
 ## Categories
 
@@ -170,18 +162,14 @@ next chat (or after `/clear`).
 ## Host tools (opt-in)
 
 The Copilot SDK includes `bash`, `read_file`, `write_file`, `grep`,
-`glob`, and `web_fetch` as standard tools — the same ones the `copilot`
-CLI uses for coding work in a terminal. They reach your machine's
-filesystem and shell, so Browy keeps them off by default.
+`glob`, and `web_fetch` — the same set the `copilot` CLI uses in a
+terminal. They reach your filesystem and shell, so Browy ships them
+off; flip them on per-tool under Settings → Tools → host (advanced)
+when you want them.
 
-To enable one, open Settings → Tools and scroll to the **host
-(advanced)** group. Each tool is a separate toggle. The native host
-keeps an allowlist of accepted names, so a compromised extension
-can't quietly enable anything outside this set.
-
-If you need a terminal coding agent without the browser side at all,
-use the [GitHub Copilot CLI](https://docs.github.com/en/copilot/github-copilot-in-the-cli)
-directly.
+If you only need a terminal coding agent, the
+[GitHub Copilot CLI](https://docs.github.com/en/copilot/github-copilot-in-the-cli)
+covers that case directly.
 
 ## See also
 

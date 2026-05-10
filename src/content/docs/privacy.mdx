@@ -85,12 +85,11 @@ That includes things power users *want* to send: API keys for backend
 testing, OAuth redirect URLs, `Authorization` headers from a network
 trace. Browy doesn't second-guess you.
 
-<Aside type="tip" title="A few sensible defaults">
-The Copilot SDK's host-touching tools (`bash`, `web_fetch`, `read_file`,
-`write_file`, `grep`, `glob`) are **off by default** — they reach your
-machine, not just the browser tab, so we make you opt in per-tool in
-**Settings → Tools** before the model can call them. Browser-driving
-tools are on by default and can each be turned off in the same place.
+<Aside type="tip" title="Defaults">
+Browser-driving tools are on; host-touching tools (`bash`, `web_fetch`,
+`read_file`, `write_file`, `grep`, `glob`) are off until you opt in
+under **Settings → Tools**. Both can be flipped per-tool in the same
+place.
 </Aside>
 
 ## How Browy is built
