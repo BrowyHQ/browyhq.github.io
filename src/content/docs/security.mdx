@@ -13,7 +13,7 @@ a fix and disclosure.
 </Aside>
 
 <CardGrid>
-  <LinkCard title="Report a vulnerability" href="https://github.com/BrowyHQ/browy/security/advisories/new" description="GitHub Security Advisory — private, preferred channel for anything sensitive." />
+  <LinkCard title="Report a vulnerability" href="https://github.com/BrowyHQ/browy/security/advisories/new" description="GitHub Security Advisory: private, preferred channel for anything sensitive." />
 </CardGrid>
 
 **Acknowledgement target:** 7 days.<br/>
@@ -33,7 +33,7 @@ Anything that lets an attacker:
 ## Out of scope
 
 <Aside type="note" title="Prompt injection on visited pages">
-Any prompt-injection on a visited page can steer the agent — that's
+Any prompt-injection on a visited page can steer the agent. That's
 true of every page-driving agent, and the threat model assumes it.
 Browy keeps host-touching tools (`bash`, `read_file`, `write_file`,
 `grep`, `glob`, `web_fetch`) off by default; you enable them per-tool
@@ -42,7 +42,7 @@ also be turned off individually.
 </Aside>
 
 Issues in third-party software Browy depends on (Chrome, Node.js,
-the GitHub Copilot CLI) — please report those upstream.
+the GitHub Copilot CLI), please report those upstream.
 
 ## What we do
 

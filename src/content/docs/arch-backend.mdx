@@ -1,5 +1,5 @@
 ---
-title: Architecture — native host (backend)
+title: "Architecture: native host (backend)"
 description: How the Browy native messaging host wraps GitHub Copilot CLI, dispatches tools, and manages sessions.
 ---
 
@@ -47,7 +47,7 @@ Every tool the agent decides to call comes back to the extension as a
     the extension, and routes tool results back into the SDK.
   </Card>
   <Card title="`src/agent/tools/browser.ts`" icon="seti:json">
-    The browser-tool registry — every tool the LLM can call
+    The browser-tool registry: every tool the LLM can call
     (`snapshot`, `click`, `type`, `network_log`, …). Each tool is
     declared inline with its JSON schema and a thin handler that
     forwards the call to the extension over the port.
@@ -62,7 +62,7 @@ Every tool the agent decides to call comes back to the extension as a
     same host run under unit tests without Chrome.
   </Card>
   <Card title="`src/cli-bin.ts`" icon="seti:shell">
-    Standalone entry — the `browy` binary. Today it's the
+    Standalone entry: the `browy` binary. Today it's the
     installer / register / unregister CLI.
   </Card>
 </CardGrid>
@@ -97,10 +97,10 @@ Copilot session.
 
 The agent also has its own scratch surfaces:
 
-- `~/.browy/data/files/` — sandboxed file scratch the `save_file` /
+- `~/.browy/data/files/`: sandboxed file scratch the `save_file` /
   `read_file` agent tools operate against
-- `~/.browy/data/notes.json` — persistent key-value memory across chats
-- `~/.browy/host/host.log` — single rotating 5 MB log file
+- `~/.browy/data/notes.json`: persistent key-value memory across chats
+- `~/.browy/host/host.log`: single rotating 5 MB log file
 
 ## Tool dispatch
 
@@ -108,7 +108,7 @@ Tool definitions live in `src/agent/tools/browser.ts`. Each one
 declares:
 
 - `name`, `description`, JSON-schema `parameters` (consumed by the SDK)
-- `handler(input, ctx)` — runs in the host, typically forwards the
+- `handler(input, ctx)`: runs in the host, typically forwards the
   call to the extension via `ctx.port.send({type: 'tool_call', …})`
   and awaits the matching `tool_result` reply
 
@@ -134,7 +134,7 @@ the host's diagnostic output, not transcripts.
 ## See also
 
 <CardGrid>
-  <LinkCard title="Architecture — extension (frontend)" href="/docs/arch-frontend/" description="Service worker, side panel, DevTools panel, content scripts." />
-  <LinkCard title="Architecture — DevTools CLI" href="/docs/arch-cli/" description="Slash commands, completion, model picker, REPL state." />
+  <LinkCard title="Architecture: extension (frontend)" href="/docs/arch-frontend/" description="Service worker, side panel, DevTools panel, content scripts." />
+  <LinkCard title="Architecture: DevTools CLI" href="/docs/arch-cli/" description="Slash commands, completion, model picker, REPL state." />
   <LinkCard title="Tools the agent has" href="/docs/tools/" description="Full reference of each tool, plus the per-tool Settings toggles." />
 </CardGrid>

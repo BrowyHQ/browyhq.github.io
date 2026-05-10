@@ -1,6 +1,6 @@
 ---
 title: Browy DevTools CLI
-description: A terminal-style agent REPL inside Chrome DevTools — slash commands, live model picker, the full Browy agent.
+description: "A terminal-style agent REPL inside Chrome DevTools: slash commands, live model picker, the full Browy agent."
 ---
 
 import { Aside, CardGrid, Card, LinkCard, Badge, Tabs, TabItem } from '@astrojs/starlight/components';
@@ -24,7 +24,7 @@ side panel, with a CLI instead of a chat bubble.
 <CardGrid>
   <Card title="Where you already are" icon="seti:html">
     Inspect the DOM, check the network panel, then ask the agent
-    something — without leaving DevTools.
+    something, without leaving DevTools.
   </Card>
   <Card title="Terminal feel" icon="seti:shell">
     Slash commands, history, autocomplete, `Ctrl+L` to clear, `Esc`
@@ -35,7 +35,7 @@ side panel, with a CLI instead of a chat bubble.
     per tab to run separate agents in parallel.
   </Card>
   <Card title="Same agent" icon="rocket">
-    Same backend, same tools, same session store as the side panel —
+    Same backend, same tools, same session store as the side panel,
     including the page snapshots, click/type tools, and network log.
   </Card>
 </CardGrid>
@@ -78,7 +78,7 @@ These run locally in DevTools and don't go through the model.
 | `/snapshot` | Quick page summary (title, URL, headings) |
 | `/dom <selector>` | `querySelectorAll` summary for a CSS selector |
 | `/eval <expr>` | Eval JavaScript in the inspected page |
-| `/js` | Toggle a **JS REPL mode** — every line is evaluated in the inspected page until you `/js` again |
+| `/js` | Toggle a **JS REPL mode**: every line is evaluated in the inspected page until you `/js` again |
 
 ### UI & meta
 

@@ -10,9 +10,9 @@ import { Image } from 'astro:assets';
 
 Browy is two pieces:
 
-1. **The native host** — a small Node.js helper that runs on your
+1. **The native host**: a small Node.js helper that runs on your
    machine and talks to GitHub Copilot.
-2. **The browser extension** — a Chrome side panel that talks to the
+2. **The browser extension**: a Chrome side panel that talks to the
    native host.
 
 The installer below sets up both.
@@ -34,7 +34,7 @@ The installer below sets up both.
   </Card>
 </CardGrid>
 
-## Step 1 — install the native host
+## Step 1: install the native host
 
 <Tabs syncKey="os">
 <TabItem label="Windows" icon="seti:windows">
@@ -96,7 +96,7 @@ The installer will:
 </TabItem>
 </Tabs>
 
-## Step 2 — load the extension
+## Step 2: load the extension
 
 <figure class="browy-frame wide">
   <Image src={placeholder} alt="chrome://extensions/ with the Browy extension loaded and pinned" />
@@ -114,11 +114,11 @@ The installer will:
 <Aside type="tip" title="Why developer mode?">
 You're loading the extension from a folder rather than the Chrome Web
 Store, so Chrome needs Developer mode on. Once you've loaded it once,
-you can leave Developer mode on or off — the extension keeps working
+you can leave Developer mode on or off, and the extension keeps working
 either way.
 </Aside>
 
-## Step 3 — sign in to Copilot
+## Step 3: sign in to Copilot
 
 Click the Browy icon to open the side panel. The first time you use it,
 Browy will prompt you to sign in.
@@ -205,16 +205,16 @@ icon on the Browy card).
 
 ## Troubleshooting
 
-<Aside type="caution" title="“Host disconnected — reconnecting…”">
+<Aside type="caution" title="“Host disconnected, reconnecting…”">
 The side panel can't reach the native host. Common causes: the native
 host failed to install (re-run the installer), the browser was opened
 before the host was registered (restart the browser), or your AV /
 endpoint protection quarantined the bundled `node` (allow the install
-directory — `%LOCALAPPDATA%\Browy\` on Windows, `~/.browy/` on macOS
-and Linux — in your AV exclusions).
+directory, `%LOCALAPPDATA%\Browy\` on Windows, `~/.browy/` on macOS
+and Linux, in your AV exclusions).
 </Aside>
 
-<Aside type="caution" title="“Host unreachable — reinstall →”">
+<Aside type="caution" title="“Host unreachable, reinstall →”">
 The reconnect attempts gave up. Click **Reinstall host** in the
 banner; it points at the same one-line installer you used the first
 time (`install.ps1` on Windows, `install.sh` on macOS / Linux). Your
@@ -222,8 +222,8 @@ chats and settings are preserved across reinstalls.
 </Aside>
 
 <Aside type="note" title="“Browy started debugging this browser”">
-Chrome's standard debugging banner appears while a session is active —
-that's how Browy reads and drives pages. Closing the banner detaches
+Chrome's standard debugging banner appears while a session is active.
+That's how Browy reads and drives pages. Closing the banner detaches
 the agent. See [Permissions → debugger](/docs/permissions/) for the
 full story.
 </Aside>

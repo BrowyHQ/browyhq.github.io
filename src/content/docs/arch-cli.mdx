@@ -1,6 +1,6 @@
 ---
-title: Architecture — DevTools CLI
-description: How the Browy DevTools panel REPL is built — slash commands, autocomplete, history, model picker.
+title: "Architecture: DevTools CLI"
+description: "How the Browy DevTools panel REPL is built: slash commands, autocomplete, history, model picker."
 ---
 
 import { CardGrid, Card, LinkCard, Aside } from '@astrojs/starlight/components';
@@ -20,7 +20,7 @@ This page is for contributors curious about how it's built.
 | `extension/devtools.js` | Calls `chrome.devtools.panels.create('Browy', icon, 'panel.html')` |
 | `extension/panel.html` | Toolbar + log + autocomplete listbox + textarea |
 | `extension/panel.css` | The retro green-on-black aesthetic |
-| `extension/panel.js` | All behavior — REPL, slash commands, port glue |
+| `extension/panel.js` | All behavior: REPL, slash commands, port glue |
 
 ## The REPL loop
 
@@ -70,7 +70,7 @@ The toolbar's `#model` badge updates on `model_changed`.
 ## History
 
 Up / down arrows when the input is empty browse a stack of past
-prompts. Stored in-memory only — DevTools panels are recreated on
+prompts. Stored in-memory only. DevTools panels are recreated on
 every page reload, so history is per-session.
 
 ## Per-target binding
@@ -87,11 +87,11 @@ the same way the inspector is per-page.
 We could have rendered the REPL in the side panel UI and called it
 "DevTools mode". We didn't, because:
 
-- DevTools panels live alongside the inspector, network, and console
-  — context that power users *want* next to the agent.
+- DevTools panels live alongside the inspector, network, and console,
+  giving power users context they *want* next to the agent.
 - The DevTools panel UI primitives (toolbar buttons, theming, host
   shortcuts like `Ctrl+L` to clear) are subtly different from a
-  regular side panel — keeping them separate avoids `if (devtools)`
+  regular side panel. Keeping them separate avoids `if (devtools)`
   forks throughout the side-panel code.
 - It lets the two surfaces evolve independently: the side panel can
   stay friendly and chat-shaped; the DevTools CLI can grow more
@@ -103,15 +103,15 @@ We could have rendered the REPL in the side panel UI and called it
 These items are tracked on the
 [GitHub project board](https://github.com/orgs/BrowyHQ/projects):
 
-- **REPL co-coding** — explicit handoff syntax (`:edit`, `:continue`)
+- **REPL co-coding**: explicit handoff syntax (`:edit`, `:continue`)
   for pair-programming with the agent on a single file.
-- **Attach to running session** — debug view of an active side-panel
+- **Attach to running session**: debug view of an active side-panel
   agent.
 
 ## See also
 
 <CardGrid>
   <LinkCard title="DevTools CLI (user guide)" href="/docs/devtools-cli/" description="Slash commands, model picker, keyboard." />
-  <LinkCard title="Architecture — native host" href="/docs/arch-backend/" description="The other end of the port." />
-  <LinkCard title="Architecture — extension" href="/docs/arch-frontend/" description="How DevTools panels fit into the wider extension." />
+  <LinkCard title="Architecture: native host" href="/docs/arch-backend/" description="The other end of the port." />
+  <LinkCard title="Architecture: extension" href="/docs/arch-frontend/" description="How DevTools panels fit into the wider extension." />
 </CardGrid>

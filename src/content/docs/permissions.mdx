@@ -94,14 +94,14 @@ messaging port responsive without a busy loop.
 
 You'll point Browy at any site you visit, so the extension declares
 permission for all URLs. The agent only attaches to tabs you target
-from the side panel — `<all_urls>` is the gate, not a license to
+from the side panel. `<all_urls>` is the gate, not a license to
 crawl in the background.
 
 ## How Browy is architected
 
 <CardGrid>
   <Card title="Local native host" icon="rocket">
-    Page content goes to **GitHub Copilot** via the local Copilot CLI —
+    Page content goes to **GitHub Copilot** via the local Copilot CLI,
     exactly as if you ran `gh copilot` from a terminal.
   </Card>
   <Card title="No background activity" icon="moon">

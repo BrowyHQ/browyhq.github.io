@@ -1,6 +1,6 @@
 ---
-title: Architecture — extension (frontend)
-description: How the Browy MV3 extension is laid out — service worker, side panel, DevTools panel, content scripts, native-messaging port.
+title: "Architecture: extension (frontend)"
+description: "How the Browy MV3 extension is laid out: service worker, side panel, DevTools panel, content scripts, native-messaging port."
 ---
 
 import { Aside, CardGrid, Card, LinkCard } from '@astrojs/starlight/components';
@@ -40,18 +40,18 @@ safety timeout) before enabling their inputs.
 ## UI surfaces
 
 <CardGrid>
-  <Card title="Side panel — `sidepanel.html`" icon="seti:html">
+  <Card title="Side panel: `sidepanel.html`" icon="seti:html">
     The default chat UI. Persistent chat history, model badge, model
     picker, slash commands, past-chats drawer, mascot. Most users live
     here.
   </Card>
-  <Card title="DevTools panel — `panel.html`" icon="seti:plan">
+  <Card title="DevTools panel: `panel.html`" icon="seti:plan">
     The terminal-style REPL. Registered by `devtools.js` via
     `chrome.devtools.panels.create('Browy', …)`. Shares the agent
     backend with the side panel and is bound to the inspected target.
     See the [DevTools CLI page](/docs/devtools-cli/).
   </Card>
-  <Card title="Options — `options.html`" icon="setting">
+  <Card title="Options: `options.html`" icon="setting">
     Model picker, tool toggles, sign-in status, and install help when
     the host isn't reachable. Opens via Chrome's standard extension
     options entry or Browy's toolbar menu.
@@ -84,7 +84,7 @@ Everything user-visible is in `chrome.storage.local`:
 - **Active chat**: `active_chat_id`
 - **Settings**: `settings.model`, `settings.theme`,
   `settings.reasoning_effort`, `settings.tools` (per-tool toggles)
-- **Last tab**: `lastActiveTabId` — used to restore which tab the
+- **Last tab**: `lastActiveTabId`, used to restore which tab the
   agent acts on after Chrome restarts
 
 Nothing leaves the local profile. There is no remote sync.
@@ -108,7 +108,7 @@ by the Chrome Web Store and Edge Add-ons listings.
 ## See also
 
 <CardGrid>
-  <LinkCard title="Architecture — native host (backend)" href="/docs/arch-backend/" description="The host process, tool dispatch, and the SDK loop." />
-  <LinkCard title="Architecture — DevTools CLI" href="/docs/arch-cli/" description="Internals of the DevTools panel REPL." />
+  <LinkCard title="Architecture: native host (backend)" href="/docs/arch-backend/" description="The host process, tool dispatch, and the SDK loop." />
+  <LinkCard title="Architecture: DevTools CLI" href="/docs/arch-cli/" description="Internals of the DevTools panel REPL." />
   <LinkCard title="Permissions" href="/docs/permissions/" description="Why each manifest permission is required." />
 </CardGrid>

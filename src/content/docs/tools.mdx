@@ -131,8 +131,8 @@ context.
 
 Every browser tool can be turned off individually in **Settings →
 Tools** (right-click the Browy toolbar icon → Options). Toggles are
-grouped by category — _inspect_, _navigate_, _interact_, _devtools_ —
-and persist in `chrome.storage.local`. Disabled tools are stripped from
+grouped by category: _inspect_, _navigate_, _interact_, and _devtools_.
+They persist in `chrome.storage.local`. Disabled tools are stripped from
 the SDK's allowlist and from the function-definition list sent to the
 model, so the agent doesn't see they exist.
 
@@ -162,8 +162,8 @@ next chat (or after `/clear`).
 ## Host tools (opt-in)
 
 The Copilot SDK includes `bash`, `read_file`, `write_file`, `grep`,
-`glob`, and `web_fetch` — the same set the `copilot` CLI uses in a
-terminal. They reach your filesystem and shell, so Browy ships them
+`glob`, and `web_fetch`, the same set the `copilot` CLI uses in a
+terminal.They reach your filesystem and shell, so Browy ships them
 off; flip them on per-tool under Settings → Tools → host (advanced)
 when you want them.
 
