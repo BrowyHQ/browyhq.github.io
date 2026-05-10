@@ -35,9 +35,7 @@ If you want a turnkey hosted product, pick Skyvern. If you want zero-trust local
 
 ## How does Browy compare to Aider / Cline / Cursor?
 
-Aider, Cline, and Cursor are AI coding agents that live in your terminal or editor. Browy lives in the browser: same agentic loop pattern, different surface.
-
-Browy also ships its own headless CLI (`browy run "task"`) which is closer to Aider in feel. The differentiator is the side-panel and DevTools surfaces that bind the agent to live tabs.
+Aider, Cline, and Cursor are AI coding agents that live in your terminal or editor. Browy lives in the browser: same agentic loop pattern, different surface. The differentiator is the side panel and DevTools surfaces that bind the agent to your live tabs.
 
 ## Does Browy work offline?
 
@@ -57,7 +55,7 @@ Any model your Copilot subscription exposes — currently Claude Opus 4.7, Sonne
 
 - Page content the agent reads → GitHub Copilot, the same path as `gh copilot` in a terminal
 - Tool calls (clicks, typed text, evaluated JS) → executed locally in your browser via `chrome.debugger`
-- Session history → stored locally in `~/.browy/cli-sessions/` (CLI) and `chrome.storage.local` (extension)
+- Session history → stored locally in `chrome.storage.local` (extension) and `~/.browy/host/` (native host logs)
 
 There is no Browy server. No telemetry. No analytics. Full detail at [Privacy & Data](/docs/privacy/).
 
@@ -65,15 +63,9 @@ There is no Browy server. No telemetry. No analytics. Full detail at [Privacy & 
 
 **Yes.** Open the extension Settings page → Tools section. Every browser tool can be toggled individually; disabled tools are stripped from the prompt, so the model can't see or call them. See [Tools](/docs/tools/).
 
-## How do I run a task without the browser open?
+## Can I run Browy without opening a browser tab?
 
-Use the [`browy run`](/docs/browy-run/) headless CLI bundled with the host:
-
-```bash
-browy run "summarize the front page of news.ycombinator.com"
-```
-
-Direct Copilot SDK, no extension needed.
+Not today. Browy is a browser agent — every tool it has acts on a live tab via `chrome.debugger`. If you want a terminal-only Copilot agent, the [GitHub Copilot CLI](https://docs.github.com/en/copilot/github-copilot-in-the-cli) covers that case directly.
 
 ## Is Browy a competitor to GitHub Copilot?
 

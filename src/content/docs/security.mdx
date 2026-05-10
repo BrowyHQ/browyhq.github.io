@@ -35,10 +35,11 @@ Anything that lets an attacker:
 <Aside type="note" title="Prompt injection on visited pages">
 Any prompt-injection attack on a visited page can affect the agent's
 behavior. That's an inherent property of all page-driving agents, and
-the threat model assumes it. The mitigation is sensible defaults:
-powerful tools like host shell and arbitrary HTTP are
-[off by default and toggled per-user in Settings](/docs/tools/), so the
-blast radius of a hostile page is bounded by what *you* enabled.
+the threat model assumes it. Browy bounds the blast radius two ways:
+host shell, filesystem, and arbitrary HTTP are blocked from the
+browser surfaces by a strict allowlist (no Settings toggle exposes
+them), and every browser tool that *is* exposed can be individually
+disabled in [Settings → Tools](/docs/tools/).
 </Aside>
 
 Issues in third-party software Browy depends on (Chrome, Node.js,
@@ -68,13 +69,13 @@ For users:
 
 <CardGrid>
   <Card title="Review what's enabled" icon="setting">
-    **Settings → Tools** is the source of truth for what the agent can
-    do on your machine. Turn host shell or filesystem off if you don't
-    need them today.
+    **Settings → Tools** is the source of truth for which browser tools
+    the agent can call. Turn off `eval_js` or `screenshot` for stricter
+    setups.
   </Card>
-  <Card title="Don't run untrusted scripts" icon="warning">
-    Don't ask the agent to `bash` or run code from a source you don't
-    trust.
+  <Card title="Don't run untrusted JavaScript" icon="warning">
+    Don't ask the agent to evaluate code (via `eval_js`) from a source
+    you don't trust.
   </Card>
   <Card title="Trust the yellow banner" icon="warning">
     Chrome's *"Browy started debugging…"* banner is the reminder that

@@ -7,10 +7,11 @@ import { CardGrid, Card, LinkCard, Aside, Badge, Tabs, TabItem } from '@astrojs/
 
 Browy ships with the browser-driving tools enabled by default. Any
 individual tool can be turned off in **Settings → Tools** for stricter
-modes (read-only, no JS evaluation, and so on). Host-touching tools
-(`read_file`, `bash`, `web_fetch`) live exclusively in the headless
-[`browy run`](#host-tools-terminal-cli) terminal CLI; they are never
-exposed to the side panel or DevTools panel.
+modes (read-only, no JS evaluation, and so on). Browy's browser
+surfaces (side panel + DevTools panel) only ever expose browser tools;
+the Copilot SDK's host-touching tools (`bash`, `read_file`,
+`write_file`, `web_fetch`) are blocked by a strict allowlist and never
+reach the model — even if a malicious page tries to call them.
 
 <Aside type="note">
 The authoritative list lives in
@@ -123,27 +124,20 @@ Common reasons to disable a tool:
 Click **enable all** in the toolbar to undo every override at once.
 Changes apply on the next chat (or after `/clear`).
 
-## Host tools (terminal CLI)
+## What about host shell, filesystem, web_fetch?
 
-The Copilot SDK ships `read_file` / `write_file` / `bash` / `grep` /
-`glob` / `web_fetch` for true coding-agent workflows. These touch the
-host machine, so Browy's browser surfaces (side panel, DevTools panel)
-do not expose them. Only the browser tools above are available there.
+The Copilot SDK includes `bash`, `read_file`, `write_file`,
+`web_fetch`, `grep`, and `glob` as standard tools — they're how the
+`copilot` CLI does coding work in a terminal. Browy's browser surfaces
+do **not** expose any of them, by design. The native host registers a
+strict allowlist when it opens a Copilot session, so even if a model
+tried to call `bash` in response to a prompt-injected page, the SDK
+would reject it. There is no Settings toggle to turn them on, and no
+in-browser path to opt in.
 
-To use the host toolset, run the terminal CLI:
-
-```bash
-browy run "summarize the diff staged in this repo"
-browy run "find every TODO in src/ and group them by file"
-browy run                                  # interactive REPL
-browy run --resume <session-id>            # pick up where you left off
-```
-
-`browy run` is scoped to the current directory by default
-(`--cwd <path>` to override). Sessions are stored under
-`~/.browy/cli-sessions/`, isolated from both Browy's browser sessions
-and your own `copilot` CLI sessions. See
-[`browy run`](/docs/browy-run/) for the full surface.
+If you need a terminal coding agent, use the
+[GitHub Copilot CLI](https://docs.github.com/en/copilot/github-copilot-in-the-cli)
+directly.
 
 ## See also
 

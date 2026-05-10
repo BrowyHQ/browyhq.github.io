@@ -17,8 +17,9 @@ permission justification.
 <Aside type="tip" title="Summary">
 Browy needs broad permissions because it's a *general-purpose* browser
 agent — you might point it at any site you visit. It only acts on tabs
-you target through the side panel, and the more dangerous host tools
-(shell, filesystem, web_fetch) are off by default in Settings.
+you target through the side panel, and host shell, filesystem, and
+arbitrary HTTP are blocked from the browser surfaces entirely (not
+toggleable in Settings).
 </Aside>
 
 ## Permissions
@@ -118,11 +119,12 @@ There is no background crawler, no prefetch, no scraping.
   <Card title="No background activity" icon="moon">
     The agent acts only when you send a message in the side panel.
   </Card>
-  <Card title="Power tools opt-in" icon="setting">
-    Host shell, host filesystem, and arbitrary HTTP come from the
-    Copilot SDK and are **off by default**. Enable them per-tool in
-    [Settings → Tools](/docs/tools/#configurable-per-tool-toggles) when
-    you need them.
+  <Card title="Strict tool allowlist" icon="setting">
+    The native host registers a strict allowlist with the Copilot SDK,
+    so the powerful host tools (shell, filesystem, `web_fetch`) never
+    reach the model. The browser-driving tools that *are* exposed can
+    each be turned off in
+    [Settings → Tools](/docs/tools/#configurable-per-tool-toggles).
   </Card>
   <Card title="No telemetry" icon="seti:lock">
     There is no analytics SDK in the extension or the native host.

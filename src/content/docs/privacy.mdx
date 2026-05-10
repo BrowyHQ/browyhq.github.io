@@ -86,11 +86,12 @@ testing, OAuth redirect URLs, `Authorization` headers from a network
 trace. Browy doesn't second-guess you.
 
 <Aside type="tip" title="A few sensible defaults">
-The Copilot SDK's most powerful built-in tools — host shell (`bash`),
-arbitrary HTTP (`web_fetch`), host filesystem (`read_file` /
-`write_file`) — are off by default. Turn them on per-tool in
-**Settings → Tools**. Default-on tools are the browser-driving ones in
-[Tools the agent has](/docs/tools/).
+The Copilot SDK's most powerful built-in tools (host shell `bash`,
+arbitrary HTTP `web_fetch`, host filesystem `read_file` /
+`write_file`) are blocked by a strict allowlist and never reach the
+model from Browy's browser surfaces. The browser-driving tools listed
+in [Tools the agent has](/docs/tools/) can each be toggled off in
+**Settings → Tools** for stricter setups.
 </Aside>
 
 ## How Browy is built

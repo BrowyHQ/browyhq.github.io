@@ -31,7 +31,6 @@ export default defineConfig({
             { label: 'Install', slug: 'install' },
             { label: 'First chat', slug: 'first-chat' },
             { label: 'DevTools CLI', slug: 'devtools-cli' },
-            { label: 'Terminal CLI (browy run)', slug: 'browy-run' },
           ],
         },
         {
