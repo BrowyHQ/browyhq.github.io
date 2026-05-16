@@ -1,6 +1,6 @@
 ---
 title: "AI slop killed the open-source bug bounty"
-description: "An open-source database project just shut down its $1k/bug bounty. The reason wasn't budget — it was AI-generated 'vulnerabilities' flooding the queue. This is what AI does to open incentive systems."
+description: "A real open-source database project just shut down its bug bounty after AI agents flooded the queue with fake vulnerabilities. The cost isn't tokens. It's maintainer attention."
 slug: blog/ai-slop-killed-the-bug-bounty
 template: doc
 tableOfContents: false
@@ -21,186 +21,191 @@ head:
       content: "ai slop, bug bounty, open source, ai agents, software security, maintainer burnout, llm, vulnerability reports"
 ---
 
-A real open-source database project just shut down its $1,000-per-critical-bug
-bounty program. The program had run for almost a year. It worked great. Then
-this week it ended — not because the budget ran out, but because LLM-generated
-"vulnerabilities" flooded the maintainer's inbox faster than humans could
-triage them.
+import { YouTube } from 'astro-embed';
 
-The pattern is bigger than one project. It's the second-order effect of cheap
-inference meeting open incentive systems, and it's coming for every queue,
-every form, every public bounty board on the internet.
+<YouTube id="jCPWKccggFM" title="We automated finding bugs. Then submitting bugs. Now nobody can fix them." />
+
+A real open-source database project just shut down a $1,000-per-bug bounty
+program that had been running for almost a year. Budget wasn't the problem.
+The problem was that for the last several months, most of the submissions
+showing up in the maintainer's inbox were written by an LLM. They had the
+shape of a security report, the vocabulary of a security report, and
+sometimes even a CVE-style numbering scheme. They were almost all
+fictional. The "exploits" did not reproduce. The "vulnerable code paths"
+did not exist. The maintainer was spending most of his bounty-program
+hours reading text that no human had really intended for him to read.
+
+So he ended the program. That is a small story about one project, and
+also a very large story about every queue on the internet that involves
+humans on one side and an open submission form on the other.
 
 ## The contract that worked
 
-A bug bounty is a beautifully simple contract. The project says: _if you find
-a bug that meets this severity bar, we'll pay you $X._ That contract trades
-one scarce resource (engineer time) for another (skilled adversarial
-attention). Both sides win. The project gets a security audit they couldn't
-otherwise afford. The hunter gets paid for genuinely useful work.
+The economics of a bug bounty are tidy. The project says: if you find a
+real problem that meets this severity bar, we pay you $X. Both sides win.
+The hunter gets paid for genuinely useful work. The project gets a
+security audit it could not have afforded any other way.
 
-That contract has a hidden assumption: the cost of *submitting* a report is
-roughly the cost of *producing* one. Producing a real exploit is hard.
-Writing it up takes effort. So submission volume self-throttles to roughly
-the rate of real findings.
+That contract rests on a quiet assumption. The cost of submitting a
+report is supposed to be in the same neighbourhood as the cost of
+producing one. Producing a real exploit is hard. Writing one up takes
+hours. So submission volume self-throttles. The queue stays roughly the
+size of the real-findings rate, which is the rate a small team can
+actually triage.
 
-Cheap LLM inference broke that assumption.
+Cheap inference broke that assumption in about eighteen months.
 
 ## What changed
 
-It costs about $0.001 to ask a frontier model to generate a "vulnerability
-report" against a codebase. The model will happily oblige. It will produce
-text that looks like a security finding — references to memory safety, a
-plausible CVE format, a call-to-action paragraph. The report will often be
-completely fictional. The "exploit" will not reproduce. The "vulnerable
-code path" will not exist. But it will look real enough that a human has to
-spend ten minutes reading it before reaching that conclusion.
+It now costs around a tenth of a cent to ask a frontier model to produce
+a vulnerability report against a public codebase. The model will produce
+one. The report will look real enough that a human has to spend about
+ten minutes reading it before concluding that it isn't. Submission is
+effectively free. Triage costs the most expensive thing a software
+project has, which is the unbroken attention of the one person who
+understands the code.
 
-For a bounty program, that asymmetry is fatal. Submission is now ~$0 and
-triage is now ~$10 of maintainer attention. The maintainer is paying with
-the most expensive resource a software project has, and the slop submitter
-is paying with the cheapest.
+You don't need many people running that arbitrage to break a small
+program. Once the submission rate climbs past the triage rate, the
+queue does not stabilise. It grows until the maintainer either gives
+up reading or gives up the program.
 
-It only takes a small number of automated submitters to overwhelm a small
-team. And once the submission rate exceeds the triage rate, the queue grows
-forever.
+## "We automated finding bugs. Then submitting them."
 
-## "We automated finding bugs. Then submitting them. Then rejecting them."
+The bug bounty story is just one shape of a pattern that is now
+everywhere.
 
-You see this same shape everywhere now:
+Drive-by pull requests are flooding popular GitHub repos. Most are
+LLM-generated typo fixes or hallucinated refactors. Maintainers either
+auto-close everything and lose the legitimate ones, or burn out on
+triage. Open issue trackers are seeing the same flood of "I think there
+might be a bug" reports with no reproduction, often filed by a chatbot
+middle layer that promised a confused user it would "let the developers
+know." Code review comments are now arriving thirty at a time on small
+PRs, mostly tautologies and hedges. The comment threads on technical
+blog posts are heading the same way.
 
-- **PR spam on popular OSS repos.** Bots open hundreds of "drive-by" pull
-  requests against trending projects. Most are LLM-generated typo fixes or
-  hallucinated refactors. Maintainers either auto-close everything (losing
-  legitimate contributions) or burn out triaging.
-- **Issue spam in support trackers.** Auto-filed "I think there might be a
-  bug" reports with no reproduction, often produced by a chatbot middle
-  layer that promised the user it would "report it to the developers."
-- **Comment spam dressed as substantive critique.** The flood now reads
-  better. It's harder to filter. It's still empty.
-- **Code review spam.** A PR shows up with thirty AI-generated review
-  comments, most of which are either wrong, irrelevant, or tautologies
-  ("consider whether this function should handle null").
+The shape is always the same. Producing the input costs nothing.
+Processing the input still costs a person.
 
-We automated finding bugs. Then we automated submitting bugs. Now we're
-automating *rejecting* bugs. Nobody automated *fixing* them.
+We have automated finding bugs. We have automated submitting bugs. This
+year we are automating rejecting bugs. Nobody is automating fixing them.
 
-## The real cost isn't tokens
+## The bottleneck was never the writing
 
-The interesting thing isn't the inference bill. It's that the cost of the
-attack is paid by the attacker, but the cost of the defense is paid by the
-defender — and the defender's resource is intrinsically more expensive.
+A lot of the early excitement about LLMs in software was that they
+could write code very fast. That turned out to be true, and it turned
+out to be the less interesting half of the problem. Writing the code
+was never the bottleneck. Reading the code is the bottleneck. Reviewing
+the code, understanding the code, deciding whether to merge the code,
+deciding whether to ship the code, deciding what to do when the code
+breaks at 2am. The reading-and-deciding loop is where engineering
+actually happens, and it has always been bounded by how many things a
+human can hold in their head at once.
 
-You cannot LLM your way out of an LLM-generated triage queue, because the
-triage decision is the *exact thing* that requires the human judgment the
-attacker is trying to commodify. If you put an AI triage layer in front of
-the queue, you've just created a new game: produce reports that are
-plausible enough to pass the AI filter. That game is also cheap to play.
+LLMs add to the writing side of that loop and add to the input side of
+every queue feeding into it. They don't move the reading-and-deciding
+bottleneck. They make it the limiting factor for almost everything.
 
-Maintainer attention is the bottleneck. It always was. Every layer of
-automation that you bolt onto a maintainer's workflow eventually has to
-return a decision to them: *should I read this, fix this, merge this,
-reject this.* That decision is what AI slop attacks. The decision queue is
-the soft underbelly of every open community.
+This is why "just put an AI in the triage loop" doesn't fix the bounty
+problem. If there's a model deciding which reports a human sees, you've
+created a new game: produce reports that pass the model. That game is
+also cheap to play. The judgment step that the attacker is trying to
+commodify is the exact step that has to stay with a person, because
+that's what was being attacked in the first place.
 
-## What might actually work
+## What might actually hold
 
-A few patterns are starting to show up in maintainer conversations. None
-are silver bullets:
+A handful of patterns are starting to circulate in maintainer
+conversations. None are clean.
 
-1. **Refundable deposit to submit.** A small refundable deposit, returned
-   if the report is valid, forfeited if it's slop. This re-prices the
-   attacker's side without affecting genuine hunters. The downside: it
-   filters out hobbyist newcomers who don't have a credit card on file.
+A refundable submission deposit is the most-discussed option. You put
+down a small amount, you get it back if the report holds up, you lose
+it if it's slop. The economics work. The downside is that it filters
+out the hobbyist newcomer who doesn't have a card on file, which is
+exactly the population the open programs were designed to find.
 
-2. **Reputation-gated submissions.** First-time submitters can only file
-   reports that meet a much higher bar (full POC, video reproduction,
-   maintainer-vouched introduction). Established hunters bypass the bar.
-   This rebuilds the apprenticeship model, but raises the cost of
-   discovering new contributors.
+Reputation gating goes the other way. First-time submitters have to
+clear a higher bar, including a full reproduction and a vouching
+introduction. Established hunters skip the bar. This rebuilds an
+apprenticeship model that hasn't really existed in software security
+for a generation, but it raises the cost of discovering new talent.
 
-3. **Honeypot programs.** Projects publish fake bounty pages designed to
-   attract automated scanners. The submissions train classifiers on what
-   slop looks like in your specific ecosystem. Several maintainers have
-   started doing this informally; one popular pattern is a public
-   "Bounty Hunters" repo with a leaderboard of automated submitters,
-   which both shames the spammer and crowdsources detection.
+A few projects have started running honeypots. They publish bounty
+programs that look real but exist mainly to attract automated
+scanners. The submissions train an internal classifier on what slop
+looks like in that specific ecosystem. There's a small but growing
+public leaderboard of automated submitters in some communities.
 
-4. **Move bounties off public surfaces entirely.** Run them through
-   verified-identity programs (HackerOne, Bugcrowd) where the platform
-   handles attribution and gating. The trade-off: small projects can't
-   afford the platform fees, and you lose the discovery effect of an
-   open bounty.
+Some teams are moving programs off public surfaces entirely and onto
+verified-identity platforms like HackerOne or Bugcrowd, where the
+platform handles attribution. Small projects can't usually afford the
+platform fees. Bigger ones lose the discovery effect of an open
+program.
 
-5. **"Proof of code."** Require a working PR against a related part of
-   the codebase before you can submit a bounty report. This converts
-   cheap-to-fake LLM output into harder-to-fake actual engineering. It
-   doesn't solve the problem, but it shifts the asymmetry.
+The most interesting idea I've seen is what one maintainer called
+"proof of code." Before you can submit a bounty report, you have to
+land a small, accepted PR somewhere in the project. The PR doesn't
+have to be security-related. It just has to be real engineering by a
+person who understood the surrounding code. That converts a cheap
+text-generation game into a more expensive engineering game. It
+doesn't solve the problem. It tilts the asymmetry the other way.
 
-Whatever wins, it will look different from the open-bounty contract that
-worked for the last twenty years.
+## This is bigger than bounties
 
-## The pattern is bigger than bounties
+The same dynamic is coming for everything that depends on an open
+queue with humans on the receiving end. Customer support tickets.
+Conference paper submissions. Open peer review. Public consultation
+periods on regulation. Government FOIA requests. Hiring inboxes. The
+comment thread under this post, probably.
 
-The same dynamic is going to play out — is already playing out — anywhere
-you have an open queue with humans on the other side:
+The economic concept is older than the internet. It's the tragedy of
+the commons, applied to attention instead of grazing land. What's new
+is the rate at which the cost of producing input is falling. Most of
+the institutions that grew up around the old cost curve don't have
+time to redesign before the next drop.
 
-- Customer support tickets
-- Open peer review on academic papers
-- Comment sections on news articles
-- Public consultation periods on regulation
-- Open hiring channels (LinkedIn DMs, careers@ inboxes)
-- Conference paper submissions
-- Government FOIA requests
+The next decade of public-facing system design is going to be about
+adding friction back in on purpose. Identity, deposits, reputation,
+proof of work, vouching. We spent twenty years stripping friction out
+of every form on the internet because friction was the enemy of
+growth. Now friction is the only thing protecting the people on the
+receiving end of those forms. The companies that figure out how to
+add it without losing the magic are going to eat everyone else.
 
-Anywhere the cost of producing input is collapsing while the cost of
-processing that input stays human-bounded, the queue eventually breaks.
+## A note on what "AI agent" means
 
-The economic concept is well-understood — it's the tragedy of the commons,
-just on the *attention* commons instead of the grazing commons. What's new
-is the rate. The cost of producing plausible-looking text used to fall by
-order of magnitude per decade. It now falls by order of magnitude per
-year. Most institutions designed around the old cost curve don't have
-time to redesign before the next cost-of-production drop hits them.
+There are two things people now mean by "AI agent," and they are
+nearly opposite.
 
-## What I take from this
+One is the slop pipeline. Cheap inference pointed at any open queue,
+with no human in the loop, generating volume that other humans then
+have to filter. The person whose name is on the submission usually
+isn't watching what's submitted. Often they don't even know what was
+submitted.
 
-Two things.
+The other is the tool a person uses to do their actual work. An agent
+that drives the browser tab they're sitting in front of, that reads
+the codebase they're working on, that runs the command they would
+have typed. The person is at the keyboard. They see every action.
+Nothing gets sent to anyone else's queue without them watching it
+happen.
 
-First, the next decade of platform design is going to be about building
-*friction back in* on purpose. Identity, deposits, reputation, proof of
-work. We spent twenty years removing friction from public-facing systems
-because friction was the enemy of growth. Now friction is the only thing
-that protects the people on the receiving end of those systems. The
-companies that figure out how to add friction without losing the magic
-will eat the rest.
+These two things share a phrase and almost nothing else. The first one
+is a tax on every public surface on the internet. The second one is a
+power tool. The fact that they have the same name in the press is
+going to cost the second category a lot of goodwill before things
+sort themselves out.
 
-Second, "AI agents" is becoming a load-bearing word that people use to
-mean two completely different things:
+I work on the second kind. [Browy](https://browy.dev) is an
+open-source AI agent that lives in a Chrome side panel and a DevTools
+REPL. It drives your real browser tabs through chat. There is no Browy
+server in the loop. There is no inbox you can flood by talking to it.
+There is a person, you, watching every click and every form fill it
+makes. Whatever happens to the public commons over the next few years,
+the part of the internet that's a tool you operate yourself is still
+going to be a good place to live.
 
-- **Slop pipelines.** Cheap inference pointed at any open queue, with no
-  judgment loop, generating volume that humans then have to filter.
-- **Useful agents.** A tool a human uses to do their actual work better
-  — drive a browser, read their codebase, edit a file, run a command.
-
-Conflating these two categories is bad for everyone in the second one.
-The first category is what most people actually mean when they say "AI
-slop." The second category is what most people *building* agentic tools
-actually want to ship.
-
-If you're shipping in the second category, the most important thing you
-can do right now is make it visible that there's a human at the other end
-of every action your tool takes. The slop pipelines are not human-at-the-
-other-end. That distinction is going to become a brand promise.
-
----
-
-I build [Browy](https://browy.dev), an open-source AI agent that lives in
-your browser side panel and DevTools REPL. It drives real tabs through
-chat — clicks buttons, fills forms, scrapes pages — and you watch every
-action happen in your own browser. There is no Browy server, no
-slop pipeline, no inbox to flood. There's a human (you) at the other end
-of every action.
-
-There's also a 30-second video version of this post on
-[YouTube](https://youtu.be/KMTwyHm6ePw) — going live Monday at 2 PM ET.
+The 30-second video version of this argument is at the top of this
+post. The bounty program that started me thinking about all of this
+ended last week.
