@@ -1,0 +1,215 @@
+---
+title: "Mullvad gave you 8 trillion exit IPs. 9 servers found you."
+description: "Mullvad VPN assigns a deterministic exit IP per server, and the picker is seeded with your WireGuard pubkey. The same float, scaled to each pool, makes a few exit IPs enough to single you out among roughly 340 users."
+slug: blog/mullvad-vpn-fingerprint
+template: doc
+tableOfContents: false
+sidebar:
+  hidden: true
+head:
+  - tag: meta
+    attrs:
+      property: og:type
+      content: article
+  - tag: meta
+    attrs:
+      property: article:published_time
+      content: "2026-05-20T00:00:00Z"
+  - tag: meta
+    attrs:
+      name: keywords
+      content: "mullvad, vpn, fingerprinting, privacy, wireguard, deanonymization, exit ip, browser security, network privacy"
+---
+
+import { YouTube } from 'astro-embed';
+
+<YouTube id="g-B_toki7PA" title="Mullvad gave you 8 trillion exit IPs. 9 servers found you." />
+
+Mullvad is one of the few VPN providers that hands you a different public
+IP for each of its servers. With 578 servers in the fleet, a naive
+calculation gives you over 8 trillion possible combinations of exit IPs
+across the network. The pitch is that you melt into a very large crowd.
+
+A researcher who writes as tmctmt sat down with a script, rotated through
+3,650 WireGuard keys, and watched which exit IPs each key was assigned
+across nine servers. They expected to see thousands of distinct
+combinations. They saw 284. The
+[full write-up is here](https://tmctmt.com/posts/mullvad-exit-ips-as-a-fingerprinting-vector/).
+
+The cause is unglamorous and the impact is not.
+
+## How the picker works
+
+When you connect to a Mullvad server, the exit IP you get is not random.
+It is picked deterministically from a per-server pool, seeded by your
+WireGuard public key. The pool sizes vary by server. Sydney exposes 60
+IPs, Helsinki 66, Los Angeles 91, Santiago 11. The key rotates every
+one to thirty days if you use the official app, and never if you bring
+your own WireGuard client.
+
+So far so reasonable. Per-key stickiness avoids hammering a single
+external IP with users who reconnect every few minutes, and it lets
+sites that ratelimit by IP behave sanely for a Mullvad user inside one
+session.
+
+The problem is the picker itself.
+
+## One float, many pools
+
+The picker seeds a standard library RNG with the pubkey, then draws a
+single floating point number in the range zero to one. It scales that
+float to the size of the current server's pool to produce an index.
+That part is plausible. The part that breaks privacy is that the float
+is the same float on every server, because the RNG is seeded with the
+same pubkey and only the upper bound changes between calls.
+
+The consequence is that your exit IPs across servers land in the same
+percentile of each pool. If your float happens to be 0.82, you sit at
+position 49 of 60 in Sydney, position 9 of 11 in Santiago, position 54
+of 66 in Helsinki. Different IPs, same relative slot.
+
+If you have ever wondered why two of the smaller Mullvad servers seem
+to give you the "same" index, this is why. Santiago and Johannesburg
+both have pools of 11. With the same float scaled to the same size,
+they hand you the same position.
+
+## Why 8.2 trillion collapsed to 284
+
+This is the headline of the post. The pool sizes multiply to 8.2 trillion
+on paper. In practice the float is one number, so the entire vector of
+exit IPs across all servers is parameterised by that one number. The
+researcher's 3,650 sampled pubkeys produced only 284 distinct
+combinations across nine servers because the space being sampled is
+not thirteen-dimensional. It is one-dimensional, then projected.
+
+The 284 figure is the resolution of that projection at nine servers.
+With more servers the resolution rises, because each additional pool
+size carves the unit interval into finer buckets. With fewer servers
+it drops, but it does not drop as much as you would hope.
+
+## What that means for a user
+
+The author built a small tool that takes a set of observed exit IPs and
+back-solves for the float interval that produced them. Nine well-chosen
+exit IPs squeeze the interval down to roughly 0.0034 wide. At an
+estimated 100,000 active Mullvad users that is around 340 people.
+
+Three hundred and forty is a lot of people in a crowd. It is not a lot
+of people in a deanonymisation attack. If a forum has IP logs and
+suspects two accounts are the same user, and the two accounts both
+connected through Mullvad on different servers, the overlap of the
+float intervals derived from those exits gives a very high probability
+that the accounts share a pubkey. Pair that with timing, user agent,
+language headers, or the kind of low-effort browser fingerprint that
+ad networks already collect, and the pool of suspects shrinks to one.
+
+The interesting attack is not a moderator with one forum's logs. It is
+the joining of logs across services that already happens in litigation,
+in subpoenas, and in stolen breach data. Mullvad's per-server IP
+diversity stops being a defence the moment two unrelated services
+contribute their exit IP records to the same correlation.
+
+## The response
+
+Mullvad's co-founder posted a response on the morning the article went
+up. The short version: some of the described behaviour was intentional,
+some was not, the unintended part is being patched on a subset of the
+fleet first, and the intended part is now under internal review. He
+also asked, gently, that future researchers consider notifying the
+vendor before publishing.
+
+That is about the best response a small vendor can give to a Tuesday
+morning surprise, and it points at the part of this story that is most
+worth sitting with.
+
+## The bug under the bug
+
+The proximate bug is a seeded RNG whose first draw was treated as a
+fresh random number per call, when it is the same number every call.
+A defensible code review could miss this. The Rust documentation does
+not put the behaviour on a billboard, and the test that would have
+caught it, "do my exit IP percentiles correlate across pools," is not
+the test anyone writes.
+
+The deeper bug is the design assumption that per-key stickiness is
+compatible with per-server independence. It is not, for any picker
+that derives its index from a single seeded float. To get true
+independence you have to either reseed per call with a per-server salt,
+or pre-mix the pubkey with the server identity before drawing, or
+abandon determinism and accept the operational cost.
+
+There is a clean lesson here about cryptographic determinism that I
+will not labour, but the practical one for anyone shipping
+privacy-flavoured software is worth saying out loud. Deterministic
+behaviour is the thing that makes user experience predictable and the
+thing that makes users linkable across observations. The instinct to
+make a system feel coherent across sessions is the same instinct that
+hands an analyst a join key.
+
+## What a user can do today
+
+The author lists two mitigations. Both reduce the value of the
+fingerprint without removing it.
+
+The first is to avoid switching servers while your pubkey is unchanged.
+If you only ever connect from one Mullvad server, an observer sees one
+exit IP and gets one of the pool's possible float intervals, not the
+intersection of many. That interval covers a much larger share of the
+user base.
+
+The second is to force-rotate your pubkey, which the Mullvad app will
+do if you log out and log back in. A new pubkey produces a new float
+and a new vector of exit IPs. Past observations of you, before the
+rotation, still link to whatever activity happened under the old key.
+
+Neither of these is satisfying. Both are what the user can do until
+the patch lands.
+
+## The bigger picture for privacy tools
+
+VPNs are sold as a tool for blending in. The category has spent ten
+years competing on server count, jurisdiction, and "we don't log."
+None of that helps if the tunnel itself emits a stable signal that
+correlates across exits. Mullvad is one of the better-regarded
+operators in the category, run by people who care about this stuff
+and respond like it. If this design slipped past them, it is worth
+assuming similar designs are sitting unexamined in operators who
+care less.
+
+The healthier framing for anyone using a privacy tool is that the tool
+moves the boundary of who can see you. It does not make you invisible
+to the people inside the new boundary. A VPN protects you from your
+ISP and from the cafe Wi-Fi. It does not protect you from the website
+you are visiting, which still sees your browser, your timing, and
+whatever your tunnel happens to leak about your identity across
+sessions. Pretending otherwise is how people end up surprised.
+
+## What this has to do with browsers
+
+A lot of the leak surface in modern web sessions is in the browser,
+not in the tunnel. Canvas fingerprinting, font enumeration, audio
+context fingerprinting, third party cookies that you thought were
+blocked, redirect chains that smuggle identifiers in the URL, the
+clipboard, the way your tabs talk to each other, the way an extension
+you forgot you installed talks to its origin. The interesting thing
+about the Mullvad story is that it is one of the rare cases where the
+leak is below the browser, and the browser would not see it without
+help.
+
+I work on [Browy](https://browy.dev), an open-source AI agent that
+lives in a Chrome side panel and a DevTools REPL. It drives the real
+tab you are looking at. You can point it at a page and ask, in
+English, what the page is sending, what it stores, what it loads from
+where, what it is trying to identify you with. It will open the
+Network tab and the Application tab and read them for you, and it
+will tell you what it found in the same chat where you asked the
+question. It does not send your browsing anywhere. The model call
+goes out and the answer comes back, the rest happens on your machine.
+
+The Mullvad bug is a server-side problem. Browy will not see it. But
+the broader habit, watching what your browser actually emits while
+you are using it, is what every category of privacy leak in the last
+decade has rewarded. The 30-second video version of the Mullvad story
+is at the top of this post. The full research, with the seed
+estimator tool, is
+[at tmctmt's site](https://tmctmt.com/posts/mullvad-exit-ips-as-a-fingerprinting-vector/).
