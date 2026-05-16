@@ -1,6 +1,6 @@
 ---
 title: "AI slop killed the open-source bug bounty"
-description: "A real open-source database project just shut down its bug bounty after AI agents flooded the queue with fake vulnerabilities. The cost isn't tokens. It's maintainer attention."
+description: "Turso retired its $1,000-per-bug bounty program this week after AI-generated submissions overwhelmed the maintainers. The pattern is going to repeat everywhere there's an open queue with a human at the end of it."
 slug: blog/ai-slop-killed-the-bug-bounty
 template: doc
 tableOfContents: false
@@ -18,62 +18,73 @@ head:
   - tag: meta
     attrs:
       name: keywords
-      content: "ai slop, bug bounty, open source, ai agents, software security, maintainer burnout, llm, vulnerability reports"
+      content: "ai slop, bug bounty, turso, open source, ai agents, software security, maintainer burnout, llm, vulnerability reports"
 ---
 
 import { YouTube } from 'astro-embed';
 
-<YouTube id="jCPWKccggFM" title="We automated finding bugs. Then submitting bugs. Now nobody can fix them." />
+<YouTube id="8ml0p8BM5Eo" title="Turso retired its bug bounty. AI did it." />
 
-A real open-source database project just shut down a $1,000-per-bug bounty
-program that had been running for almost a year. Budget wasn't the problem.
-The problem was that for the last several months, most of the submissions
-showing up in the maintainer's inbox were written by an LLM. They had the
-shape of a security report, the vocabulary of a security report, and
-sometimes even a CVE-style numbering scheme. They were almost all
-fictional. The "exploits" did not reproduce. The "vulnerable code paths"
-did not exist. The maintainer was spending most of his bounty-program
-hours reading text that no human had really intended for him to read.
+Turso, the SQLite-compatible database written in Rust, retired its bug
+bounty program this week. The post explaining why is titled, dryly,
+[The wonders of AI](https://turso.tech/blog/the-wonders-of-ai). For
+about a year the project had been paying $1,000 for each critical
+vulnerability someone reported in the codebase. Budget wasn't the
+problem. The problem was that most of the reports landing in the
+maintainer's inbox were written by an LLM, and the maintainer was
+spending most of his bounty hours reading text that no human had really
+intended for him to read.
 
-So he ended the program. That is a small story about one project, and
-also a very large story about every queue on the internet that involves
-humans on one side and an open submission form on the other.
+The examples are funny in a bleak way. One submission claimed to have
+found a critical flaw that let an attacker execute arbitrary SQL
+statements. Against a SQL database. Another report on the same project
+described a buffer overflow whose reproduction steps included editing
+Turso's own source code, recompiling with a forced volatile write past
+the end of a vector, and running the modified binary. The "vulnerable
+code paths" did not exist. The "exploits" did not reproduce.
+
+So the maintainers ended the program. That is a small story about one
+database, and also a very large story about every queue on the internet
+that involves humans on one side and an open submission form on the
+other. The [HN thread](https://news.ycombinator.com/item?id=48148391)
+hit the front page within hours, because every maintainer reading it
+recognised their own inbox.
 
 ## The contract that worked
 
 The economics of a bug bounty are tidy. The project says: if you find a
-real problem that meets this severity bar, we pay you $X. Both sides win.
-The hunter gets paid for genuinely useful work. The project gets a
-security audit it could not have afforded any other way.
+real problem that meets this severity bar, we pay you $X. Both sides
+win. The hunter gets paid for genuinely useful work. The project gets
+a security audit it could not have afforded any other way.
 
-That contract rests on a quiet assumption. The cost of submitting a
-report is supposed to be in the same neighbourhood as the cost of
+That contract rested on a quiet assumption. The cost of submitting a
+report was supposed to be in the same neighbourhood as the cost of
 producing one. Producing a real exploit is hard. Writing one up takes
-hours. So submission volume self-throttles. The queue stays roughly the
-size of the real-findings rate, which is the rate a small team can
+hours. So submission volume self-throttled. The queue stayed roughly
+the size of the real-findings rate, which is the rate a small team can
 actually triage.
 
 Cheap inference broke that assumption in about eighteen months.
 
 ## What changed
 
-It now costs around a tenth of a cent to ask a frontier model to produce
-a vulnerability report against a public codebase. The model will produce
-one. The report will look real enough that a human has to spend about
-ten minutes reading it before concluding that it isn't. Submission is
-effectively free. Triage costs the most expensive thing a software
-project has, which is the unbroken attention of the one person who
-understands the code.
+It now costs roughly a tenth of a cent to ask a frontier model to
+produce a vulnerability report against a public codebase. The model
+will produce one. The report will look real enough that a human has to
+spend about ten minutes reading it before concluding that it isn't.
+Submission is effectively free. Triage costs the most expensive thing
+a software project has, which is the unbroken attention of the one
+person who understands the code.
 
 You don't need many people running that arbitrage to break a small
 program. Once the submission rate climbs past the triage rate, the
 queue does not stabilise. It grows until the maintainer either gives
-up reading or gives up the program.
+up reading or gives up the program. Turso gave up the program.
 
-## "We automated finding bugs. Then submitting them."
+## The same shape, everywhere
 
-The bug bounty story is just one shape of a pattern that is now
-everywhere.
+The bug bounty story is just one shape of a pattern that is now visible
+in a dozen places.
 
 Drive-by pull requests are flooding popular GitHub repos. Most are
 LLM-generated typo fixes or hallucinated refactors. Maintainers either
@@ -107,12 +118,12 @@ LLMs add to the writing side of that loop and add to the input side of
 every queue feeding into it. They don't move the reading-and-deciding
 bottleneck. They make it the limiting factor for almost everything.
 
-This is why "just put an AI in the triage loop" doesn't fix the bounty
-problem. If there's a model deciding which reports a human sees, you've
-created a new game: produce reports that pass the model. That game is
-also cheap to play. The judgment step that the attacker is trying to
-commodify is the exact step that has to stay with a person, because
-that's what was being attacked in the first place.
+This is why "just put an AI in the triage loop" doesn't fix the Turso
+problem. If there's a model deciding which reports a human sees,
+you've created a new game: produce reports that pass the model. That
+game is also cheap to play. The judgment step that the attacker is
+trying to commodify is the exact step that has to stay with a person,
+because that's what was being attacked in the first place.
 
 ## What might actually hold
 
@@ -120,10 +131,11 @@ A handful of patterns are starting to circulate in maintainer
 conversations. None are clean.
 
 A refundable submission deposit is the most-discussed option. You put
-down a small amount, you get it back if the report holds up, you lose
-it if it's slop. The economics work. The downside is that it filters
-out the hobbyist newcomer who doesn't have a card on file, which is
-exactly the population the open programs were designed to find.
+down a small amount, say $20. You get it back if the report holds up.
+You lose it if it's slop. The economics work. The downside is that it
+filters out the hobbyist newcomer who doesn't have a card on file,
+which is exactly the population the open programs were designed to
+find.
 
 Reputation gating goes the other way. First-time submitters have to
 clear a higher bar, including a full reproduction and a vouching
@@ -131,11 +143,14 @@ introduction. Established hunters skip the bar. This rebuilds an
 apprenticeship model that hasn't really existed in software security
 for a generation, but it raises the cost of discovering new talent.
 
-A few projects have started running honeypots. They publish bounty
-programs that look real but exist mainly to attract automated
-scanners. The submissions train an internal classifier on what slop
-looks like in that specific ecosystem. There's a small but growing
-public leaderboard of automated submitters in some communities.
+A few projects have started running honeypots. The clearest example is
+[UnsafeLabs/Bounty-Hunters](https://github.com/UnsafeLabs/Bounty-Hunters),
+which publishes a bounty-shaped repo that exists mainly to attract
+automated scanners. The submissions feed a public
+[leaderboard of automated submitters](https://clankers-leaderboard.pages.dev).
+You can read it as petty, or you can read it as the first attempt at
+something a search engine spam team would recognise: a shared blocklist
+for the actor side of an asymmetric inbox problem.
 
 Some teams are moving programs off public surfaces entirely and onto
 verified-identity platforms like HackerOne or Bugcrowd, where the
@@ -143,11 +158,11 @@ platform handles attribution. Small projects can't usually afford the
 platform fees. Bigger ones lose the discovery effect of an open
 program.
 
-The most interesting idea I've seen is what one maintainer called
-"proof of code." Before you can submit a bounty report, you have to
-land a small, accepted PR somewhere in the project. The PR doesn't
-have to be security-related. It just has to be real engineering by a
-person who understood the surrounding code. That converts a cheap
+The most interesting idea I've seen is what one HN commenter called
+proof of code. Before you can submit a bounty report, you have to land
+a small, accepted PR somewhere in the project. The PR doesn't have to
+be security-related. It just has to be real engineering by a person
+who understood the surrounding code. That converts a cheap
 text-generation game into a more expensive engineering game. It
 doesn't solve the problem. It tilts the asymmetry the other way.
 
@@ -159,30 +174,30 @@ Conference paper submissions. Open peer review. Public consultation
 periods on regulation. Government FOIA requests. Hiring inboxes. The
 comment thread under this post, probably.
 
-The economic concept is older than the internet. It's the tragedy of
-the commons, applied to attention instead of grazing land. What's new
+The economic concept is older than the internet. It is the tragedy of
+the commons applied to attention instead of grazing land. What's new
 is the rate at which the cost of producing input is falling. Most of
 the institutions that grew up around the old cost curve don't have
 time to redesign before the next drop.
 
 The next decade of public-facing system design is going to be about
-adding friction back in on purpose. Identity, deposits, reputation,
-proof of work, vouching. We spent twenty years stripping friction out
+adding friction back in on purpose. Identity. Deposits. Reputation.
+Proof of work. Vouching. We spent twenty years stripping friction out
 of every form on the internet because friction was the enemy of
 growth. Now friction is the only thing protecting the people on the
-receiving end of those forms. The companies that figure out how to
-add it without losing the magic are going to eat everyone else.
+receiving end of those forms. The companies that figure out how to add
+it without losing the magic are going to eat everyone else.
 
 ## A note on what "AI agent" means
 
 There are two things people now mean by "AI agent," and they are
 nearly opposite.
 
-One is the slop pipeline. Cheap inference pointed at any open queue,
-with no human in the loop, generating volume that other humans then
-have to filter. The person whose name is on the submission usually
-isn't watching what's submitted. Often they don't even know what was
-submitted.
+One is the slop pipeline that broke Turso. Cheap inference pointed at
+any open queue, with no human in the loop, generating volume that
+other humans then have to filter. The person whose name is on the
+submission usually isn't watching what's submitted. Often they don't
+even know what was submitted.
 
 The other is the tool a person uses to do their actual work. An agent
 that drives the browser tab they're sitting in front of, that reads
@@ -207,5 +222,7 @@ the part of the internet that's a tool you operate yourself is still
 going to be a good place to live.
 
 The 30-second video version of this argument is at the top of this
-post. The bounty program that started me thinking about all of this
-ended last week.
+post. Turso's own write-up is
+[here](https://turso.tech/blog/the-wonders-of-ai). The HN thread that
+prompted me to put this together is
+[here](https://news.ycombinator.com/item?id=48148391).
