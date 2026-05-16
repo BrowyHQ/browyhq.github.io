@@ -10,7 +10,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT = resolve(__dirname, '_capture');
 mkdirSync(OUT, { recursive: true });
 
-const BASE = process.env.BROWY_DOCS_BASE || 'https://browyhq.github.io/docs';
+const BASE = process.env.BROWY_DOCS_BASE || 'https://browyhq.github.io';
 
 const PAGES = [
   ['index',       '/'],

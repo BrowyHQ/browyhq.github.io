@@ -5,10 +5,17 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  // GitHub Pages serves the repo at https://browyhq.github.io/docs/
+  // GitHub Pages serves the org-page repo (BrowyHQ/browyhq.github.io) at the root.
   site: 'https://browyhq.github.io',
-  base: '/docs',
   trailingSlash: 'ignore',
+  // Keep old /docs/* inbound links working (CWS listing, manifest homepage_url,
+  // YouTube descriptions, README backlinks). Astro emits client-side meta-refresh
+  // redirect pages at build time.
+  redirects: {
+    '/docs': '/',
+    '/docs/': '/',
+    '/docs/[...slug]': '/[...slug]',
+  },
   integrations: [
     starlight({
       title: 'Browy',
@@ -19,11 +26,11 @@ export default defineConfig({
       // `head:` blocks are appended after this and can override.
       head: [
         // Default social card so link previews aren't blank.
-        { tag: 'meta', attrs: { property: 'og:image', content: 'https://browyhq.github.io/docs/og-default.png' } },
+        { tag: 'meta', attrs: { property: 'og:image', content: 'https://browyhq.github.io/og-default.png' } },
         { tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
         { tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
         { tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' } },
-        { tag: 'meta', attrs: { name: 'twitter:image', content: 'https://browyhq.github.io/docs/og-default.png' } },
+        { tag: 'meta', attrs: { name: 'twitter:image', content: 'https://browyhq.github.io/og-default.png' } },
         { tag: 'meta', attrs: { name: 'theme-color', content: '#0a1f12' } },
         // Canonical author for blog posts (overridable per-post)
         { tag: 'meta', attrs: { name: 'author', content: 'Ritabrata Maiti' } },
@@ -35,7 +42,7 @@ export default defineConfig({
         { icon: 'github', label: 'GitHub', href: 'https://github.com/BrowyHQ' },
       ],
       editLink: {
-        baseUrl: 'https://github.com/BrowyHQ/docs/edit/main/',
+        baseUrl: 'https://github.com/BrowyHQ/browyhq.github.io/edit/main/',
       },
       sidebar: [
         {

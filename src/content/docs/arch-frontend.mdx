@@ -7,7 +7,7 @@ import { Aside, CardGrid, Card, LinkCard } from '@astrojs/starlight/components';
 
 The Browy extension is a Chromium MV3 extension that hosts three UI
 surfaces (side panel, DevTools panel, options page) and talks to the
-[native host](/docs/arch-backend/) over a single native-messaging port.
+[native host](/arch-backend/) over a single native-messaging port.
 
 ## File layout
 
@@ -49,7 +49,7 @@ safety timeout) before enabling their inputs.
     The terminal-style REPL. Registered by `devtools.js` via
     `chrome.devtools.panels.create('Browy', …)`. Shares the agent
     backend with the side panel and is bound to the inspected target.
-    See the [DevTools CLI page](/docs/devtools-cli/).
+    See the [DevTools CLI page](/devtools-cli/).
   </Card>
   <Card title="Options: `options.html`" icon="setting">
     Model picker, tool toggles, sign-in status, and install help when
@@ -74,7 +74,7 @@ When the host says *"call `snapshot` with these args"*, the SW:
 The Yellow Banner of Doom (Chrome's *"Browy started debugging…"*
 notice) is Chrome's mandatory disclosure for any extension using the
 DevTools Protocol. We don't try to suppress it. See
-[Permissions → debugger](/docs/permissions/#debugger-).
+[Permissions → debugger](/permissions/#debugger-).
 
 ## Storage
 
@@ -108,7 +108,7 @@ by the Chrome Web Store and Edge Add-ons listings.
 ## See also
 
 <CardGrid>
-  <LinkCard title="Architecture: native host (backend)" href="/docs/arch-backend/" description="The host process, tool dispatch, and the SDK loop." />
-  <LinkCard title="Architecture: DevTools CLI" href="/docs/arch-cli/" description="Internals of the DevTools panel REPL." />
-  <LinkCard title="Permissions" href="/docs/permissions/" description="Why each manifest permission is required." />
+  <LinkCard title="Architecture: native host (backend)" href="/arch-backend/" description="The host process, tool dispatch, and the SDK loop." />
+  <LinkCard title="Architecture: DevTools CLI" href="/arch-cli/" description="Internals of the DevTools panel REPL." />
+  <LinkCard title="Permissions" href="/permissions/" description="Why each manifest permission is required." />
 </CardGrid>

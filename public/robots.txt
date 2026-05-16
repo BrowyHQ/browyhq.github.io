@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://browyhq.github.io/docs/sitemap-index.xml
+Sitemap: https://browyhq.github.io/sitemap-index.xml

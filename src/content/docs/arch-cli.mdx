@@ -9,7 +9,7 @@ The DevTools CLI is a small, dependency-free TypeScript-style
 implementation living in `extension/panel.{html,js,css}`. It mounts
 inside the DevTools panel registered by `extension/devtools.js`.
 
-For *how to use it*, see [the DevTools CLI page](/docs/devtools-cli/).
+For *how to use it*, see [the DevTools CLI page](/devtools-cli/).
 This page is for contributors curious about how it's built.
 
 ## Files
@@ -31,7 +31,7 @@ On `Enter`:
 1. If the input starts with `/`, dispatch to the slash-command
    registry (`COMMANDS` array near line 200 of `panel.js`).
 2. Otherwise, send `{type: 'user', text, sessionId}` over the port to
-   the [native host](/docs/arch-backend/), append a row, and stream
+   the [native host](/arch-backend/), append a row, and stream
    `delta` chunks into a single growing assistant row.
 
 On `Esc` mid-flight, the panel posts `{type: 'cancel'}` to the host
@@ -111,7 +111,7 @@ These items are tracked on the
 ## See also
 
 <CardGrid>
-  <LinkCard title="DevTools CLI (user guide)" href="/docs/devtools-cli/" description="Slash commands, model picker, keyboard." />
-  <LinkCard title="Architecture: native host" href="/docs/arch-backend/" description="The other end of the port." />
-  <LinkCard title="Architecture: extension" href="/docs/arch-frontend/" description="How DevTools panels fit into the wider extension." />
+  <LinkCard title="DevTools CLI (user guide)" href="/devtools-cli/" description="Slash commands, model picker, keyboard." />
+  <LinkCard title="Architecture: native host" href="/arch-backend/" description="The other end of the port." />
+  <LinkCard title="Architecture: extension" href="/arch-frontend/" description="How DevTools panels fit into the wider extension." />
 </CardGrid>

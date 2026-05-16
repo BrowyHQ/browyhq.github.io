@@ -2,7 +2,7 @@
 
 Public documentation for [Browy](https://github.com/BrowyHQ/browy) — an AI agent that lives in your browser.
 
-Live site: <https://browyhq.github.io/docs/>
+Live site: <https://browyhq.github.io/>
 
 ## Local dev
 
