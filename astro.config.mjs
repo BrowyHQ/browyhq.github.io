@@ -41,6 +41,8 @@ export default defineConfig({
         { tag: 'meta', attrs: { name: 'author', content: 'Ritabrata Maiti' } },
         // Google Search Console domain verification.
         { tag: 'meta', attrs: { name: 'google-site-verification', content: 'KTuHyXaGSJO9UWwBUrqMv_QU__MMir4-TcJjPjofGCI' } },
+        // Bing Webmaster Tools domain verification.
+        { tag: 'meta', attrs: { name: 'msvalidate.01', content: '4C234987AA54CF197108F37740B31010' } },
       ],
       components: {
         Hero: './src/components/Hero.astro',
