@@ -1,0 +1,134 @@
+---
+title: China setup guide
+description: How to install and run Browy from mainland China. Notes on Copilot access, GitHub mirrors, and network workarounds.
+---
+
+import { Aside, Steps, CardGrid, Card, LinkCard, Tabs, TabItem } from '@astrojs/starlight/components';
+
+This page covers the parts of [installation](/install/) that need extra
+attention if you are running from mainland China. Browy itself works
+the same everywhere; the friction is around reaching GitHub Releases
+and GitHub Copilot from the mainland.
+
+<Aside type="caution" title="Read this if anything in /install/ times out">
+The install script downloads a ~130 MB tarball from
+`github.com/BrowyHQ/browy/releases`. If the download stalls or
+returns a TLS error, the cause is almost always upstream network
+quality to GitHub, not the script.
+</Aside>
+
+## Does Browy work in China?
+
+Yes, with two real-world caveats.
+
+<CardGrid>
+  <Card title="GitHub access" icon="seti:github">
+    The native-host installer pulls binaries from GitHub Releases.
+    Speeds vary by ISP and time of day. If you cannot reach
+    `objects.githubusercontent.com` you can mirror the release through
+    a CDN or download the tarball manually (see below).
+  </Card>
+  <Card title="Copilot access" icon="setting">
+    Browy uses your GitHub Copilot subscription. Copilot is sold to
+    individuals in mainland China when you can pay with a card the
+    GitHub billing system accepts. Education plans work the same way
+    as elsewhere. API calls to `api.githubcopilot.com` from the
+    mainland have higher latency than from HK / SG but are reachable.
+  </Card>
+</CardGrid>
+
+## Recommended setup
+
+<Steps>
+1. **Use Edge or a recent Chrome.** Both ship in China through normal
+   channels and Browy installs on either with the same listing.
+2. **Sign in to GitHub on your machine** before running the install
+   script. The device-flow that grants Copilot access redirects through
+   `github.com` and is more reliable when you already have a working
+   session.
+3. **Run the installer.** PowerShell on Windows, bash on macOS / Linux.
+   Commands are identical to the global ones, in
+   [Install](/install/).
+4. **First chat.** Open the side panel, click "Sign in to GitHub
+   Copilot", complete the device-flow. The terminal closes itself when
+   the token lands.
+</Steps>
+
+## If the GitHub download is unreachable
+
+The installer accepts a custom release URL. You can mirror the latest
+tarball to any host you control, then point the installer at it.
+
+<Tabs syncKey="os">
+<TabItem label="Windows" icon="seti:windows">
+
+```powershell
+$env:BROWY_RELEASE_URL = "https://your-mirror.example.com/browy-win-x64.tar.gz"
+irm https://github.com/BrowyHQ/browy/releases/latest/download/install.ps1 | iex
+```
+
+</TabItem>
+<TabItem label="macOS / Linux" icon="seti:apple">
+
+```bash
+BROWY_RELEASE_URL="https://your-mirror.example.com/browy-linux-x64.tar.gz" \
+  bash <(curl -fsSL https://github.com/BrowyHQ/browy/releases/latest/download/install.sh)
+```
+
+</TabItem>
+</Tabs>
+
+A few public CDN options that have historically worked from the mainland:
+
+- **jsDelivr GitHub proxy**: `https://cdn.jsdelivr.net/gh/BrowyHQ/browy@latest/...`
+- **ghproxy**: `https://ghproxy.com/https://github.com/BrowyHQ/browy/...`
+
+These are operated by third parties and we do not endorse them. If you
+are in an enterprise setting we recommend hosting your own mirror.
+
+## Latency notes
+
+Browy makes two kinds of network calls in normal use.
+
+| Call | Endpoint | Where the latency lives |
+|---|---|---|
+| Model inference | `api.githubcopilot.com` | Round-trip from your machine to GitHub Copilot's nearest region. From the mainland, this is usually a Pacific hop; expect 200-400 ms over a normal residential link. |
+| Tool execution | Your local machine | No network. The agent runs the tool on the page in front of you. |
+
+For most prompts the model call dominates. A chat that fires three or
+four tool calls in a row will feel a beat slower from the mainland than
+from HK / SG / EU, but the agent loop does not stall waiting for the
+network.
+
+## Mirroring the source
+
+We mirror the public extension repo to Gitee for users who prefer a
+mainland host:
+
+<LinkCard
+  title="Browy on Gitee"
+  href="https://gitee.com/BrowyHQ/browy"
+  description="Mirror of github.com/BrowyHQ/browy. Pulls automatically from the GitHub source."
+/>
+
+The Gitee mirror is read-only. Issues and PRs still go to the
+[GitHub repo](https://github.com/BrowyHQ/browy).
+
+## What does not work
+
+A handful of features have hard external dependencies. They will work
+or fail the same way they would for any user.
+
+- **Chrome Web Store install.** If `chromewebstore.google.com` is not
+  reachable, use the unpacked-extension sideload path documented in
+  [Install](/install/#prefer-to-sideload).
+- **YouTube embeds** in the [blog](/blog/). The blog text is the same
+  with or without the video.
+- **Crash and telemetry reporting.** Browy does not send telemetry,
+  so this is a non-issue.
+
+## Getting help
+
+[Open an issue on GitHub](https://github.com/BrowyHQ/browy/issues) or
+[email the maintainer](mailto:hello@browy.dev). If GitHub is unreachable
+at the moment, email works.

@@ -22,6 +22,11 @@ export default defineConfig({
       description: 'The AI agent that lives in your browser. Drives real tabs through chat. Side panel + DevTools REPL.',
       logo: { src: './src/assets/logo.png', replacesTitle: false },
       customCss: ['./src/styles/custom.css'],
+      defaultLocale: 'root',
+      locales: {
+        root: { label: 'English', lang: 'en' },
+        'zh-cn': { label: '简体中文', lang: 'zh-CN' },
+      },
       // Global head injection — runs on every page. Per-page frontmatter
       // `head:` blocks are appended after this and can override.
       head: [
@@ -49,24 +54,28 @@ export default defineConfig({
       sidebar: [
         {
           label: 'Start Here',
+          translations: { 'zh-CN': '从这里开始' },
           items: [
-            { label: 'What is Browy?', slug: 'index' },
-            { label: 'Install', slug: 'install' },
-            { label: 'First chat', slug: 'first-chat' },
+            { label: 'What is Browy?', translations: { 'zh-CN': 'Browy 是什么？' }, slug: 'index' },
+            { label: 'Install', translations: { 'zh-CN': '安装' }, slug: 'install' },
+            { label: 'China setup', translations: { 'zh-CN': '中国开发者指南' }, slug: 'china-setup' },
+            { label: 'First chat', translations: { 'zh-CN': '第一次对话' }, slug: 'first-chat' },
             { label: 'DevTools CLI', slug: 'devtools-cli' },
           ],
         },
         {
           label: 'Reference',
+          translations: { 'zh-CN': '参考' },
           items: [
-            { label: 'Permissions', slug: 'permissions' },
-            { label: 'Tools the agent has', slug: 'tools' },
-            { label: 'Privacy & Data', slug: 'privacy' },
-            { label: 'Security', slug: 'security' },
+            { label: 'Permissions', translations: { 'zh-CN': '权限说明' }, slug: 'permissions' },
+            { label: 'Tools the agent has', translations: { 'zh-CN': '可用工具' }, slug: 'tools' },
+            { label: 'Privacy & Data', translations: { 'zh-CN': '隐私与数据' }, slug: 'privacy' },
+            { label: 'Security', translations: { 'zh-CN': '安全' }, slug: 'security' },
           ],
         },
         {
           label: 'Architecture',
+          translations: { 'zh-CN': '架构' },
           items: [
             { label: 'Native host (backend)', slug: 'arch-backend' },
             { label: 'Extension (frontend)', slug: 'arch-frontend' },
@@ -75,16 +84,18 @@ export default defineConfig({
         },
         {
           label: 'Project',
+          translations: { 'zh-CN': '项目' },
           items: [
-            { label: 'FAQ', slug: 'faq' },
-            { label: 'Changelog', slug: 'changelog' },
-            { label: 'Roadmap & contributing', slug: 'roadmap' },
+            { label: 'FAQ', translations: { 'zh-CN': '常见问题' }, slug: 'faq' },
+            { label: 'Changelog', translations: { 'zh-CN': '更新日志' }, slug: 'changelog' },
+            { label: 'Roadmap & contributing', translations: { 'zh-CN': '路线图与贡献' }, slug: 'roadmap' },
           ],
         },
         {
           label: 'Writing',
+          translations: { 'zh-CN': '博客' },
           items: [
-            { label: 'Blog', slug: 'blog' },
+            { label: 'Blog', translations: { 'zh-CN': '博客' }, slug: 'blog' },
           ],
         },
       ],

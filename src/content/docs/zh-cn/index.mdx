@@ -1,0 +1,113 @@
+---
+title: Browy
+description: 浏览器里的 AI 智能体。通过对话驱动真实的网页标签页。侧边栏 + DevTools REPL。
+template: splash
+hero:
+  tagline: 浏览器里的 AI 智能体。通过对话驱动真实的网页标签页。侧边栏适合日常工作，DevTools REPL 适合高级用户。
+  image:
+    file: ../../../assets/logo.png
+    alt: Browy 吉祥物
+  actions:
+    - text: 添加到 Chrome
+      link: https://chromewebstore.google.com/detail/iondecjdokngnlkfpipgolgkfegpmjca
+      icon: external
+    - text: 安装指南
+      link: /zh-cn/install/
+      icon: right-arrow
+      variant: minimal
+    - text: 在 GitHub 上查看
+      link: https://github.com/BrowyHQ
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid, LinkCard, Aside, Badge } from '@astrojs/starlight/components';
+import placeholder from '../../../assets/screenshots/panel-summarize.png';
+import { Image } from 'astro:assets';
+
+## Browy 是什么
+
+Browy 是一个 Chrome 侧边栏智能体。你和它对话，它读取当前标签页内容，
+点击页面元素，填写表单，执行 JavaScript，截图，并在多个会话之间记住
+上下文。
+
+它由两部分组成：**浏览器扩展**（这个 Chrome Web Store 商店页面的内容）
+和一个用一行命令安装的**本地原生消息主机**。
+[安装指南](/zh-cn/install/)涵盖了两部分。
+
+<figure class="browy-frame">
+  <Image src={placeholder} alt="Browy 侧边栏正在对当前标签页内容进行对话" />
+  <figcaption>侧边栏在总结一篇维基百科文章。</figcaption>
+</figure>
+
+<Aside type="tip" title="中国大陆开发者">
+针对从中国大陆访问 GitHub Releases 和 GitHub Copilot 的网络情况，我们整理了
+[中国开发者指南](/zh-cn/china-setup/)，包括镜像、设置建议和延迟说明。
+</Aside>
+
+## 为什么用 Browy
+
+<CardGrid stagger>
+  <Card title="在浏览器里运行" icon="laptop">
+    Chrome 侧边栏加一个小的本地辅助进程。直接操作你已经打开的标签页，
+    保留你的 cookie 和登录态。
+  </Card>
+  <Card title="自由切换模型" icon="setting">
+    随时在前沿模型之间切换（Claude、GPT、Gemini、Llama），
+    用 `/model` 命令或在设置里更改。
+  </Card>
+  <Card title="基于可访问性树工作" icon="seti:html">
+    智能体使用索引化的可访问性节点而非 CSS 选择器，所以不会因为
+    类名变化而失效。需要时也可以让它执行任意 JavaScript。
+  </Card>
+  <Card title="开源" icon="open-book">
+    Apache 2.0 许可证。阅读智能体循环、fork 一份、自己构建都可以。
+    浏览器工具可以在设置里单独关闭；主机的 shell 和文件系统默认是
+    关闭的，需要逐个工具显式打开。
+  </Card>
+</CardGrid>
+
+## 你可以用它做什么
+
+<CardGrid>
+  <LinkCard title='"总结这个页面，给我五点要点"' href="/first-chat/#summarize-this-page" description="读取文章并把总结写回到对话里。" />
+  <LinkCard title='"帮我把这个表单填好"' href="/first-chat/#fill-out-this-form-for-me" description="通过可访问性索引填写多字段表单。提交前会停下来等你确认。" />
+  <LinkCard title='"找一张最便宜的机票"' href="/first-chat/#find-the-cheapest-flight" description="在机票搜索网站上浏览、解析结果、汇报回来。" />
+  <LinkCard title='"最慢的 API 调用是哪一个？"' href="/first-chat/#inspect-the-network" description="通过 CDP 读取网络日志。不用打开 DevTools。" />
+</CardGrid>
+
+## 开始使用
+
+<Aside type="tip" title="两步安装">
+**1.** [在 Chrome Web Store 添加 Browy](https://chromewebstore.google.com/detail/iondecjdokngnlkfpipgolgkfegpmjca)（一键安装）。
+
+**2.** 安装本地原生消息主机。Windows 用户打开 PowerShell：
+
+```powershell
+irm https://github.com/BrowyHQ/browy/releases/latest/download/install.ps1 | iex
+```
+
+macOS / Linux：
+
+```bash
+curl -fsSL https://github.com/BrowyHQ/browy/releases/latest/download/install.sh | bash
+```
+
+从中国大陆访问 GitHub 偶尔会慢，参见
+[中国开发者指南](/zh-cn/china-setup/)中的镜像方案。
+</Aside>
+
+<CardGrid>
+  <LinkCard title="安装" href="/zh-cn/install/" description="扩展加本地主机。大约两分钟。" />
+  <LinkCard title="中国开发者指南" href="/zh-cn/china-setup/" description="GitHub 镜像、Copilot 访问、延迟说明。" />
+  <LinkCard title="第一次对话" href="/first-chat/" description="侧边栏里可以尝试的五个示例提示词（英文）。" />
+  <LinkCard title="隐私与数据" href="/privacy/" description="什么留在你机器上，什么会离开（英文）。" />
+</CardGrid>
+
+## 状态 <Badge text="早期版本" variant="caution" />
+
+本地主机安装脚本从
+[GitHub Releases](https://github.com/BrowyHQ/browy/releases)分发。
+扩展已经发布到
+[Chrome Web Store](https://chromewebstore.google.com/detail/iondecjdokngnlkfpipgolgkfegpmjca)，
+同一份商店页面同时覆盖 Chrome、Edge 和 Brave。

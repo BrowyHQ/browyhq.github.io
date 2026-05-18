@@ -1,0 +1,121 @@
+---
+title: 中国开发者指南
+description: 从中国大陆安装和使用 Browy 的注意事项。包含 Copilot 访问、GitHub 镜像和网络变通方案。
+---
+
+import { Aside, Steps, CardGrid, Card, LinkCard, Tabs, TabItem } from '@astrojs/starlight/components';
+
+这一页针对从中国大陆使用 Browy 的特殊情况补充[安装指南](/zh-cn/install/)。
+Browy 本身在世界各地的行为完全一致，主要的麻烦来自从大陆访问 GitHub
+Releases 和 GitHub Copilot 的网络质量。
+
+<Aside type="caution" title="如果 /zh-cn/install/ 里的任何下载超时，请先看这里">
+安装脚本会从 `github.com/BrowyHQ/browy/releases` 下载约 130 MB 的发行包。
+如果下载卡住或者报 TLS 错误，几乎都是上游到 GitHub 的网络问题，
+和脚本本身无关。
+</Aside>
+
+## Browy 在中国能用吗？
+
+能用，但有两个现实层面的注意点。
+
+<CardGrid>
+  <Card title="GitHub 访问" icon="seti:github">
+    本地主机安装脚本从 GitHub Releases 拉取二进制。下载速度因
+    运营商和时段不同。如果完全无法访问
+    `objects.githubusercontent.com`，可以走 CDN 镜像，或者
+    手动下载 tar 包（见下文）。
+  </Card>
+  <Card title="Copilot 访问" icon="setting">
+    Browy 使用你自己的 GitHub Copilot 订阅。Copilot 在大陆可以用
+    GitHub 计费系统接受的银行卡正常订阅，教育版的流程和其他国家一致。
+    从大陆到 `api.githubcopilot.com` 的延迟比香港 / 新加坡高一些，
+    但是可达。
+  </Card>
+</CardGrid>
+
+## 推荐安装流程
+
+<Steps>
+1. **使用 Edge 或较新的 Chrome。** 两者都可以通过正常渠道在大陆获得，
+   Browy 用同一份商店页面覆盖两者。
+2. **先在机器上登录 GitHub** 再运行安装脚本。Copilot 的授权
+   device-flow 会经过 `github.com`，在你已经登录的前提下更稳定。
+3. **运行安装脚本。** Windows 用 PowerShell，macOS / Linux 用 bash。
+   命令和[安装指南](/zh-cn/install/)里的完全一致。
+4. **第一次对话。** 打开侧边栏，点 "Sign in to GitHub Copilot"，
+   完成 device-flow。授权成功后终端会自动关闭。
+</Steps>
+
+## 如果 GitHub 下载完全不可达
+
+安装脚本支持自定义发行包 URL。你可以把最新 tar 包镜像到任何你可控的
+主机上，然后让脚本去那里下载。
+
+<Tabs syncKey="os">
+<TabItem label="Windows" icon="seti:windows">
+
+```powershell
+$env:BROWY_RELEASE_URL = "https://your-mirror.example.com/browy-win-x64.tar.gz"
+irm https://github.com/BrowyHQ/browy/releases/latest/download/install.ps1 | iex
+```
+
+</TabItem>
+<TabItem label="macOS / Linux" icon="seti:apple">
+
+```bash
+BROWY_RELEASE_URL="https://your-mirror.example.com/browy-linux-x64.tar.gz" \
+  bash <(curl -fsSL https://github.com/BrowyHQ/browy/releases/latest/download/install.sh)
+```
+
+</TabItem>
+</Tabs>
+
+历史上能从大陆访问的几个公共 CDN：
+
+- **jsDelivr GitHub 代理**：`https://cdn.jsdelivr.net/gh/BrowyHQ/browy@latest/...`
+- **ghproxy**：`https://ghproxy.com/https://github.com/BrowyHQ/browy/...`
+
+这些都是第三方运营的服务，我们不做担保。企业环境建议自建镜像。
+
+## 延迟说明
+
+Browy 在正常使用中会发起两类网络调用。
+
+| 调用 | 端点 | 延迟来源 |
+|---|---|---|
+| 模型推理 | `api.githubcopilot.com` | 从你的机器到 GitHub Copilot 最近区域的往返时间。从大陆出去通常是一跳到太平洋，普通家用网络下大约 200 到 400 毫秒。 |
+| 工具执行 | 你的本地机器 | 没有网络。智能体直接在你眼前的页面上执行工具。 |
+
+大多数提示词的耗时主要来自模型调用本身。连续触发三四次工具调用的对话
+会比从香港、新加坡或欧洲发起的稍微慢半拍，但智能体循环不会因为网络
+卡住而停下来。
+
+## 源码镜像
+
+我们把公开的扩展仓库镜像到了 Gitee，方便偏好大陆主机的用户：
+
+<LinkCard
+  title="Browy on Gitee"
+  href="https://gitee.com/BrowyHQ/browy"
+  description="github.com/BrowyHQ/browy 的镜像，自动从 GitHub 同步。"
+/>
+
+Gitee 上的仓库只读。Issue 和 PR 仍然走
+[GitHub 主仓库](https://github.com/BrowyHQ/browy)。
+
+## 哪些功能依赖外部服务
+
+少数功能有硬性的外部依赖，能不能用的情况和任意其他用户一样。
+
+- **Chrome Web Store 安装。** 如果无法访问
+  `chromewebstore.google.com`，可以走未打包扩展的旁加载方式，参见
+  [安装指南](/zh-cn/install/#第二步安装本地原生消息主机)里的提示。
+- **博客里的 YouTube 嵌入。** 嵌入失败不影响文本，博客的内容是完整的。
+- **崩溃和遥测上报。** Browy 不发送遥测，所以这一项不存在问题。
+
+## 怎么联系到我们
+
+[在 GitHub 上提 issue](https://github.com/BrowyHQ/browy/issues) 或者
+[给维护者发邮件](mailto:hello@browy.dev)。如果暂时连不上 GitHub，
+邮件可以正常用。
