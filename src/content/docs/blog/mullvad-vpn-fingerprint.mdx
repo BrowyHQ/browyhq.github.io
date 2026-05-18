@@ -17,11 +17,44 @@ head:
       content: "2026-05-20T00:00:00Z"
   - tag: meta
     attrs:
+      property: article:author
+      content: "Ritabrata Maiti"
+  - tag: meta
+    attrs:
       name: keywords
       content: "mullvad, vpn, fingerprinting, privacy, wireguard, deanonymization, exit ip, browser security, network privacy"
+  - tag: script
+    attrs:
+      type: application/ld+json
+    content: |
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Mullvad gave you 8 trillion exit IPs. 9 servers found you.",
+        "description": "Mullvad VPN assigns a deterministic exit IP per server, and the picker is seeded with your WireGuard pubkey. The same float, scaled to each pool, makes a few exit IPs enough to single you out among roughly 340 users.",
+        "datePublished": "2026-05-20T00:00:00Z",
+        "dateModified": "2026-05-20T00:00:00Z",
+        "author": {
+          "@type": "Person",
+          "name": "Ritabrata Maiti",
+          "url": "https://github.com/ritabratamaiti"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Browy",
+          "url": "https://browyhq.github.io/"
+        },
+        "mainEntityOfPage": "https://browyhq.github.io/blog/mullvad-vpn-fingerprint/",
+        "image": "https://browyhq.github.io/og-default.png",
+        "inLanguage": "en",
+        "keywords": ["mullvad", "vpn", "fingerprinting", "privacy", "wireguard", "deanonymization"]
+      }
 ---
 
 import { YouTube } from 'astro-embed';
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+<p style="opacity:0.7;font-size:0.9em;margin-top:-0.5em">By <a href="https://github.com/ritabratamaiti">Ritabrata Maiti</a> · <time datetime="2026-05-20">May 20, 2026</time> · 8 min read</p>
 
 <YouTube id="g-B_toki7PA" title="Mullvad gave you 8 trillion exit IPs. 9 servers found you." />
 
@@ -213,3 +246,10 @@ decade has rewarded. The 30-second video version of the Mullvad story
 is at the top of this post. The full research, with the seed
 estimator tool, is
 [at tmctmt's site](https://tmctmt.com/posts/mullvad-exit-ips-as-a-fingerprinting-vector/).
+
+---
+
+<CardGrid>
+  <LinkCard title="← All posts" href="/blog/" description="Index of every post on the Browy blog." />
+  <LinkCard title="AI slop killed the open-source bug bounty" href="/blog/ai-slop-killed-the-bug-bounty/" description="The same shape in software security: a real database project just retired its bounty program because AI submissions broke the queue." />
+</CardGrid>

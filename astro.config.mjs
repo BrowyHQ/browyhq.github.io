@@ -43,6 +43,9 @@ export default defineConfig({
         { tag: 'meta', attrs: { name: 'google-site-verification', content: 'KTuHyXaGSJO9UWwBUrqMv_QU__MMir4-TcJjPjofGCI' } },
         // Bing Webmaster Tools domain verification.
         { tag: 'meta', attrs: { name: 'msvalidate.01', content: '4C234987AA54CF197108F37740B31010' } },
+        // RSS feed discovery for feedreaders + Google.
+        { tag: 'link', attrs: { rel: 'alternate', type: 'application/rss+xml', title: 'Browy blog', href: 'https://browyhq.github.io/rss.xml' } },
+        { tag: 'link', attrs: { rel: 'alternate', type: 'application/rss+xml', title: 'Browy 博客', href: 'https://browyhq.github.io/zh-cn/rss.xml', hreflang: 'zh-CN' } },
       ],
       components: {
         Hero: './src/components/Hero.astro',

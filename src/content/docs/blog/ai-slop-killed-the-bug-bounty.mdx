@@ -17,11 +17,44 @@ head:
       content: "2026-05-16T00:00:00Z"
   - tag: meta
     attrs:
+      property: article:author
+      content: "Ritabrata Maiti"
+  - tag: meta
+    attrs:
       name: keywords
       content: "ai slop, bug bounty, turso, open source, ai agents, software security, maintainer burnout, llm, vulnerability reports"
+  - tag: script
+    attrs:
+      type: application/ld+json
+    content: |
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "AI slop killed the open-source bug bounty",
+        "description": "Turso retired its $1,000-per-bug bounty program this week after AI-generated submissions overwhelmed the maintainers. The pattern is going to repeat everywhere there's an open queue with a human at the end of it.",
+        "datePublished": "2026-05-16T00:00:00Z",
+        "dateModified": "2026-05-16T00:00:00Z",
+        "author": {
+          "@type": "Person",
+          "name": "Ritabrata Maiti",
+          "url": "https://github.com/ritabratamaiti"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Browy",
+          "url": "https://browyhq.github.io/"
+        },
+        "mainEntityOfPage": "https://browyhq.github.io/blog/ai-slop-killed-the-bug-bounty/",
+        "image": "https://browyhq.github.io/og-default.png",
+        "inLanguage": "en",
+        "keywords": ["ai slop", "bug bounty", "turso", "open source", "maintainer burnout", "llm"]
+      }
 ---
 
 import { YouTube } from 'astro-embed';
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+<p style="opacity:0.7;font-size:0.9em;margin-top:-0.5em">By <a href="https://github.com/ritabratamaiti">Ritabrata Maiti</a> · <time datetime="2026-05-16">May 16, 2026</time> · 7 min read</p>
 
 <YouTube id="8ml0p8BM5Eo" title="Turso retired its bug bounty. AI did it." />
 
@@ -224,3 +257,10 @@ going to be a good place to live.
 The 30-second video version of this argument is at the top of this
 post. Turso's own write-up is
 [here](https://turso.tech/blog/the-wonders-of-ai).
+
+---
+
+<CardGrid>
+  <LinkCard title="← All posts" href="/blog/" description="Index of every post on the Browy blog." />
+  <LinkCard title="Mullvad gave you 8 trillion exit IPs. 9 servers found you." href="/blog/mullvad-vpn-fingerprint/" description="Same researcher-pattern thinking, different domain: a VPN whose deterministic IP picker leaks identity across servers." />
+</CardGrid>
