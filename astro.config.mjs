@@ -49,6 +49,7 @@ export default defineConfig({
       ],
       components: {
         Hero: './src/components/Hero.astro',
+        SocialIcons: './src/components/SocialIcons.astro',
       },
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/BrowyHQ' },

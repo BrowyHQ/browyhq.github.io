@@ -1,0 +1,35 @@
+---
+import Default from '@astrojs/starlight/components/SocialIcons.astro';
+
+const isZhCn = Astro.url.pathname.startsWith('/zh-cn/') || Astro.url.pathname === '/zh-cn';
+const blogHref = isZhCn ? '/zh-cn/blog/' : '/blog/';
+const blogLabel = isZhCn ? '博客' : 'Blog';
+---
+
+<a href={blogHref} class="browy-top-blog">{blogLabel}</a>
+<Default {...Astro.props}><slot /></Default>
+
+<style>
+  .browy-top-blog {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 0.5rem;
+    font-size: var(--sl-text-sm);
+    font-weight: 600;
+    color: var(--sl-color-text);
+    text-decoration: none;
+    border-radius: 0.25rem;
+    transition: color 0.15s, background-color 0.15s;
+  }
+  .browy-top-blog:hover {
+    color: var(--sl-color-text-accent);
+    background-color: var(--sl-color-gray-6);
+  }
+  /* Match Starlight's media-query for hiding social row on small screens
+     to avoid header overflow; show Blog inline with other top-right items. */
+  @media (max-width: 50em) {
+    .browy-top-blog {
+      display: none;
+    }
+  }
+</style>
