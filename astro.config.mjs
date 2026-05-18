@@ -34,6 +34,8 @@ export default defineConfig({
         { tag: 'meta', attrs: { name: 'theme-color', content: '#0a1f12' } },
         // Canonical author for blog posts (overridable per-post)
         { tag: 'meta', attrs: { name: 'author', content: 'Ritabrata Maiti' } },
+        // Google Search Console domain verification.
+        { tag: 'meta', attrs: { name: 'google-site-verification', content: 'KTuHyXaGSJO9UWwBUrqMv_QU__MMir4-TcJjPjofGCI' } },
       ],
       components: {
         Hero: './src/components/Hero.astro',
