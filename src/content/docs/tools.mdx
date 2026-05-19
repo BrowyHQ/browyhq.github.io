@@ -11,8 +11,8 @@ evaluation, and so on).
 
 The Copilot SDK also exposes a set of **host tools** (`bash`,
 `read_file`, `write_file`, `grep`, `glob`, `web_fetch`) that reach your
-machine's filesystem and shell. Those are off until you opt in
-per-tool in Settings.
+machine's filesystem and shell. These are off by default. Turn them on
+one at a time in Settings.
 
 <Aside type="note">
 The authoritative list lives in
@@ -26,8 +26,8 @@ in [`src/agent/loop.ts`](https://github.com/BrowyHQ/browy/blob/main/src/agent/lo
 
 | | Default | Where it runs | Toggle |
 |---|---|---|---|
-| **Browser tools** (everything below) | ON | The active tab via CDP | Disable per-tool in Settings |
-| **Host tools** (`bash`, `read_file`, `write_file`, `grep`, `glob`, `web_fetch`) | OFF | Your machine, with your user privileges | Enable per-tool in Settings → Tools → host (advanced) |
+| **Browser tools** (everything below) | ON | The active tab via CDP | Turn off individually in Settings |
+| **Host tools** (`bash`, `read_file`, `write_file`, `grep`, `glob`, `web_fetch`) | OFF | Your machine, with your user privileges | Turn on individually in Settings → Tools → host (advanced) |
 
 ## Categories
 

@@ -33,15 +33,15 @@ Anything that lets an attacker:
 ## Out of scope
 
 <Aside type="note" title="Prompt injection on visited pages">
-Any prompt-injection on a visited page can steer the agent. That's
+Any prompt injection on a visited page can steer the agent. That's
 true of every page-driving agent, and the threat model assumes it.
 Browy keeps host-touching tools (`bash`, `read_file`, `write_file`,
-`grep`, `glob`, `web_fetch`) off by default; you enable them per-tool
-under [Settings → Tools](/tools/), where every browser tool can
-also be turned off individually.
+`grep`, `glob`, `web_fetch`) off by default; turn them on individually
+under [Settings → Tools](/tools/), where every browser tool can also
+be turned off the same way.
 </Aside>
 
-Issues in third-party software Browy depends on (Chrome, Node.js,
+For issues in third-party software Browy depends on (Chrome, Node.js,
 the GitHub Copilot CLI), please report those upstream.
 
 ## What we do
@@ -74,8 +74,8 @@ For users:
   </Card>
   <Card title="Host tools are off by default" icon="warning">
     `bash`, `read_file`, `write_file`, `grep`, `glob`, and `web_fetch`
-    reach your machine, not the browser tab. Opt in per-tool under
-    Settings → Tools → host (advanced) when you need them.
+    reach your machine, not the browser tab. Turn them on individually
+    under Settings → Tools → host (advanced) when you need them.
   </Card>
   <Card title="Don't run untrusted JavaScript" icon="warning">
     Don't ask the agent to evaluate code (via `evaluate_js` or

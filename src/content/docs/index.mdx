@@ -76,33 +76,33 @@ and a small **native messaging host** you install with one command. The
 
 <CardGrid stagger>
   <Card title="Lives in the browser" icon="laptop">
-    A Chrome side panel and a small native helper. Works against the
+    A Chrome side panel plus a small native helper. Acts on the
     tabs you already have open.
   </Card>
   <Card title="Pick your model" icon="setting">
     Switch between frontier models (Claude, GPT, Gemini, Llama) on
     the fly with `/model` or in Settings.
   </Card>
-  <Card title="Works on accessibility tree" icon="seti:html">
-    The agent acts on indexed accessibility nodes instead of CSS selectors,
-    so it doesn't break when class names change. JavaScript evaluation is
-    available when the snapshot can't express what you need.
+  <Card title="Reads the accessibility tree" icon="seti:html">
+    The agent acts on indexed accessibility nodes, not CSS selectors,
+    so it doesn't break when class names change. JavaScript
+    evaluation is available when the snapshot isn't enough.
   </Card>
   <Card title="Open source" icon="open-book">
     Apache 2.0. Read the agent loop, fork it, build it yourself.
-    Browser tools can be turned off individually in Settings; host
-    shell and filesystem are off by default and only reachable if you
-    opt in per-tool.
+    Browser tools can be turned off individually in Settings.
+    Host shell and filesystem are off by default; enable them one
+    at a time.
   </Card>
 </CardGrid>
 
 ## What you can do
 
 <CardGrid>
-  <LinkCard title='"Summarize this page in 5 bullets"' href="/first-chat/#summarize-this-page" description="Reads the article and writes the summary back into the chat." />
-  <LinkCard title='"Fill out this form for me"' href="/first-chat/#fill-out-this-form-for-me" description="Multi-field form filling by accessibility index. Stops before submit." />
-  <LinkCard title='"Find the cheapest flight"' href="/first-chat/#find-the-cheapest-flight" description="Navigates a flight-search site, parses results, reports back." />
-  <LinkCard title="What's the slowest API call?" href="/first-chat/#inspect-the-network" description="Reads the network log via CDP. Skips opening DevTools." />
+  <LinkCard title='"Summarize this page in 5 bullets"' href="/first-chat/#summarize-this-page" description="Reads the article and writes the summary into the chat." />
+  <LinkCard title='"Fill out this form for me"' href="/first-chat/#fill-out-this-form-for-me" description="Fills every field in one prompt. Stops before submit." />
+  <LinkCard title='"Find the cheapest flight"' href="/first-chat/#find-the-cheapest-flight" description="Navigates a flight-search site, parses the results, reports back." />
+  <LinkCard title="What's the slowest API call?" href="/first-chat/#inspect-the-network" description="Reads the network log straight from chat. No DevTools panel required." />
 </CardGrid>
 
 ## Get started

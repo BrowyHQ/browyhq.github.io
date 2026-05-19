@@ -57,19 +57,19 @@ third-party service except the local Copilot CLI.
 ## You decide what to share
 
 Page content the agent reads, including DOM snapshots, console output,
-network logs, and screenshots, comes from the active tab and is sent to the
-model unmodified.You pick the tab the agent runs against, what you type
-into chat, and which tools are enabled in Settings.
+network logs, and screenshots, comes from the active tab and is sent
+to the model unmodified. You pick the tab the agent runs against,
+what you type into chat, and which tools are enabled in Settings.
 
 That includes things power users *want* to send: API keys for backend
 testing, OAuth redirect URLs, `Authorization` headers from a network
 trace. Browy doesn't second-guess you.
 
 <Aside type="tip" title="Defaults">
-Browser-driving tools are on; host-touching tools (`bash`, `web_fetch`,
-`read_file`, `write_file`, `grep`, `glob`) are off until you opt in
-under **Settings → Tools**. Both can be flipped per-tool in the same
-place.
+Browser-driving tools are on. Host-touching tools (`bash`, `web_fetch`,
+`read_file`, `write_file`, `grep`, `glob`) are off until you turn them
+on under **Settings → Tools**. Both can be toggled individually in the
+same place.
 </Aside>
 
 ## Children

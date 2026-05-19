@@ -33,7 +33,7 @@ Browy's main draw is **session reuse**: your cookies, your logins, your password
 
 ## Is Browy an alternative to Aider / Cline / Cursor?
 
-No, they're complementary. Aider, Cline, and Cursor edit a repository on your disk; Browy drives your browser. Use a coding agent for code, Browy for the tabs. If you want filesystem and shell access from Browy as well, you can opt the host tools (`bash`, `read_file`, `write_file`, …) on under Settings → Tools, but a dedicated coding agent will give you a much better editing flow.
+No, they're complementary. Aider, Cline, and Cursor edit a repository on your disk; Browy drives your browser. Use a coding agent for code, Browy for the tabs. If you also want filesystem and shell access from Browy, you can turn on the host tools (`bash`, `read_file`, `write_file`, …) under Settings → Tools, but a dedicated coding agent will give you a much better editing flow.
 
 ## Does Browy work offline?
 
@@ -59,7 +59,7 @@ Full detail at [Privacy & Data](/privacy/).
 
 ## Can I disable specific tools?
 
-**Yes.** Open the extension Settings → Tools. Every browser tool is on by default and can be toggled off; the disabled ones are stripped from the prompt the model sees. Host tools (`bash`, `read_file`, `write_file`, `grep`, `glob`, `web_fetch`) are off by default and can be opted into per-tool. See [Tools](/tools/).
+**Yes.** Open the extension Settings → Tools. Every browser tool is on by default and can be turned off; disabled tools are stripped from the prompt the model sees. Host tools (`bash`, `read_file`, `write_file`, `grep`, `glob`, `web_fetch`) are off by default and can be turned on individually. See [Tools](/tools/).
 
 ## Can I run Browy without opening a browser tab?
 
@@ -67,7 +67,7 @@ Not today. Browy is a browser agent: every tool it has acts on a live tab via `c
 
 ## Is Browy a competitor to GitHub Copilot?
 
-No. Browy is built on top of GitHub Copilot. We use the [`@github/copilot-sdk`](https://www.npmjs.com/package/@github/copilot-sdk) for LLM access; Browy adds the browser-control loop and UI surfaces on top of the agent that GitHub already ships.
+No. Browy is built on top of GitHub Copilot. We use the [`@github/copilot-sdk`](https://www.npmjs.com/package/@github/copilot-sdk) for model access; Browy adds the browser-control loop and the UI on top of the agent that GitHub already ships.
 
 ## Can I contribute?
 
