@@ -44,6 +44,11 @@ one-line installer for the native host.
 
 Pin the Browy toolbar icon so the side panel is one click away.
 
+<Aside type="tip" title="✓ Validate">
+Click the Browy toolbar icon. The side panel should open and show a
+"host disconnected" banner. That is expected until Step 2.
+</Aside>
+
 <Aside type="tip" title="Prefer to sideload?">
 The native-host installer below also stages an unpacked copy of the
 extension at `~/Downloads/Browy-Extension/` (or
@@ -74,6 +79,12 @@ The installer will:
 4. Stage an unpacked extension copy at `%USERPROFILE%\Downloads\Browy-Extension\` for sideload installs
 </Steps>
 
+<Aside type="tip" title="✓ Validate">
+Re-open the side panel. The "host disconnected" banner should be gone.
+If not, run `& "$env:LOCALAPPDATA\Browy\app\browy.exe" --version` to
+confirm the binary is on disk.
+</Aside>
+
 </TabItem>
 <TabItem label="macOS" icon="seti:apple">
 
@@ -91,6 +102,12 @@ The installer will:
 3. Register `com.browy.host` with Chrome / Edge / Brave (pre-approves both the Web Store and unpacked extension IDs)
 4. Stage an unpacked extension copy at `~/Downloads/Browy-Extension/` for sideload installs
 </Steps>
+
+<Aside type="tip" title="✓ Validate">
+Re-open the side panel. The "host disconnected" banner should be gone.
+If not, run `~/.browy/app/browy --version` to confirm the binary is on
+disk.
+</Aside>
 
 </TabItem>
 <TabItem label="Linux" icon="linux">
@@ -110,6 +127,12 @@ The installer will:
 4. Stage an unpacked extension copy at `~/Downloads/Browy-Extension/` for sideload installs
 </Steps>
 
+<Aside type="tip" title="✓ Validate">
+Re-open the side panel. The "host disconnected" banner should be gone.
+If not, run `~/.browy/app/browy --version` to confirm the binary is on
+disk.
+</Aside>
+
 </TabItem>
 </Tabs>
 
@@ -127,7 +150,12 @@ A terminal window opens with the GitHub Copilot **device-flow link**.
 Paste the code into the URL it shows, authorize Browy in your browser,
 and the terminal closes itself.
 
-You're done. Try [your first chat](/first-chat/).
+<Aside type="tip" title="✓ Validate">
+Send "what is the headline of this page" against any tab. You should
+see a `snapshot` tool call followed by a streamed reply.
+</Aside>
+
+You're done. Try [your first chat](/first-chat/) for five concrete examples.
 
 ## Updating
 
