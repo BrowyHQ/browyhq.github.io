@@ -1,0 +1,183 @@
+---
+title: "Google 悄悄对开放 web 宣战了。"
+description: "在本周的 Google I/O 2026 上，AI Overviews 成为英语用户搜索的默认体验。搜索越来越多地从一份 Google 自己托管的合成里回答你，而不是把你送去原始来源。网络现在是原材料。中间人在试图把它吞掉。"
+slug: zh-cn/blog/google-vs-the-web
+template: doc
+tableOfContents: false
+sidebar:
+  hidden: true
+head:
+  - tag: meta
+    attrs:
+      property: og:type
+      content: article
+  - tag: meta
+    attrs:
+      property: article:published_time
+      content: "2026-05-28T00:00:00Z"
+  - tag: meta
+    attrs:
+      property: article:author
+      content: "Ritabrata Maiti"
+  - tag: meta
+    attrs:
+      property: og:image
+      content: "https://browyhq.github.io/og/google-vs-the-web.png"
+  - tag: meta
+    attrs:
+      name: twitter:image
+      content: "https://browyhq.github.io/og/google-vs-the-web.png"
+  - tag: meta
+    attrs:
+      name: keywords
+      content: "google, 搜索, ai overviews, AI 搜索, 开放 web, seo, web 标准, 浏览器主动权, 智能体, google io 2026"
+  - tag: script
+    attrs:
+      type: application/ld+json
+    content: |
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Google 悄悄对开放 web 宣战了。",
+        "description": "在 Google I/O 2026 上，AI Overviews 成为搜索的默认体验。支撑了 web 二十年的那笔交易被悄悄取消了。",
+        "datePublished": "2026-05-28T00:00:00Z",
+        "dateModified": "2026-05-28T00:00:00Z",
+        "author": {
+          "@type": "Person",
+          "name": "Ritabrata Maiti",
+          "url": "https://github.com/ritabratamaiti"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Browy",
+          "url": "https://browyhq.github.io/"
+        },
+        "mainEntityOfPage": "https://browyhq.github.io/zh-cn/blog/google-vs-the-web/",
+        "image": "https://browyhq.github.io/og/google-vs-the-web.png",
+        "inLanguage": "zh-CN",
+        "keywords": ["google", "搜索", "AI 搜索", "开放 web", "浏览器主动权"]
+      }
+---
+
+import { YouTube } from 'astro-embed';
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+<p style="opacity:0.7;font-size:0.9em;margin-top:-0.5em">作者：<a href="https://github.com/ritabratamaiti">Ritabrata Maiti</a> · <time datetime="2026-05-28">2026 年 5 月 28 日</time> · 约 8 分钟阅读</p>
+
+<YouTube id="cxqv5HIIFVo" title="Google quietly declared war on the open web." />
+
+在本周的 Google I/O 上，搜索团队把 AI Overviews 变成了英语用户的
+默认回答表面。
+[官方的 keynote 博客](https://blog.google/products-and-platforms/products/search/search-io-2026/)
+用大量"智能体"和"个人智能"的语言把这件事包了起来，但实际效果很小
+也很确定：搜索现在从一份 Google 自己托管的合成里回答你。蓝色的
+链接变成兜底，不是产品本身。
+
+这是从 featured snippets 开始、被 AI Overviews 加速的一连串变化的
+下一个必然步骤。AI Overviews
+[10% 的回答不准确率](https://www.techrepublic.com/article/google-ai-overviews-inaccurate-answers-analysis/)
+现在是所有人的问题，因为 Overviews 现在是所有人的默认答案。
+
+[tante.cc 那篇文章](https://tante.cc/2026/05/20/on-google-declaring-war-on-the-web/)
+把这件事叫"对 web 宣战"，用词是准确的。下面是我认为这件事到底是
+什么、被取消的那笔交易是什么、以及能做什么。
+
+## 支撑了 web 的那笔交易
+
+网站让 Google 爬取。Google 把流量送回去。双方都赢。爬虫拿到新鲜
+内容；网站拿到读者，读者想深入挖的时候有清晰的路径回到源头。
+
+这份契约维持了大约二十年。它建起了作为发布表面的开放 web、能交得起
+房租的独立博客、SEO 行业、小众参考站的长尾，以及我们今天叫做"互联网
+上的文档"的几乎一切。这是一笔不对称的交易，但双方都清楚。你给 Google
+目录，Google 给你客流。
+
+AI Overviews 悄悄取消了这笔交易。
+
+爬虫还在跑。目录还在被消化。出现在用户屏幕上的输出现在是一份 Google
+合成出来的答案，源头被降级成一排小小的、芯片状的引用链接，中位数
+用户不会去点。读者得到了一个答案，常常对、有时错，永远不需要离开
+搜索结果页。
+
+## 老实给这件事起个名字
+
+原文里那段框架很锋利，值得整段引用：
+
+> 你的工作、你的写作或艺术还是有点意义的：作为给他们的合成文本
+> 挤压机用的（无偿的）原材料。你免费工作，让 Google 能严密控制
+> 信息的流向，确保人们拿到的回答符合他们需要的样子。
+
+这是对的框架。Web 不再是产品。Web 是原材料。产品是搭在它之上的
+那份合成视图，托管在 Google 的基础设施上、贴着 Google 的 UI、对
+Google 的编辑选择负责。
+
+一个有用的类比：通讯社和报纸的关系。通讯社生产底层报道；报纸挑选、
+编辑、呈现。读者看到的是报纸。很长一段时间里，web 是报纸。Google
+是索引、是指向报纸的目录页。AI Overviews 把这件事翻过来了。Google
+现在是报纸。你的网站是通讯社。
+
+让人感到失去方向的是没人谈判过新安排。发布者没同意做通讯社撰稿人。
+通讯社撰稿人没拿到钱。报纸的报头从没问过。
+
+## 为什么这比搜索流量数学更大
+
+人很容易把这当成 SEO 问题。流量数字会掉，网站会适应，市场会自己
+调好。这忽略了规模。
+
+Google 拥有这个星球上最大的单一浏览器部署、最大的单一移动操作系统、
+最大的单一 web 视频平台、web 标准委员会里占主导份额的参与、广告
+技术里占主导的份额，现在又拥有占主导的搜索回答表面。一家公司在
+发布者和读者之间的每一个点上设定了抽象层。当这家公司决定抽象层
+不应该包含外链时，没有一个对手大到足以在规模上反对。
+
+这是 SEO 框架漏掉的部分。市场没法把这种规模的问题调好，因为市场
+里没有这种规模的参与者。最接近的类比是监管。欧盟开始动了。DOJ 的
+案子还在磨。两个都不够快，跟不上 Google 能发布的速度。
+
+Web 会挺过这一关。独立发布者、单人博客、小众参考站、那些一个人为
+另外十五个人写下来的互联网角落，会在这个过程里被挤压。一些会退出。
+一些会上付费墙。一些会迁到 Substack 或邮件列表上去，那也就是自己
+跑分发栈。开放 web 的形状会大幅改变，比 SEO 市场预期的更快。
+
+## 作为用户能做什么
+
+比这个问题更老的建议仍然适用。用你自己的工具。挑你自己的来源。
+不要把读什么外包给一个激励方向是让你留在它表面上的系统。
+
+具体来说：
+
+- **用一个会外链的搜索引擎。** Kagi、Marginalia、Mojeek、Searx、
+  DuckDuckGo、Brave Search。没有完美的，但全都默认外链。Web 还在
+  被索引；索引只是不再是默认的表面。
+- **留一个 RSS 阅读器。** Feedbin、Inoreader、Mac 上的 NetNewsWire、
+  想要 web 归档的话用 Readwise Reader。直接订阅你信任的发布者，
+  完全绕开回答表面。
+- **建一个个人常用来源白名单。** 你想要真答案时先去看的那一小撮
+  网站。我自己大概是三十个；找不到时才去搜索引擎。这大致就是 2005
+  年所有人用 web 的方式。
+- **赌注高时读源材料。** AI Overviews 10% 是错的。这个比例对"煎饼
+  的食谱是什么"来说没问题。对"这个药和什么会有相互作用"来说有问题。
+
+每个情况里的模式是一样的：错的代价高时让人留在回路里；错的代价
+低时让机器去浓缩。
+
+## 这和我做的东西有什么关系
+
+我做的是 [Browy](https://browy.dev)，一个住在 Chromium 扩展里的
+开源 AI 智能体。它驱动你打开的那个真实浏览器标签页。你问它问题；
+它检查页面、跟着链接走、读其他标签页，然后给你写一份带行内可见
+源头的答案。它不从一份托管的索引里合成。它操作的是如果你自己做
+这件事时会看到的那个 web。
+
+这不是巧合。这是对上文那种"去中间化"动作的回应。如果回答表面被一个
+和你利益方向不一致的对手托管，你想要的那个答案，是你能自己生产的，
+用你信任的来源，在加载到你面前的那个页面上。
+
+Web 不会终结。中间人在试图把它吞掉。用你自己的工具。
+
+---
+
+<CardGrid>
+  <LinkCard title="← 所有文章" href="/zh-cn/blog/" description="Browy 博客上所有文章的索引。" />
+  <LinkCard title="GitHub 被一个 VSCode 扩展打穿了" href="/zh-cn/blog/vscode-extension-breach/" description="威胁模型不是聪明的攻击者。是你没仔细看的复选框。" />
+</CardGrid>

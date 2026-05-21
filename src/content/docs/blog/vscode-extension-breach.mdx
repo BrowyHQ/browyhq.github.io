@@ -1,0 +1,221 @@
+---
+title: "GitHub got pwned through one VSCode extension. 3,800 repos."
+description: "GitHub confirmed this week that 3,800 of their internal repos were exfiltrated after one employee installed a trojanised Nx Console extension from the official VS Code Marketplace. The deeper problem isn't this one extension. It's that the editor has no sandbox model."
+slug: blog/vscode-extension-breach
+template: doc
+tableOfContents: false
+sidebar:
+  hidden: true
+head:
+  - tag: meta
+    attrs:
+      property: og:type
+      content: article
+  - tag: meta
+    attrs:
+      property: article:published_time
+      content: "2026-05-22T00:00:00Z"
+  - tag: meta
+    attrs:
+      property: article:author
+      content: "Ritabrata Maiti"
+  - tag: meta
+    attrs:
+      property: og:image
+      content: "https://browyhq.github.io/og/vscode-extension-breach.png"
+  - tag: meta
+    attrs:
+      name: twitter:image
+      content: "https://browyhq.github.io/og/vscode-extension-breach.png"
+  - tag: meta
+    attrs:
+      name: keywords
+      content: "github, vscode, security, supply chain, nx console, tanstack, malicious extension, developer security, infosec, browser extension security"
+  - tag: script
+    attrs:
+      type: application/ld+json
+    content: |
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "GitHub got pwned through one VSCode extension. 3,800 repos.",
+        "description": "GitHub confirmed 3,800 internal repos were exfiltrated via a trojanised Nx Console VSCode extension. The deeper problem is the editor's permission model.",
+        "datePublished": "2026-05-22T00:00:00Z",
+        "dateModified": "2026-05-22T00:00:00Z",
+        "author": {
+          "@type": "Person",
+          "name": "Ritabrata Maiti",
+          "url": "https://github.com/ritabratamaiti"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Browy",
+          "url": "https://browyhq.github.io/"
+        },
+        "mainEntityOfPage": "https://browyhq.github.io/blog/vscode-extension-breach/",
+        "image": "https://browyhq.github.io/og/vscode-extension-breach.png",
+        "inLanguage": "en",
+        "keywords": ["github", "vscode", "security", "supply chain", "developer security"]
+      }
+---
+
+import { YouTube } from 'astro-embed';
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+<p style="opacity:0.7;font-size:0.9em;margin-top:-0.5em">By <a href="https://github.com/ritabratamaiti">Ritabrata Maiti</a> · <time datetime="2026-05-22">May 22, 2026</time> · 7 min read</p>
+
+<YouTube id="CcBjlKit9IY" title="GitHub got pwned through one VSCode extension. 3,800 repos." />
+
+GitHub confirmed this week that roughly 3,800 of its internal
+repositories were exfiltrated after one of its own employees installed
+a trojanised version of the Nx Console extension for VSCode. The
+malicious extension came through the official VS Code Marketplace, ran
+with the editor's permissions, and quietly handed back the contents of
+the employee's repo cache. GitHub has since linked the campaign to the
+[TanStack npm supply chain attack](https://www.bleepingcomputer.com/news/security/github-links-repo-breach-to-tanstack-npm-supply-chain-attack/)
+from earlier this month and removed the poisoned extension from the
+marketplace.
+
+The TeamPCP group is asking $50,000 for the dump. As far as anyone
+outside GitHub can tell, no customer data has moved.
+
+That is the news. The interesting part is the design that made it
+possible.
+
+## The editor has no sandbox
+
+A VSCode extension runs as Node.js code inside the editor's process.
+It has the editor's permissions. That means it can read every file in
+every workspace you have ever opened, every token in your
+`~/.aws/credentials`, every entry in your SSH agent, and every byte
+that ever passed through `git push`. The Marketplace itself has no
+sandbox model. There has been
+[a feature request open since 2018](https://github.com/microsoft/vscode/issues/52116)
+asking Microsoft to ship one. The request is still open.
+
+This is not a VSCode-specific complaint. It is the model. Cursor
+inherits the architecture. Windsurf inherits it. JetBrains plugins
+run with the IDE's permissions, just packaged differently. Vim and
+Emacs have had this problem since plugins were invented; the only
+reason it never blew up at this scale is that nobody put a marketplace
+in front of them.
+
+The Marketplace is the part that scales the blast radius. Twelve
+months ago, a set of malicious extensions disguised as legitimate
+tools racked up
+[9 million installs](https://www.bleepingcomputer.com/news/security/vscode-extensions-with-9-million-installs-pulled-over-security-risks/)
+before takedown. A different set posed as
+[cryptominer-laden helpers](https://www.bleepingcomputer.com/news/security/malicious-vscode-extensions-infect-windows-with-cryptominers/).
+A WhiteCobra-flooded batch of twenty-four extensions, one of them with
+[basic ransomware capability](https://www.bleepingcomputer.com/news/security/ai-slop-ransomware-test-sneaks-on-to-vs-code-marketplace/),
+made it onto the marketplace before anyone noticed. And in January, a
+pair of malicious AI-coding-assistant extensions with
+[1.5 million installs](https://www.bleepingcomputer.com/news/security/malicious-ai-extensions-on-vscode-marketplace-steal-developer-data/)
+silently shipped developer data to servers in China.
+
+Add it up. Across the visible-to-the-public campaigns, this is more
+than 11 million installs of code that should not have been there. The
+GitHub breach is one well-placed install away from "any of the above
+got an SRE."
+
+## The bug, named honestly
+
+The threat model in this story is not a clever attacker. The threat
+model is a checkbox the operator did not read carefully because they
+were trying to get work done.
+
+A developer at GitHub had an editor open. The editor said: install
+this extension. It looked like Nx Console; the developer needed Nx
+Console. They clicked install. Three thousand eight hundred internal
+repos went out the back door. There is no version of "be more
+careful" that fixes this. The marketplace is the install surface and
+the marketplace cannot, in its current shape, distinguish the real
+extension from the malicious one with the same name.
+
+The fix is at the layer the operator doesn't have to think about.
+That is either:
+
+1. The editor ships a sandbox. Extensions ask for the file paths,
+   network endpoints, and OS capabilities they need. The user reviews
+   a manifest, the same way they review extension permissions in a
+   browser. Microsoft has been promising this since 2018.
+2. The marketplace adds an integrity layer that an attacker cannot
+   forge. Reproducible builds, source mirroring, signed releases.
+   Nothing on the marketplace today provides this end to end.
+3. The user installs nothing they have not personally read or that
+   does not come from a vendor whose source they can audit.
+
+Option 3 is the only one available today. Options 1 and 2 require
+Microsoft to ship work that has been promised for seven years.
+
+## Why this matters for browser extensions
+
+I work on a browser extension, so I want to be clear about what does
+and does not transfer from this story.
+
+Chromium MV3 extensions are not VSCode extensions. The permission
+model is real. An extension declares the URLs it can touch
+(`host_permissions`) and the capabilities it can use (`debugger`,
+`storage`, `nativeMessaging`, and so on) in `manifest.json`. The
+browser enforces those declarations. An extension that says
+`"host_permissions": ["https://gmail.com/*"]` literally cannot reach
+`bank.example.com`. The Chrome Web Store review process is not
+perfect, but it does look at the manifest before publish.
+
+That makes the browser-extension surface meaningfully better than the
+editor-extension surface for the same class of attack. It does not
+make it safe. Things to watch:
+
+- **`<all_urls>`** is a real permission Chrome will grant if the user
+  agrees. Many general-purpose extensions ask for it. Browy asks for
+  it (we have to; you point us at any tab you visit). What stops
+  abuse is the next thing on the list.
+- **The CRX you download is signed.** It is not necessarily the
+  source you read. Chrome Web Store does not require reproducible
+  builds. If the vendor publishes obfuscated code, you are trusting
+  the vendor, not the code.
+- **Native messaging is the escape hatch.** Browy has a native host
+  that runs on your machine. So does any "remote control" extension,
+  any password manager native bridge, and many "AI assistants." A
+  malicious extension can ship a clean source repo and a malicious
+  native binary, and the user has no easy way to know.
+
+The list of things that would help Chrome users defend themselves is
+roughly the same as for VSCode users: a sandbox the user reviews, a
+marketplace integrity layer the attacker cannot forge, and a habit of
+installing nothing whose source you have not read.
+
+## What I do about this in Browy
+
+[Browy](https://browy.dev) is open-source under Apache-2.0. The
+source ships in the release. The
+[agent loop is in one file](https://github.com/BrowyHQ/browy/blob/main/src/agent/loop.ts)
+and the
+[tool registry is in another](https://github.com/BrowyHQ/browy/blob/main/src/agent/tools/browser.ts).
+A reviewer who reads either file in twenty minutes has read the
+attack surface. There is no Browy server. The model call goes from
+your machine to GitHub Copilot via the local Copilot CLI; everything
+else is local.
+
+The host-touching tools (`bash`, `read_file`, `write_file`, `grep`,
+`glob`, `web_fetch`) are off by default. To use any of them you have
+to open Settings, find the tool, and turn it on. The browser-driving
+tools are on by default but each can be turned off the same way. We
+ship a debugger banner whenever a session is live, because Chrome
+makes that mandatory and we are happy with that.
+
+None of this prevents a future me from going rogue and shipping a
+malicious release. It does mean that anyone who cares can pin a
+known-good build, audit any future build before installing, and run
+their own from source. The fix for the marketplace problem is not a
+better marketplace. It is a habit of looking at what you install.
+
+The short version: when the editor has no sandbox, the only sandbox
+left is your attention. Spend it before you click install, not after.
+
+---
+
+<CardGrid>
+  <LinkCard title="← All posts" href="/blog/" description="Index of every post on the Browy blog." />
+  <LinkCard title="AI slop killed the open-source bug bounty" href="/blog/ai-slop-killed-the-bug-bounty/" description="The other end of the same arc: cheap inference, asymmetric inbox, maintainer attention as the limiting factor." />
+</CardGrid>

@@ -1,0 +1,220 @@
+---
+title: "Google quietly declared war on the open web."
+description: "At Google I/O 2026 this week, AI Overviews became the default Search experience for English users. Search increasingly answers from a Google-hosted synthesis instead of routing you to the source. The web is the raw material now. The middleman is trying to swallow it."
+slug: blog/google-vs-the-web
+template: doc
+tableOfContents: false
+sidebar:
+  hidden: true
+head:
+  - tag: meta
+    attrs:
+      property: og:type
+      content: article
+  - tag: meta
+    attrs:
+      property: article:published_time
+      content: "2026-05-28T00:00:00Z"
+  - tag: meta
+    attrs:
+      property: article:author
+      content: "Ritabrata Maiti"
+  - tag: meta
+    attrs:
+      property: og:image
+      content: "https://browyhq.github.io/og/google-vs-the-web.png"
+  - tag: meta
+    attrs:
+      name: twitter:image
+      content: "https://browyhq.github.io/og/google-vs-the-web.png"
+  - tag: meta
+    attrs:
+      name: keywords
+      content: "google, search, ai overviews, ai search, open web, seo, web standards, browser agency, agentic ai, google io 2026"
+  - tag: script
+    attrs:
+      type: application/ld+json
+    content: |
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Google quietly declared war on the open web.",
+        "description": "At Google I/O 2026, AI Overviews became the default Search experience. The deal that built the web for two decades has been quietly cancelled.",
+        "datePublished": "2026-05-28T00:00:00Z",
+        "dateModified": "2026-05-28T00:00:00Z",
+        "author": {
+          "@type": "Person",
+          "name": "Ritabrata Maiti",
+          "url": "https://github.com/ritabratamaiti"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Browy",
+          "url": "https://browyhq.github.io/"
+        },
+        "mainEntityOfPage": "https://browyhq.github.io/blog/google-vs-the-web/",
+        "image": "https://browyhq.github.io/og/google-vs-the-web.png",
+        "inLanguage": "en",
+        "keywords": ["google", "search", "ai overviews", "open web", "browser agency"]
+      }
+---
+
+import { YouTube } from 'astro-embed';
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+<p style="opacity:0.7;font-size:0.9em;margin-top:-0.5em">By <a href="https://github.com/ritabratamaiti">Ritabrata Maiti</a> · <time datetime="2026-05-28">May 28, 2026</time> · 8 min read</p>
+
+<YouTube id="cxqv5HIIFVo" title="Google quietly declared war on the open web." />
+
+At Google I/O this week, the Search team made AI Overviews the default
+answer surface for English users. The
+[official keynote post](https://blog.google/products-and-platforms/products/search/search-io-2026/)
+buries the change under a lot of "agentic" and "personal intelligence"
+language, but the practical effect is small and definite: Search now
+answers from a Google-hosted synthesis. The blue links are a fallback,
+not the product.
+
+This was the inevitable next step of a series of changes that started
+with featured snippets and accelerated with AI Overviews. The
+[10 percent inaccuracy rate](https://www.techrepublic.com/article/google-ai-overviews-inaccurate-answers-analysis/)
+on AI Overviews is now everyone's problem, because Overviews are
+everyone's default answer.
+
+The
+[piece on tante.cc](https://tante.cc/2026/05/20/on-google-declaring-war-on-the-web/)
+called this "declaring war on the web," and the wording is exactly
+right. What follows is what I think the change actually is, the deal
+that broke, and what to do about it.
+
+## The deal that built the web
+
+Sites let Google crawl them. Google sent traffic back. Both sides
+won. The crawler got fresh content; the site got readers, and the
+readers had a clear path back to the source when they wanted to dig
+deeper.
+
+This contract held for about twenty years. It built the open web as
+a publishing surface, the indie blog as a thing that paid rent, the
+SEO industry, the long-tail of niche reference sites, and most of
+what we now call "documentation on the internet." It was an
+asymmetric trade, but both sides understood it. You give Google the
+catalog. Google sends you the foot traffic.
+
+AI Overviews quietly cancelled the trade.
+
+The crawler still runs. The catalog still gets ingested. The output
+on the user's screen is now a Google-synthesised answer, with the
+sources demoted to a row of tiny chip-shaped citations the median
+user does not click. The reader gets an answer, often correct,
+sometimes wrong, and never has to leave the search results page.
+
+## What this is, named plainly
+
+The framing in the original piece is sharp and worth quoting at
+length:
+
+> Your work, your writing or art do matter a bit still: As (unpaid)
+> raw material for their synthetic text extruders. You get to work
+> for free so Google can have tight control on the flow of
+> information and make sure that the responses people get are in
+> line with what they need them to be.
+
+This is the right frame. The web is not the product anymore. The
+web is the raw material. The product is the synthesised view on top
+of it, hosted on Google's infrastructure, branded with Google's UI,
+and accountable to Google's editorial choices.
+
+A useful analogy: the relationship between a wire service and a
+newspaper. The wire produces the underlying reporting; the newspaper
+picks, edits, and presents. The reader sees the newspaper. For a
+long time the web was the newspaper. Google was the index, the table
+of contents that pointed at the newspaper. AI Overviews flipped that.
+Google is the newspaper now. Your site is the wire.
+
+The thing that makes this disorienting is that nobody negotiated the
+new arrangement. The publishers did not agree to be wire
+contributors. The wire contributors did not get paid. The newspaper
+masthead never asked.
+
+## Why this is bigger than search-traffic math
+
+The temptation is to treat this as an SEO problem. Traffic numbers
+will drop, sites will adapt, the market will sort it out. That misses
+the scale.
+
+Google holds the largest single browser deployment on the planet,
+the largest single mobile OS, the largest single web video platform,
+the dominant share of web standards committee participation, the
+dominant share of ad-tech, and now the dominant search-answer
+surface. A single company sets the abstraction layer at every point
+between the publisher and the reader. When that company decides the
+abstraction layer should not include outbound links, there is no
+counter-party large enough to disagree at scale.
+
+This is the part the SEO frame misses. The market does not have a
+way to sort out a question of this scale because the market does not
+have a participant of this scale. The closest analogue is regulatory.
+The EU has begun acting. The DOJ case is grinding along. Neither is
+fast enough to matter at the speed Google can ship.
+
+The web is going to survive this. The independent publisher, the
+solo blog, the niche reference site, the corner of the internet
+written by one human for fifteen others, will get squeezed in the
+process. Some will respond by exiting. Some will paywall. Some will
+move to Substack or to mailing lists, which is just running their own
+distribution stack. The shape of the open web will change a lot,
+faster than the SEO market expects.
+
+## What you can do as a user
+
+The advice older than the problem still applies. Run your own tools.
+Pick your own sources. Don't outsource your reading to a system whose
+incentives are to keep you on its surface.
+
+Concretely:
+
+- **Use a search engine that links out.** Kagi, Marginalia, Mojeek,
+  Searx, DuckDuckGo, Brave Search. None are perfect, all are linking
+  out by default. The web still indexes; the index is just not the
+  default surface anymore.
+- **Keep an RSS reader.** Feedbin, Inoreader, NetNewsWire on the Mac,
+  Readwise Reader if you want web archiving. Subscribing directly to
+  the publishers you trust routes you around the answer-surface
+  entirely.
+- **Build a personal allowlist of go-to sources.** The handful of
+  sites you check first when you want a real answer. For me that's
+  about thirty sites; the search engine is where I go when none of
+  them have it. This is roughly how everyone used the web in 2005.
+- **Read source material when the stakes are high.** AI Overviews are
+  wrong 10 percent of the time. That rate is fine for "what is the
+  recipe for pancakes." It is not fine for "what does this medication
+  interact with."
+
+The pattern is the same in each case: keep the human in the loop
+when the cost of wrong is high, and let the machine condense when the
+cost of wrong is low.
+
+## What this has to do with what I build
+
+I work on [Browy](https://browy.dev), an open-source AI agent that
+lives in a Chromium extension. It drives the real browser tab you
+have open. You ask it a question; it inspects the page, follows
+links, reads other tabs, and writes you an answer with the sources
+visible inline. It does not synthesise from a hosted index. It
+operates on the web you would see if you were doing the work yourself.
+
+That is not a coincidence. It is the response to exactly the
+disintermediation move described above. If the answer-surface is
+hosted by a counter-party whose incentives are not yours, the answer
+you want is the one you can produce yourself, against the sources
+you trust, on the page that loaded in front of you.
+
+The web is not ending. The middleman is trying to swallow it. Run
+your own tools.
+
+---
+
+<CardGrid>
+  <LinkCard title="← All posts" href="/blog/" description="Index of every post on the Browy blog." />
+  <LinkCard title="GitHub got pwned through one VSCode extension" href="/blog/vscode-extension-breach/" description="The threat model isn't a clever attacker. It's a checkbox you didn't read." />
+</CardGrid>

@@ -1,0 +1,195 @@
+---
+title: "GitHub 被一个 VSCode 扩展打穿了。3,800 个仓库。"
+description: "GitHub 本周确认，他们的 3,800 个内部仓库被泄露，原因是一名员工安装了来自官方 VS Code 商店的、被注入木马的 Nx Console 扩展。更深的问题不在这一个扩展，在于编辑器没有沙箱模型。"
+slug: zh-cn/blog/vscode-extension-breach
+template: doc
+tableOfContents: false
+sidebar:
+  hidden: true
+head:
+  - tag: meta
+    attrs:
+      property: og:type
+      content: article
+  - tag: meta
+    attrs:
+      property: article:published_time
+      content: "2026-05-22T00:00:00Z"
+  - tag: meta
+    attrs:
+      property: article:author
+      content: "Ritabrata Maiti"
+  - tag: meta
+    attrs:
+      property: og:image
+      content: "https://browyhq.github.io/og/vscode-extension-breach.png"
+  - tag: meta
+    attrs:
+      name: twitter:image
+      content: "https://browyhq.github.io/og/vscode-extension-breach.png"
+  - tag: meta
+    attrs:
+      name: keywords
+      content: "github, vscode, 安全, 供应链, nx console, tanstack, 恶意扩展, 开发者安全, infosec, 浏览器扩展安全"
+  - tag: script
+    attrs:
+      type: application/ld+json
+    content: |
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "GitHub 被一个 VSCode 扩展打穿了。3,800 个仓库。",
+        "description": "GitHub 确认 3,800 个内部仓库被泄露，起因是一个被木马化的 Nx Console VSCode 扩展。更深的问题在于编辑器的权限模型。",
+        "datePublished": "2026-05-22T00:00:00Z",
+        "dateModified": "2026-05-22T00:00:00Z",
+        "author": {
+          "@type": "Person",
+          "name": "Ritabrata Maiti",
+          "url": "https://github.com/ritabratamaiti"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Browy",
+          "url": "https://browyhq.github.io/"
+        },
+        "mainEntityOfPage": "https://browyhq.github.io/zh-cn/blog/vscode-extension-breach/",
+        "image": "https://browyhq.github.io/og/vscode-extension-breach.png",
+        "inLanguage": "zh-CN",
+        "keywords": ["github", "vscode", "安全", "供应链", "开发者安全"]
+      }
+---
+
+import { YouTube } from 'astro-embed';
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+<p style="opacity:0.7;font-size:0.9em;margin-top:-0.5em">作者：<a href="https://github.com/ritabratamaiti">Ritabrata Maiti</a> · <time datetime="2026-05-22">2026 年 5 月 22 日</time> · 约 7 分钟阅读</p>
+
+<YouTube id="CcBjlKit9IY" title="GitHub got pwned through one VSCode extension. 3,800 repos." />
+
+GitHub 本周确认，他们大约 3,800 个内部仓库被泄露，原因是他们的一个
+员工在 VSCode 里安装了被木马化的 Nx Console 扩展。这个恶意扩展是从
+官方 VS Code 商店来的，跑在编辑器的权限下，悄悄把那位员工的仓库缓存
+内容传走了。GitHub 已经把这次事件
+[关联到了 TanStack 这次 npm 供应链攻击](https://www.bleepingcomputer.com/news/security/github-links-repo-breach-to-tanstack-npm-supply-chain-attack/)，
+并把那个被投毒的扩展从商店里下架了。
+
+TeamPCP 团伙在为这份数据要价 5 万美元。从 GitHub 之外能看到的范围
+判断，目前没有客户数据流出。
+
+这是新闻。有意思的部分是让它发生的那个设计。
+
+## 编辑器没有沙箱
+
+一个 VSCode 扩展就是跑在编辑器进程里的 Node.js 代码。它拥有编辑器的
+权限。也就是说它能读到你打开过的每一个工作区里的每一个文件，能读到
+`~/.aws/credentials` 里的每一个 token，能读到你 SSH agent 里的每一条
+条目，能读到所有曾经走过 `git push` 的字节。商店本身没有沙箱模型。
+从 2018 年起，
+[Microsoft 那边的 feature request](https://github.com/microsoft/vscode/issues/52116)
+就一直要求他们做一个。请求还开着。
+
+这不是 VSCode 独有的问题。这是这个模型本身的问题。Cursor 继承了这个
+架构。Windsurf 继承了它。JetBrains 插件以 IDE 的权限运行，只是打包
+方式不同。Vim 和 Emacs 自从有插件那天起就一直是这种状况；从来没爆到
+这种规模的唯一原因，是没人在它们前面架一个商店。
+
+商店是把炸开半径放大的那一层。十二个月前，一组伪装成正经工具的恶意
+扩展在被下架前累计了
+[900 万次安装](https://www.bleepingcomputer.com/news/security/vscode-extensions-with-9-million-installs-pulled-over-security-risks/)。
+另一组伪装成
+[挖矿工具的扩展](https://www.bleepingcomputer.com/news/security/malicious-vscode-extensions-infect-windows-with-cryptominers/)。
+WhiteCobra 一次性灌了二十四个，里面有一个有
+[基础的勒索软件能力](https://www.bleepingcomputer.com/news/security/ai-slop-ransomware-test-sneaks-on-to-vs-code-marketplace/)，
+都在被发现之前上了商店。今年一月，两个伪装成 AI 编程助手的恶意扩展，
+合计
+[150 万次安装](https://www.bleepingcomputer.com/news/security/malicious-ai-extensions-on-vscode-marketplace-steal-developer-data/)，
+悄悄把开发者数据送到了中国境内的服务器。
+
+加起来。仅公开报道的活动里，就有超过 1100 万次"不该被装上的代码"
+的安装。GitHub 这次被打穿，就是那一个"装在 SRE 机器上的"完美投放
+而已。
+
+## 老实给这个 bug 起个名字
+
+这个故事里的威胁模型不是聪明的攻击者。威胁模型是一个操作者没仔细
+看的复选框，因为他正在赶活。
+
+GitHub 的一位开发者打开了编辑器。编辑器说：装这个扩展吧。看起来
+就是 Nx Console；这位开发者需要 Nx Console。他点了安装。三千八百
+个内部仓库从后门走出去了。这里没有"更小心一点"这种修法可以解决。
+商店就是安装表面，而商店在当前这种形态下，没法把真的扩展和同名的
+恶意扩展区分开。
+
+修复要在操作者不需要思考的那一层做。要么是：
+
+1. 编辑器自己上沙箱。扩展声明它需要的文件路径、网络端点和系统能力。
+   用户审阅一份清单，跟在浏览器里审阅扩展权限是一回事。Microsoft 从
+   2018 年起就一直在承诺这件事。
+2. 商店加一层攻击者伪造不了的完整性。可复现构建、源代码镜像、签名
+   发布。今天商店里没有任何东西能端到端提供这些。
+3. 用户什么都不装，除非自己亲手读过，或者来自一个能审计源码的厂商。
+
+第 3 个是今天唯一能选的选项。第 1 和第 2 都需要 Microsoft 把承诺
+了七年的工作发布出来。
+
+## 这对浏览器扩展意味着什么
+
+我做的是一个浏览器扩展，所以我想说清楚：这个故事的哪些部分会延伸
+到那一边，哪些不会。
+
+Chromium MV3 扩展和 VSCode 扩展不是一回事。权限模型是真实的。
+一个扩展在 `manifest.json` 里声明它能访问的 URL（`host_permissions`）
+和它能用的能力（`debugger`、`storage`、`nativeMessaging` 等等）。
+浏览器强制执行这些声明。一个写着
+`"host_permissions": ["https://gmail.com/*"]` 的扩展真的没办法访问
+`bank.example.com`。Chrome Web Store 的审核流程不是完美的，但是它
+确实会在发布前看 manifest。
+
+这让浏览器扩展这个面，对于同一类攻击来说，比编辑器扩展那个面好得多。
+但是不代表它就安全了。要留意的几件事：
+
+- **`<all_urls>`** 是 Chrome 在用户同意时会授予的真实权限。很多
+  通用扩展会要它。Browy 也要它（我们必须要；你会让我们去操作你访问
+  的任何标签页）。挡住滥用的是清单里的下一项。
+- **你下到的 CRX 是签过名的。** 但它不一定是你读过的源码。Chrome
+  Web Store 不强制可复现构建。如果厂商发布的是混淆过的代码，你信任
+  的是厂商，不是代码。
+- **原生消息是逃生通道。** Browy 有一个跑在你机器上的原生主机。
+  其他"远程控制"扩展、密码管理器的本地桥、很多"AI 助手"都一样。
+  恶意扩展可以发一份干净的源码仓库再加上一个恶意的原生二进制，
+  用户没什么简单办法能识别。
+
+Chrome 用户要自我防御所需要的清单，和 VSCode 用户的差不多：一个
+用户能审阅的沙箱、一个攻击者伪造不了的商店完整性层，以及一个
+"没读过源码的就不装"的习惯。
+
+## 我在 Browy 里怎么处理这个
+
+[Browy](https://browy.dev) 是 Apache-2.0 协议下的开源软件。源代码
+随发布一起发出去。
+[智能体循环在一个文件里](https://github.com/BrowyHQ/browy/blob/main/src/agent/loop.ts)，
+[工具注册表在另一个文件里](https://github.com/BrowyHQ/browy/blob/main/src/agent/tools/browser.ts)。
+认真读其中任意一个文件二十分钟的人，就把攻击面读完了。没有 Browy 的
+服务器。模型调用从你的机器经本地 Copilot CLI 出去到 GitHub Copilot；
+其他东西都是本地的。
+
+触碰主机的工具（`bash`、`read_file`、`write_file`、`grep`、`glob`、
+`web_fetch`）默认是关的。要用其中任何一个，你都得打开设置、找到那个
+工具、把它打开。浏览器驱动类工具默认开，但每一个都可以用同样方式
+关掉。每次会话活跃时我们都会显示调试器横幅，因为 Chrome 强制要求这
+件事，而我们觉得这样很好。
+
+这些都不能阻止未来某一天的我变坏、发一个恶意版本。但它确实意味着，
+任何在意这件事的人都可以固定一个已知良好的版本、在装任何后续版本
+之前先审计、或者干脆自己从源码构建。商店问题的修复方式不是一个
+更好的商店。是一个看清自己装了什么的习惯。
+
+短版本：当编辑器没有沙箱时，唯一剩下的沙箱就是你的注意力。在点击
+安装之前花掉它，而不是之后。
+
+---
+
+<CardGrid>
+  <LinkCard title="← 所有文章" href="/zh-cn/blog/" description="Browy 博客上所有文章的索引。" />
+  <LinkCard title="AI slop 杀死了开源漏洞赏金" href="/zh-cn/blog/ai-slop-killed-the-bug-bounty/" description="同一条弧线的另一端：便宜的推理、不对称的收件箱、维护者注意力作为限制因素。" />
+</CardGrid>

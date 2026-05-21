@@ -47,6 +47,20 @@ const posts = [
     accent: '#fbbf24',
     mascot: 'sweat.png',
   },
+  {
+    slug: 'vscode-extension-breach',
+    title: 'GitHub got pwned through\none VSCode extension.',
+    subtitle: '3,800 internal repos exfiltrated.',
+    accent: '#f87171',
+    mascot: 'shocked.png',
+  },
+  {
+    slug: 'google-vs-the-web',
+    title: 'Google quietly declared\nwar on the open web.',
+    subtitle: 'AI Overviews is the default answer now.',
+    accent: '#a78bfa',
+    mascot: 'thinking.png',
+  },
 ];
 
 function wrapText(text, maxCharsPerLine = 22) {
