@@ -1,0 +1,42 @@
+name: IndexNow
+
+# Submit fresh URLs to IndexNow (Bing, Yandex, Seznam, Naver, DuckDuckGo)
+# whenever docs content changes. Google is NOT an IndexNow participant; for
+# Google, use Search Console URL Inspection.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/content/**'
+      - 'public/sitemap.xml'
+  workflow_dispatch:
+    inputs:
+      urls:
+        description: 'Specific URLs (newline-separated). Empty = submit full sitemap.'
+        required: false
+        type: string
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    if: github.repository == 'BrowyHQ/browyhq.github.io'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Wait for GitHub Pages to redeploy
+        # Give Pages a minute to publish the new sitemap before we submit.
+        run: sleep 90
+
+      - name: Submit to IndexNow
+        env:
+          MANUAL_URLS: ${{ github.event.inputs.urls }}
+        run: |
+          if [ -n "$MANUAL_URLS" ]; then
+            echo "$MANUAL_URLS" | xargs node scripts/indexnow-submit.mjs
+          else
+            node scripts/indexnow-submit.mjs
+          fi
