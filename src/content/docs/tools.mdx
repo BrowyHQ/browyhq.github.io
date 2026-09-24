@@ -40,7 +40,7 @@ in [`src/agent/loop.ts`](https://github.com/BrowyHQ/browy/blob/main/src/agent/lo
 | `get_page_info` | URL, title, meta description, visible-text preview. |
 | `get_page_html` | HTML of the page or a selector (≤8KB). |
 | `extract_text` | Visible text of page or selector (≤4KB). |
-| `extract_form` | Enumerate inputs of a form for `fill_form`. |
+| `extract_form` | Enumerate inputs of a form for `fill_form`. Read the schema once, then fill in one call. [How the pair works together](/blog/filling-forms-signed-in/). |
 | `query_dom` | CSS-selector fallback when the indexed tools can't reach what you need. |
 | `find_visible_text` | Locate elements by their on-screen text. |
 | `accessibility_snapshot` | Raw AXTree-style accessibility info. |

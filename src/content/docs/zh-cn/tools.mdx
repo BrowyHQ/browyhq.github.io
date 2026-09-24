@@ -38,7 +38,7 @@ Copilot SDK 还暴露了一组**主机工具**（`bash`、`read_file`、
 | `get_page_info` | URL、标题、meta description、可见文本预览。 |
 | `get_page_html` | 页面或某个选择器的 HTML（≤8KB）。 |
 | `extract_text` | 页面或选择器的可见文本（≤4KB）。 |
-| `extract_form` | 列出表单字段，给 `fill_form` 用。 |
+| `extract_form` | 列出表单字段，给 `fill_form` 用。先读一次结构，再一次调用填完。[这对工具是怎么配合的](/zh-cn/blog/filling-forms-signed-in/)。 |
 | `query_dom` | 索引工具够不到时的 CSS 选择器兜底。 |
 | `find_visible_text` | 按页面上显示的文字定位元素。 |
 | `accessibility_snapshot` | 原始 AXTree 风格的可访问性信息。 |
