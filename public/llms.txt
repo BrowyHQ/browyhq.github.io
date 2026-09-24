@@ -1,0 +1,55 @@
+# Browy
+
+> Browy is an open-source browser agent that runs as a Chromium extension for Chrome, Edge and Brave. It drives the user's real, already-logged-in tabs through chat, from a side panel or a DevTools panel REPL. It runs on an existing GitHub Copilot subscription rather than a separate model API key, so there is no second bill.
+
+Browy is two pieces: a browser extension, and a local native-messaging host
+written in Node that wraps the GitHub Copilot SDK. The extension holds
+`chrome.debugger` and routes Chrome DevTools Protocol commands from the host to
+the page. Nothing is rendered or proxied on a remote server, and the agent
+operates the user's own browser profile with their existing cookies, sessions
+and extensions intact.
+
+It acts on an indexed snapshot of the page's accessibility tree rather than on
+CSS selectors, so each interactive element gets a stable numbered handle that
+survives re-renders better than a selector does.
+
+Licence: Apache-2.0. Source: https://github.com/BrowyHQ/browy
+
+## Start here
+
+- [What Browy is and how to install it](https://browyhq.github.io/): overview, the two-part install, and what it can do.
+- [Install guide](https://browyhq.github.io/install/): one-line installer for Windows, macOS and Linux, plus the Chrome Web Store link for the extension half.
+- [Your first chat](https://browyhq.github.io/first-chat/): a worked example of driving a page from the side panel.
+- [FAQ](https://browyhq.github.io/faq/): requirements, supported browsers, what happens to your data, and common install failures.
+
+## Capabilities
+
+- [Tool reference](https://browyhq.github.io/tools/): every browser tool the agent can call. Includes indexed click and type, form extraction and bulk fill, network request reading and replay, console log reading, cookie and storage access, event listener inspection, accessibility tree snapshots, JavaScript evaluation in page context, screenshots and PDF export.
+- [DevTools panel REPL](https://browyhq.github.io/devtools-cli/): a terminal-style surface next to the inspector, with slash commands, a model picker, and page-context JavaScript evaluation.
+
+## Architecture
+
+- [Backend and native host](https://browyhq.github.io/arch-backend/): how the Node host wraps the Copilot SDK, and how sessions persist.
+- [Extension frontend](https://browyhq.github.io/arch-frontend/): side panel, DevTools panel, and the service worker that bridges them to the host.
+- [Command line](https://browyhq.github.io/arch-cli/): the headless terminal agent.
+
+## Trust and safety
+
+- [Permissions](https://browyhq.github.io/permissions/): why each Chrome permission is requested, including `debugger`.
+- [Security model](https://browyhq.github.io/security/): the tool allowlist, why filesystem and shell tools are disabled by default, and the prompt-injection surface that comes with reading arbitrary pages.
+- [Privacy](https://browyhq.github.io/privacy/): what data moves where, and what does not leave the machine.
+
+## Writing
+
+- [Blog index](https://browyhq.github.io/blog/)
+- [AI slop killed the bug bounty](https://browyhq.github.io/blog/ai-slop-killed-the-bug-bounty/): Turso retired a $1,000-per-bug bounty after a year of AI-generated submissions.
+- [Mullvad gave you 8 trillion exit IPs, 9 servers found you](https://browyhq.github.io/blog/mullvad-vpn-fingerprint/): deterministic exit-IP assignment seeded from a WireGuard public key.
+- [GitHub got pwned through one VSCode extension](https://browyhq.github.io/blog/vscode-extension-breach/): a supply-chain compromise reaching roughly 3,800 internal repositories.
+- [Every $20 AI subscription costs $100 to serve](https://browyhq.github.io/blog/ai-subscription-bomb/): the unit economics behind flat-rate assistant pricing.
+- [Google quietly declared war on the open web](https://browyhq.github.io/blog/google-vs-the-web/): AI Overviews becoming the default answer surface.
+
+## Optional
+
+- [Roadmap](https://browyhq.github.io/roadmap/)
+- [Changelog](https://browyhq.github.io/changelog/)
+- [Setup notes for users in China](https://browyhq.github.io/china-setup/)
