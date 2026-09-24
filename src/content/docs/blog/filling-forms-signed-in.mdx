@@ -1,0 +1,225 @@
+---
+title: "Your browser already knows who you are. The form does not."
+description: "Submission portals ask for the same author list, the same affiliation, the same ORCID, every time. The data is already in the browser you are signed into. Here is what it takes for an agent to fill the form from inside that session instead of from a fresh one."
+slug: blog/filling-forms-signed-in
+template: doc
+tableOfContents: false
+sidebar:
+  hidden: true
+head:
+  - tag: meta
+    attrs:
+      property: og:type
+      content: article
+  - tag: meta
+    attrs:
+      property: article:published_time
+      content: "2026-09-24T00:00:00Z"
+  - tag: meta
+    attrs:
+      property: article:author
+      content: "Ritabrata Maiti"
+  - tag: meta
+    attrs:
+      property: og:image
+      content: "https://browyhq.github.io/og/filling-forms-signed-in.png"
+  - tag: meta
+    attrs:
+      name: twitter:image
+      content: "https://browyhq.github.io/og/filling-forms-signed-in.png"
+  - tag: meta
+    attrs:
+      name: keywords
+      content: "form filling, browser automation, ai browser extension, accessibility tree, chrome devtools protocol, logged in session, web forms, browser agent, autofill"
+  - tag: script
+    attrs:
+      type: application/ld+json
+    content: |
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Your browser already knows who you are. The form does not.",
+        "description": "Why browser agents that run in a fresh session cannot fill the forms that matter, and what acting on the accessibility tree from inside your own session changes.",
+        "datePublished": "2026-09-24T00:00:00Z",
+        "dateModified": "2026-09-24T00:00:00Z",
+        "author": {
+          "@type": "Person",
+          "name": "Ritabrata Maiti",
+          "url": "https://github.com/ritabratamaiti"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Browy",
+          "url": "https://browyhq.github.io/"
+        },
+        "mainEntityOfPage": "https://browyhq.github.io/blog/filling-forms-signed-in/",
+        "image": "https://browyhq.github.io/og/filling-forms-signed-in.png",
+        "inLanguage": "en",
+        "keywords": ["form filling", "browser automation", "accessibility tree", "browser agent"]
+      }
+---
+
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+<p style="opacity:0.7;font-size:0.9em;margin-top:-0.5em">By <a href="https://github.com/ritabratamaiti">Ritabrata Maiti</a> · <time datetime="2026-09-24">September 24, 2026</time> · 6 min read</p>
+
+The fifth journal portal of the year wants the author list again. Same eight
+names, same order, same affiliations, same ORCID identifiers, typed into eight
+separate pairs of first-name and last-name boxes because the form was designed
+in 2011 and has been load-bearing ever since. You have the data. It is in the
+last submission, which is in the portal you are looking at, three clicks away
+in a tab you are already signed into.
+
+This is the shape of most form work. Not one enormous form once, but the same
+medium-sized form over and over, on a site that knows exactly who you are, with
+data that already exists somewhere the browser can reach.
+
+It is also the thing browser agents are worst at, and the reason is structural.
+
+## Two different problems wearing the same word
+
+"Automate this form" splits into two problems that have almost nothing in
+common.
+
+The first is filling a form on a public page. A signup, a contact form, a
+checkout. Anything can do this. Playwright has done it for years, headless
+browsers in the cloud do it at scale, and it works because the page is the same
+for everybody.
+
+The second is filling a form that only exists because you are signed in. A
+manuscript submission. An expense claim. A CRM record. A conference review. A
+grant portal. Here the page is assembled from your session: your saved drafts,
+your institution's custom fields, the co-authors you added last time, a
+half-finished record from three weeks ago.
+
+Almost every browser agent solves the first problem and quietly cannot touch
+the second. They launch a fresh browser, usually in a data centre. That browser
+has no cookies, no session, no extensions, and no history. Pointed at a portal,
+it lands on a login screen. You can hand it credentials, which means putting
+your institutional password into an agent's config, and then it meets your
+second factor and stops.
+
+The gap is not intelligence. A model that could reason its way through the form
+still never gets to see it.
+
+## Running inside the session you already have
+
+Browy takes the other route. It is a Chromium extension, so it drives the
+browser you are actually using: your profile, your cookies, your logged-in
+tabs, your password manager, your 2FA already satisfied an hour ago. There is
+no credential handoff because there is nothing to hand off. The page the agent
+sees is the page you see.
+
+That choice costs something, and it is worth naming. Browy cannot run a hundred
+of these overnight while you sleep. It is attached to a real browser on a real
+machine, so it is bounded by that. If you need volume against public pages,
+Browser Use or Skyvern will serve you better and I would point you at them.
+What this buys instead is access to the pages that only exist after login,
+which is where the repetitive work actually lives.
+
+## Indices, not selectors
+
+The second structural problem is how an agent refers to a field.
+
+The common approach is CSS selectors, either written by hand or generated by
+the model. Both are brittle in the same way. A selector like
+`div.form-group:nth-child(7) > input` describes where something sat in the DOM
+at the moment it was written, and a React re-render or a conditionally shown
+field moves it. Stagehand's answer to this is self-healing selectors, which is
+a real approach to a real problem.
+
+Browy does something different. Before acting, it builds an indexed snapshot of
+the page from the accessibility tree, the same structure a screen reader
+consumes, and gives every interactive element a number:
+
+```
+[12]<input type="text" name="author_1_given" aria-label="Given name">
+[13]<input type="text" name="author_1_family" aria-label="Family name">
+[14]<select name="author_1_role" selected="Author" options=[Author, Editor, Reviewer]>
+~[27]<button>Add another author</button>
+```
+
+The model works in those indices. `type_index(13, "Maiti")` targets the element
+that snapshot resolved, not a path guessed from HTML the model half-remembers.
+Elements below the fold are marked with a tilde and scrolled into view
+automatically. Elements that appeared since the last snapshot are flagged, which
+matters more than it sounds: when a form reveals a conditional section, the new
+fields are the interesting ones and the agent is told which those are.
+
+The accessibility tree also carries the labels. Not `name="f_7"` but "Given
+name", because that is what the browser exposes to assistive technology. A form
+that is accessible is, by accident, a form that is legible to an agent.
+
+## Reading the form before writing to it
+
+The part that changes the economics is doing the whole form in one pass.
+
+`extract_form` returns the structure: every field, its label, its type, whether
+it is required, its current value, and for a select, the options it will accept.
+That is one call and it produces something the model can plan against rather
+than discover field by field.
+
+Then `fill_form` takes an array and fills all of it in a single call:
+
+```json
+[
+  { "index": 12, "value": "Ritabrata" },
+  { "index": 13, "value": "Maiti" },
+  { "index": 14, "value": "Author" },
+  { "index": 18, "value": "0000-0002-1825-0097" }
+]
+```
+
+One tool call, not twenty. This matters for a boring reason: every tool call is
+a round trip through the model, and a thirty-field form filled one field at a
+time is thirty round trips of latency and tokens, with thirty chances for the
+page to shift underneath. Reading the schema once and writing once collapses
+that.
+
+Type detection is handled per field, so checkboxes, radios and selects do not
+need separate calls. `submit_form` is deliberately separate, and it reports
+whether the URL changed afterwards, because "did that actually submit" is a
+question worth answering rather than assuming.
+
+## Where it still goes wrong
+
+Three places, honestly.
+
+Custom widgets that are not really form controls. A rich-text editor built on a
+contenteditable div, or a date picker that is fourteen nested divs and no
+`<input>`, will not appear as a fillable field. The escape hatch is
+`evaluate_js`, which runs in page context and can do anything the page can do,
+but at that point you are writing code rather than asking for something.
+
+Multi-step wizards where the next step depends on server validation of the
+current one. Browy handles these, but each step is a fresh snapshot and a fresh
+round trip, so a six-step wizard feels slow in a way a single page does not.
+
+And uploads still need a real file path. `upload_index` bypasses the OS file
+dialog, which is the hard part, but you have to know where the file is.
+
+## The thing that made me build it
+
+The honest origin is that I was uploading a manuscript, for the fourth time
+that month, to a portal that had all of my previous submissions stored, and
+asking me to retype every author anyway. The data was sitting in the same
+browser session. It just had no way to move six inches across the screen.
+
+That is not a hard problem in the sense of requiring a better model. It is a
+plumbing problem: something that can read the page as structure rather than
+pixels, act on stable handles rather than guessed paths, and do it from inside
+the session where the data already lives.
+
+Browy is open source, Apache-2.0, and runs on a GitHub Copilot subscription you
+probably already have, so there is no second bill for the tokens. If you want to
+see the form tools specifically, they are in the
+[tool reference](https://browyhq.github.io/tools/), and
+[the install guide](https://browyhq.github.io/install/) covers the two-part
+setup.
+
+---
+
+<CardGrid>
+  <LinkCard title="← All posts" href="/blog/" description="Index of every post on the Browy blog." />
+  <LinkCard title="Tool reference" href="/tools/" description="Every browser tool the agent can call, including extract_form and fill_form." />
+</CardGrid>

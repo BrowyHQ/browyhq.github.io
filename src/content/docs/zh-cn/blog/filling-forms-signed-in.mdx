@@ -1,0 +1,197 @@
+---
+title: "浏览器已经知道你是谁，表单却不知道"
+description: "投稿系统每次都要你重新填一遍作者列表、单位、ORCID。这些数据就在你已经登录的浏览器里。本文讲的是，智能体要从这个已登录的会话内部填表，而不是从一个全新会话里填，需要哪些东西。"
+slug: zh-cn/blog/filling-forms-signed-in
+template: doc
+tableOfContents: false
+sidebar:
+  hidden: true
+head:
+  - tag: meta
+    attrs:
+      property: og:type
+      content: article
+  - tag: meta
+    attrs:
+      property: article:published_time
+      content: "2026-09-24T00:00:00Z"
+  - tag: meta
+    attrs:
+      property: article:author
+      content: "Ritabrata Maiti"
+  - tag: meta
+    attrs:
+      property: og:image
+      content: "https://browyhq.github.io/og/filling-forms-signed-in.png"
+  - tag: meta
+    attrs:
+      name: twitter:image
+      content: "https://browyhq.github.io/og/filling-forms-signed-in.png"
+  - tag: meta
+    attrs:
+      name: keywords
+      content: "表单填写, 浏览器自动化, AI 浏览器扩展, 无障碍树, Chrome DevTools Protocol, 已登录会话, 网页表单, 浏览器智能体"
+  - tag: script
+    attrs:
+      type: application/ld+json
+    content: |
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "浏览器已经知道你是谁，表单却不知道",
+        "description": "为什么在全新会话里运行的浏览器智能体填不了真正重要的表单，以及从你自己的会话内部、基于无障碍树来操作会带来什么不同。",
+        "datePublished": "2026-09-24T00:00:00Z",
+        "dateModified": "2026-09-24T00:00:00Z",
+        "author": {
+          "@type": "Person",
+          "name": "Ritabrata Maiti",
+          "url": "https://github.com/ritabratamaiti"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Browy",
+          "url": "https://browyhq.github.io/"
+        },
+        "mainEntityOfPage": "https://browyhq.github.io/zh-cn/blog/filling-forms-signed-in/",
+        "image": "https://browyhq.github.io/og/filling-forms-signed-in.png",
+        "inLanguage": "zh-CN",
+        "keywords": ["表单填写", "浏览器自动化", "无障碍树", "浏览器智能体"]
+      }
+---
+
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+<p style="opacity:0.7;font-size:0.9em;margin-top:-0.5em">作者 <a href="https://github.com/ritabratamaiti">Ritabrata Maiti</a> · <time datetime="2026-09-24">2026 年 9 月 24 日</time> · 阅读约 6 分钟</p>
+
+今年第五个投稿系统又要你填一遍作者列表。同样的八个人，同样的顺序，同样的单位，
+同样的 ORCID，要填进八组分开的姓和名输入框，因为这个表单是 2011 年设计的，
+而且一直沿用至今。数据你是有的。它就在上一次投稿里，而上一次投稿就在你正看着的
+这个系统里，在一个你已经登录的标签页里，点三下就能找到。
+
+大部分表单工作都是这个形态。不是一次填一个巨大的表单，而是同一个中等大小的表单
+反复填，填在一个完全知道你是谁的网站上，用的数据本来就存在浏览器够得着的地方。
+
+这也恰恰是浏览器智能体最不擅长的事，原因是结构性的。
+
+## 同一个词底下是两个不同的问题
+
+"把这个表单自动填了"其实是两个几乎毫无共同点的问题。
+
+第一个是填公开页面上的表单。注册、联系表单、下单结账。这个谁都能做。
+Playwright 做了很多年，云端的无头浏览器可以大规模地做，能做成是因为这个页面
+对所有人都一样。
+
+第二个是填一个只有你登录之后才存在的表单。投稿、报销、CRM 记录、会议评审、
+基金申报。这里的页面是用你的会话拼出来的：你保存的草稿、你所在单位的自定义字段、
+你上次添加的合作者、三周前填了一半的记录。
+
+几乎所有浏览器智能体解决的都是第一个问题，而对第二个问题无声地无能为力。
+它们会启动一个全新的浏览器，通常还在数据中心里。那个浏览器没有 cookie，
+没有会话，没有扩展，也没有历史。把它指向一个投稿系统，它只会停在登录页。
+你可以把账号密码交给它，也就是把你单位的密码写进某个智能体的配置文件里，
+然后它会撞上你的双因素认证，然后停下。
+
+差距不在智能程度。一个推理能力足以填完表单的模型，压根没机会看到这个表单。
+
+## 在你已有的会话内部运行
+
+Browy 走的是另一条路。它是一个 Chromium 扩展，所以它驱动的就是你正在用的浏览器：
+你的配置文件、你的 cookie、你已登录的标签页、你的密码管理器、你一小时前已经通过的
+双因素认证。不存在凭据交接，因为根本没有东西需要交接。智能体看到的页面就是你看到的
+页面。
+
+这个选择是有代价的，值得说清楚。Browy 没法在你睡觉时通宵跑一百个任务。它依附在
+一台真实机器上的真实浏览器里，因此也被这一点限制住。如果你要的是针对公开页面的
+规模化执行，Browser Use 或者 Skyvern 更适合你，我也会直接建议你去用它们。
+换来的是能进入那些只在登录之后才存在的页面，而重复性的工作恰恰都在那里。
+
+## 用序号，而不是选择器
+
+第二个结构性问题是，智能体要怎么指代一个字段。
+
+常见做法是 CSS 选择器，手写的或者模型生成的都有。两者以同样的方式脆弱。
+像 `div.form-group:nth-child(7) > input` 这样的选择器，描述的是写下它的那一刻
+某个元素在 DOM 里的位置，而一次 React 重渲染，或者一个按条件显示的字段，
+就会让它挪位置。Stagehand 对此的回答是自愈选择器，这是针对一个真实问题的真实方案。
+
+Browy 的做法不一样。动作之前，它会基于无障碍树构建一份带序号的页面快照，
+也就是屏幕阅读器读取的那套结构，并给每个可交互元素一个编号：
+
+```
+[12]<input type="text" name="author_1_given" aria-label="Given name">
+[13]<input type="text" name="author_1_family" aria-label="Family name">
+[14]<select name="author_1_role" selected="Author" options=[Author, Editor, Reviewer]>
+~[27]<button>Add another author</button>
+```
+
+模型就在这些序号上工作。`type_index(13, "Maiti")` 命中的是那份快照解析出来的元素，
+而不是模型凭半点印象猜出来的路径。在可视区域之外的元素会用波浪号标出，并会被自动
+滚动到可视范围内。自上一份快照以来新出现的元素会被标记，这一点比听上去更重要：
+当一个表单展开了某个条件区块时，新出现的字段才是有意思的那些，而智能体被明确告知
+了是哪些。
+
+无障碍树里还带着标签。不是 `name="f_7"`，而是"Given name"，因为这才是浏览器
+暴露给辅助技术的内容。一个做了无障碍的表单，顺带也就成了一个对智能体可读的表单。
+
+## 先读表单，再写表单
+
+真正改变成本结构的，是一趟把整个表单做完。
+
+`extract_form` 返回的是结构：每个字段、它的标签、它的类型、是否必填、当前值，
+如果是下拉框，还有它接受的选项。这是一次调用，产出的东西模型可以据此做规划，
+而不必一个字段一个字段地摸索。
+
+然后 `fill_form` 接收一个数组，一次调用填完全部：
+
+```json
+[
+  { "index": 12, "value": "Ritabrata" },
+  { "index": 13, "value": "Maiti" },
+  { "index": 14, "value": "Author" },
+  { "index": 18, "value": "0000-0002-1825-0097" }
+]
+```
+
+一次工具调用，而不是二十次。这件事之所以重要，原因很朴素：每一次工具调用都是一次
+往返模型的开销，一个三十字段的表单如果一个字段一个字段地填，就是三十次往返的延迟
+和 token，外加三十次页面在脚下发生变化的机会。读一次结构、写一次，把这些都压掉了。
+
+类型是按字段自动判断的，所以复选框、单选框和下拉框不需要单独调用。`submit_form`
+被有意做成独立的一步，并且会报告提交之后 URL 有没有变化，因为"这一下到底提交成功
+了没有"是个值得回答的问题，而不是想当然。
+
+## 它仍然会出问题的地方
+
+老实说，有三处。
+
+不是真正表单控件的自定义组件。一个基于 contenteditable div 做的富文本编辑器，
+或者一个由十四层嵌套 div 拼出来、根本没有 `<input>` 的日期选择器，不会作为可填
+字段出现。兜底办法是 `evaluate_js`，它在页面上下文里运行，页面能做的它都能做，
+但到那一步你其实是在写代码，而不是在提要求。
+
+下一步依赖服务端校验上一步的多步向导。Browy 能处理，但每一步都是一次新的快照加
+一次新的往返，所以一个六步的向导感觉上会比单页慢。
+
+还有上传仍然需要一个真实的文件路径。`upload_index` 绕开了操作系统的文件对话框，
+这是难的那部分，但你得知道文件在哪。
+
+## 我为什么会去做这个
+
+真实的起因是，我在把一篇稿子上传给一个投稿系统，那个月的第四次，而这个系统存着我
+之前所有的投稿记录，却还是要我把每个作者重新打一遍。数据就在同一个浏览器会话里。
+它只是没有办法在屏幕上横向挪动那十几厘米。
+
+这不是那种需要更强模型才能解决的难题。这是一个管道问题：需要一个东西，能把页面
+当作结构而不是像素来读，能基于稳定的句柄而不是猜出来的路径去操作，并且是从数据本来
+就在的那个会话内部去做。
+
+Browy 是开源的，Apache-2.0，跑在你多半已经有的 GitHub Copilot 订阅上，
+所以不会为 token 再来一份账单。如果你想直接看表单相关的工具，它们在
+[工具参考](/zh-cn/tools/)里，[安装指南](/zh-cn/install/)讲了两部分的安装过程。
+
+---
+
+<CardGrid>
+  <LinkCard title="← 全部文章" href="/zh-cn/blog/" description="Browy 博客的全部文章索引。" />
+  <LinkCard title="工具参考" href="/zh-cn/tools/" description="智能体可以调用的全部浏览器工具，包括 extract_form 和 fill_form。" />
+</CardGrid>

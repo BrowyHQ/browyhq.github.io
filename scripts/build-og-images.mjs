@@ -27,6 +27,13 @@ const HEIGHT = 630;
 
 const posts = [
   {
+    slug: 'filling-forms-signed-in',
+    title: 'Your browser already knows who you are.\nThe form does not.',
+    subtitle: 'Filling forms from inside the session you are signed into.',
+    accent: '#4ade80',
+    mascot: 'thinking.png',
+  },
+  {
     slug: 'ai-slop-killed-the-bug-bounty',
     title: 'AI slop killed the open-source bug bounty',
     subtitle: 'Turso retired its $1,000-per-bug program.',
