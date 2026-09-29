@@ -45,8 +45,9 @@ one-line installer for the native host.
 Pin the Browy toolbar icon so the side panel is one click away.
 
 <Aside type="tip" title="✓ Validate">
-Click the Browy toolbar icon. The side panel should open and show a
-"host disconnected" banner. That is expected until Step 2.
+Click the Browy toolbar icon. The side panel opens and asks you to
+install the backend, with the command for your operating system and a
+copy button. That's Step 2.
 </Aside>
 
 <Aside type="tip" title="Prefer to sideload?">
@@ -73,16 +74,20 @@ irm https://github.com/BrowyHQ/browy/releases/latest/download/install.ps1 | iex
 The installer will:
 
 <Steps>
-1. Download the latest Browy release (~130 MB)
+1. Download the latest Browy release (~80 MB)
 2. Install the native host to `%LOCALAPPDATA%\Browy\app\`
 3. Register `com.browy.host` with Chrome / Edge / Brave (pre-approves both the Web Store and unpacked extension IDs)
 4. Stage an unpacked extension copy at `%USERPROFILE%\Downloads\Browy-Extension\` for sideload installs
 </Steps>
 
 <Aside type="tip" title="✓ Validate">
-Re-open the side panel. The "host disconnected" banner should be gone.
-If not, run `& "$env:LOCALAPPDATA\Browy\app\browy.exe" --version` to
-confirm the binary is on disk.
+Go back to the side panel. It picks up the backend by itself within a
+few seconds and moves on to the chat (if it doesn't, close and reopen
+it). Still stuck? Check the host is on disk:
+
+```powershell
+& "$env:LOCALAPPDATA\Browy\app\node.exe" "$env:LOCALAPPDATA\Browy\app\dist\cli-bin.js" --version
+```
 </Aside>
 
 </TabItem>
@@ -97,16 +102,20 @@ curl -fsSL https://github.com/BrowyHQ/browy/releases/latest/download/install.sh 
 The installer will:
 
 <Steps>
-1. Detect your architecture (Apple Silicon or Intel) and download the matching tarball (~125 MB)
+1. Detect your architecture (Apple Silicon or Intel) and download the matching tarball (~75 MB)
 2. Install the native host to `~/.browy/app/`
 3. Register `com.browy.host` with Chrome / Edge / Brave (pre-approves both the Web Store and unpacked extension IDs)
 4. Stage an unpacked extension copy at `~/Downloads/Browy-Extension/` for sideload installs
 </Steps>
 
 <Aside type="tip" title="✓ Validate">
-Re-open the side panel. The "host disconnected" banner should be gone.
-If not, run `~/.browy/app/browy --version` to confirm the binary is on
-disk.
+Go back to the side panel. It picks up the backend by itself within a
+few seconds and moves on to the chat (if it doesn't, close and reopen
+it). Still stuck? Check the host is on disk:
+
+```bash
+~/.browy/app/node ~/.browy/app/dist/cli-bin.js --version
+```
 </Aside>
 
 </TabItem>
@@ -121,16 +130,20 @@ curl -fsSL https://github.com/BrowyHQ/browy/releases/latest/download/install.sh 
 The installer will:
 
 <Steps>
-1. Detect your architecture (`x86_64` or `aarch64`) and download the matching tarball (~133 MB)
+1. Detect your architecture (`x86_64` or `aarch64`) and download the matching tarball (~82 MB)
 2. Install the native host to `~/.browy/app/`
 3. Register `com.browy.host` with Chrome / Edge / Brave (writes to `~/.config/<browser>/NativeMessagingHosts/`, pre-approves both extension IDs)
 4. Stage an unpacked extension copy at `~/Downloads/Browy-Extension/` for sideload installs
 </Steps>
 
 <Aside type="tip" title="✓ Validate">
-Re-open the side panel. The "host disconnected" banner should be gone.
-If not, run `~/.browy/app/browy --version` to confirm the binary is on
-disk.
+Go back to the side panel. It picks up the backend by itself within a
+few seconds and moves on to the chat (if it doesn't, close and reopen
+it). Still stuck? Check the host is on disk:
+
+```bash
+~/.browy/app/node ~/.browy/app/dist/cli-bin.js --version
+```
 </Aside>
 
 </TabItem>
@@ -159,8 +172,11 @@ You're done. Try [your first chat](/first-chat/) for five concrete examples.
 
 ## Updating
 
-Re-run the installer. It detects your existing install and updates in
-place.
+Re-run the installer. It detects your existing install and updates it
+in place, keeping your chats and settings. When the Web Store updates
+the extension past your backend, the side panel shows a yellow
+**browy backend is out of date** banner with a button that copies this
+command for you.
 
 <Tabs syncKey="os">
 <TabItem label="Windows" icon="seti:windows">
@@ -179,8 +195,10 @@ curl -fsSL https://github.com/BrowyHQ/browy/releases/latest/download/install.sh 
 </TabItem>
 </Tabs>
 
-Then **reload** the extension in `chrome://extensions/` (the circular ↻
-icon on the Browy card).
+The side panel reconnects to the new backend on its own. If you
+sideloaded the extension, also **reload** it in `chrome://extensions/`
+(the circular ↻ icon on the Browy card) to pick up the new extension
+files. Web Store installs update themselves.
 
 ## Uninstall
 
@@ -189,7 +207,7 @@ icon on the Browy card).
 
 <Steps>
 1. Remove the extension from `chrome://extensions/`
-2. Delete `%LOCALAPPDATA%\Browy\` and `%USERPROFILE%\.browy\`
+2. Delete `%LOCALAPPDATA%\Browy\`, `%USERPROFILE%\.browy\`, and `%USERPROFILE%\.browseragent\` (the host log)
 3. Delete the native messaging host registration:
    `%LOCALAPPDATA%\Google\Chrome\User Data\NativeMessagingHosts\com.browy.host.json`
    (and the equivalent under Edge / Brave folders)
@@ -202,7 +220,7 @@ icon on the Browy card).
 1. Remove the extension from `chrome://extensions/`
 2. Run the bundled uninstaller, then remove the install directory:
    ```bash
-   ~/.browy/app/uninstall.sh && rm -rf ~/.browy ~/Downloads/Browy-Extension
+   ~/.browy/app/uninstall.sh && rm -rf ~/.browy ~/.browseragent ~/Downloads/Browy-Extension
    ```
 3. The uninstaller deletes the native messaging host manifests under
    `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/`
@@ -216,7 +234,7 @@ icon on the Browy card).
 1. Remove the extension from `chrome://extensions/`
 2. Run the bundled uninstaller, then remove the install directory:
    ```bash
-   ~/.browy/app/uninstall.sh && rm -rf ~/.browy ~/Downloads/Browy-Extension
+   ~/.browy/app/uninstall.sh && rm -rf ~/.browy ~/.browseragent ~/Downloads/Browy-Extension
    ```
 3. The uninstaller deletes the native messaging host manifests under
    `~/.config/google-chrome/NativeMessagingHosts/` (and the equivalent
@@ -226,7 +244,22 @@ icon on the Browy card).
 </TabItem>
 </Tabs>
 
+<Aside type="note" title="Your chats">
+Chat transcripts live in the GitHub Copilot SDK's store under
+`~/.copilot/`, alongside any other Copilot CLI sessions, so
+uninstalling doesn't remove them. To remove them, delete the chats
+from the side panel's history before you uninstall.
+</Aside>
+
 ## Troubleshooting
+
+<Aside type="caution" title="“browy backend is out of date”">
+The Web Store updated the extension, but the backend on your computer
+predates it, so newer features (like deleting chats) won't work. Click
+**copy update command** in the banner, paste it into PowerShell or a
+terminal, and the panel reconnects on its own. See
+[Updating](#updating).
+</Aside>
 
 <Aside type="caution" title="“Host disconnected, reconnecting…”">
 The side panel can't reach the native host. Common causes: the native

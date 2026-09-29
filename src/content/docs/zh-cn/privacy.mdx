@@ -5,7 +5,7 @@ description: Browy 从你的标签页读取什么数据、发给 GitHub Copilot 
 
 import { Aside, CardGrid, Card, LinkCard, Badge, Tabs, TabItem } from '@astrojs/starlight/components';
 
-<Badge text="最近更新 2026-05-10" variant="note" />
+<Badge text="最近更新 2026-09-29" variant="note" />
 
 Browy 是一个桌面应用：一个基于 Chromium 的浏览器扩展，加一个跑在
 你机器上的小型原生消息主机。这一页说明 Browy 处理什么数据，也是
@@ -44,11 +44,11 @@ BrowyHQ 没有任何后端服务。扩展和原生主机都不会向 BrowyHQ 发
 
 | 数据 | 位置 | 生命周期 |
 |---|---|---|
-| 对话历史 | `chrome.storage.local`（按 profile 隔离的扩展存储） | 在侧边栏里清掉或者卸载扩展为止 |
-| 设置（模型、推理强度、主题、上次使用的标签页） | `chrome.storage.local` | 同上 |
-| 原生主机日志 | `~/.browy/host/host.log`（单文件循环，5 MB） | 循环时被覆盖；卸载时删除 |
+| 对话历史 | 完整记录：GitHub Copilot SDK 在你电脑上 `~/.copilot/` 下的会话存储。显示缓存：`chrome.storage.local`（按 profile 隔离的扩展存储） | 在侧边栏的历史记录里删除该对话为止，两处会一起删除。卸载扩展只会清掉缓存 |
+| 设置（模型、推理强度、主题、上次使用的标签页） | `chrome.storage.local` | 卸载扩展为止 |
+| 原生主机日志 | `~/.browseragent/native-host.log`（超过 5 MB 时轮转，保留一份旧副本 `.1`） | 删除 `~/.browseragent/` 目录为止；卸载不会删除它 |
 | 智能体临时磁盘 + 键值记忆 | `~/.browy/data/files/` 和 `~/.browy/data/notes.json` | 你删为止；跨对话保留 |
-| GitHub Copilot 会话状态 | `~/.copilot/`（由 Copilot CLI 管理，不由 Browy 管理） | 看 Copilot CLI 自己的行为 |
+| GitHub Copilot 会话状态，包括 Browy 的对话记录 | `~/.copilot/`（由 Copilot CLI 管理，不由 Browy 管理） | 看 Copilot CLI 自己的行为；在 Browy 里删除对话会删掉对应的会话 |
 
 ## 由你决定要分享什么
 

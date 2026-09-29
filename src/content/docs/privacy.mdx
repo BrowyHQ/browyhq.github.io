@@ -5,7 +5,7 @@ description: What data Browy reads from your tabs, what it sends to GitHub Copil
 
 import { Aside, CardGrid, Card, LinkCard, Badge, Tabs, TabItem } from '@astrojs/starlight/components';
 
-<Badge text="Last updated 2026-05-10" variant="note" />
+<Badge text="Last updated 2026-09-29" variant="note" />
 
 Browy is a desktop application: a Chromium browser extension plus a
 small native messaging host that runs on your machine. This page
@@ -48,11 +48,11 @@ third-party service except the local Copilot CLI.
 
 | Data | Where | Lifetime |
 |---|---|---|
-| Chat history | `chrome.storage.local` (per-profile extension storage) | Until you clear it from the side panel or uninstall |
-| Settings (model, reasoning effort, theme, last tab) | `chrome.storage.local` | Same |
-| Native host log | `~/.browy/host/host.log` (single rotating 5 MB file) | Overwritten on rotation; deleted on uninstall |
+| Chat history | Transcripts: the GitHub Copilot SDK's session store under `~/.copilot/` on your machine. Display cache: `chrome.storage.local` (per-profile extension storage) | Until you delete the chat from the side panel's history, which removes both. Uninstalling the extension clears only the cache |
+| Settings (model, reasoning effort, theme, last tab) | `chrome.storage.local` | Until you uninstall the extension |
+| Native host log | `~/.browseragent/native-host.log` (rotated at 5 MB, one previous copy kept as `.1`) | Until you delete `~/.browseragent/`; uninstalling doesn't remove it |
 | Agent scratch disk + key-value memory | `~/.browy/data/files/` and `~/.browy/data/notes.json` | Until you delete them; survives across chats |
-| GitHub Copilot session state | `~/.copilot/` (managed by the Copilot CLI, not Browy) | Per Copilot CLI's behavior |
+| GitHub Copilot session state, including Browy's chat transcripts | `~/.copilot/` (managed by the Copilot CLI, not Browy) | Per Copilot CLI's behavior; deleting a chat in Browy removes its session |
 
 ## You decide what to share
 

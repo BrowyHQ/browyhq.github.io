@@ -50,8 +50,7 @@ GitHub Releases 和 Copilot 的访问情况和你所处的网络有关。如果�
 把 Browy 的工具栏图标固定到工具栏，方便随时打开侧边栏。
 
 <Aside type="tip" title="✓ 确认">
-点击 Browy 工具栏图标。侧边栏应该打开，并显示"主机未连接"提示。
-这是预期行为，第二步会修复。
+点击 Browy 工具栏图标。侧边栏会打开并提示你安装后端，同时给出适合你操作系统的安装命令和一个复制按钮。这就是第二步。
 </Aside>
 
 <Aside type="tip" title="想用未打包方式加载？">
@@ -77,15 +76,18 @@ irm https://github.com/BrowyHQ/browy/releases/latest/download/install.ps1 | iex
 安装脚本会：
 
 <Steps>
-1. 下载最新 Browy 发行包（约 130 MB）
+1. 下载最新 Browy 发行包（约 80 MB）
 2. 把本地主机安装到 `%LOCALAPPDATA%\Browy\app\`
 3. 在 Chrome / Edge / Brave 注册 `com.browy.host`（同时预批准 Web Store 和未打包扩展 ID）
 4. 把扩展的未打包版本放到 `%USERPROFILE%\Downloads\Browy-Extension\`
 </Steps>
 
 <Aside type="tip" title="✓ 确认">
-重新打开侧边栏。"主机未连接"提示应该消失。如果还在，运行
-`& "$env:LOCALAPPDATA\Browy\app\browy.exe" --version` 确认二进制已经装好。
+回到侧边栏。几秒钟内它会自己检测到后端并进入聊天界面（如果没有，关掉侧边栏再重新打开）。还是不行？确认主机已经装好：
+
+```powershell
+& "$env:LOCALAPPDATA\Browy\app\node.exe" "$env:LOCALAPPDATA\Browy\app\dist\cli-bin.js" --version
+```
 </Aside>
 
 </TabItem>
@@ -100,15 +102,18 @@ curl -fsSL https://github.com/BrowyHQ/browy/releases/latest/download/install.sh 
 安装脚本会：
 
 <Steps>
-1. 检测你的架构（Apple Silicon 或 Intel）并下载对应的 tar 包（约 125 MB）
+1. 检测你的架构（Apple Silicon 或 Intel）并下载对应的 tar 包（约 75 MB）
 2. 把本地主机安装到 `~/.browy/app/`
 3. 在 Chrome / Edge / Brave 注册 `com.browy.host`（同时预批准两种扩展 ID）
 4. 把扩展的未打包版本放到 `~/Downloads/Browy-Extension/`
 </Steps>
 
 <Aside type="tip" title="✓ 确认">
-重新打开侧边栏。"主机未连接"提示应该消失。如果还在，运行
-`~/.browy/app/browy --version` 确认二进制已经装好。
+回到侧边栏。几秒钟内它会自己检测到后端并进入聊天界面（如果没有，关掉侧边栏再重新打开）。还是不行？确认主机已经装好：
+
+```bash
+~/.browy/app/node ~/.browy/app/dist/cli-bin.js --version
+```
 </Aside>
 
 </TabItem>
@@ -123,15 +128,18 @@ curl -fsSL https://github.com/BrowyHQ/browy/releases/latest/download/install.sh 
 安装脚本会：
 
 <Steps>
-1. 检测你的架构（`x86_64` 或 `aarch64`）并下载对应的 tar 包（约 133 MB）
+1. 检测你的架构（`x86_64` 或 `aarch64`）并下载对应的 tar 包（约 82 MB）
 2. 把本地主机安装到 `~/.browy/app/`
 3. 在 Chrome / Edge / Brave 注册 `com.browy.host`（写入 `~/.config/<browser>/NativeMessagingHosts/`，同时预批准两种扩展 ID）
 4. 把扩展的未打包版本放到 `~/Downloads/Browy-Extension/`
 </Steps>
 
 <Aside type="tip" title="✓ 确认">
-重新打开侧边栏。"主机未连接"提示应该消失。如果还在，运行
-`~/.browy/app/browy --version` 确认二进制已经装好。
+回到侧边栏。几秒钟内它会自己检测到后端并进入聊天界面（如果没有，关掉侧边栏再重新打开）。还是不行？确认主机已经装好：
+
+```bash
+~/.browy/app/node ~/.browy/app/dist/cli-bin.js --version
+```
 </Aside>
 
 </TabItem>
@@ -154,11 +162,11 @@ curl -fsSL https://github.com/BrowyHQ/browy/releases/latest/download/install.sh 
 `snapshot` 工具调用，然后是流式回复。
 </Aside>
 
-完成了。试试[你的第一次对话](/first-chat/)（英文）。
+完成了。试试[你的第一次对话](/zh-cn/first-chat/)，里面有五个具体示例。
 
 ## 更新
 
-再次运行安装脚本即可。它会检测到已有安装并就地升级。
+再次运行安装脚本即可。它会检测到已有安装并就地升级，聊天记录和设置都会保留。当 Web Store 把扩展更新到比你的后端更新的版本时，侧边栏会显示一条黄色的 **browy backend is out of date** 提示，上面的按钮可以直接复制这条命令。
 
 <Tabs syncKey="os">
 <TabItem label="Windows" icon="seti:windows">
@@ -177,7 +185,7 @@ curl -fsSL https://github.com/BrowyHQ/browy/releases/latest/download/install.sh 
 </TabItem>
 </Tabs>
 
-然后在 `chrome://extensions/` 里**重新加载**扩展（点 Browy 卡片上的循环 ↻ 图标）。
+侧边栏会自动重新连接到新的后端。如果你是以未打包方式加载的扩展，还需要在 `chrome://extensions/` 里**重新加载**它（点 Browy 卡片上的循环 ↻ 图标），才能用上新的扩展文件。从 Web Store 安装的扩展会自动更新。
 
 ## 卸载
 
@@ -186,7 +194,7 @@ curl -fsSL https://github.com/BrowyHQ/browy/releases/latest/download/install.sh 
 
 <Steps>
 1. 在 `chrome://extensions/` 移除扩展
-2. 删除 `%LOCALAPPDATA%\Browy\` 和 `%USERPROFILE%\.browy\`
+2. 删除 `%LOCALAPPDATA%\Browy\`、`%USERPROFILE%\.browy\` 和 `%USERPROFILE%\.browseragent\`（主机日志）
 3. 删除原生消息主机注册：
    `%LOCALAPPDATA%\Google\Chrome\User Data\NativeMessagingHosts\com.browy.host.json`
    （Edge 和 Brave 下也有同名文件）
@@ -199,7 +207,7 @@ curl -fsSL https://github.com/BrowyHQ/browy/releases/latest/download/install.sh 
 1. 在 `chrome://extensions/` 移除扩展
 2. 运行内置卸载脚本，然后删除安装目录：
    ```bash
-   ~/.browy/app/uninstall.sh && rm -rf ~/.browy ~/Downloads/Browy-Extension
+   ~/.browy/app/uninstall.sh && rm -rf ~/.browy ~/.browseragent ~/Downloads/Browy-Extension
    ```
 3. 卸载脚本会清理
    `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/`
@@ -213,7 +221,7 @@ curl -fsSL https://github.com/BrowyHQ/browy/releases/latest/download/install.sh 
 1. 在 `chrome://extensions/` 移除扩展
 2. 运行内置卸载脚本，然后删除安装目录：
    ```bash
-   ~/.browy/app/uninstall.sh && rm -rf ~/.browy ~/Downloads/Browy-Extension
+   ~/.browy/app/uninstall.sh && rm -rf ~/.browy ~/.browseragent ~/Downloads/Browy-Extension
    ```
 3. 卸载脚本会清理 `~/.config/google-chrome/NativeMessagingHosts/`
    下的清单文件（Edge 和 Brave 也类似）。
@@ -221,3 +229,35 @@ curl -fsSL https://github.com/BrowyHQ/browy/releases/latest/download/install.sh 
 
 </TabItem>
 </Tabs>
+
+<Aside type="note" title="你的对话记录">
+对话记录保存在 GitHub Copilot SDK 的存储里（`~/.copilot/` 下），和其他
+Copilot CLI 会话放在一起，所以卸载不会删除它们。如果想删掉，请在卸载之前
+先从侧边栏的历史记录里删除这些对话。
+</Aside>
+
+## 故障排查
+
+<Aside type="caution" title="“browy backend is out of date”">
+Web Store 已经更新了扩展，但你电脑上的后端比它旧，所以一些新功能（比如删除聊天）用不了。点击提示条里的 **copy update command**，粘贴到 PowerShell 或终端里运行，侧边栏会自动重新连接。参见[更新](#更新)。
+</Aside>
+
+<Aside type="caution" title="“Host disconnected, reconnecting…”">
+侧边栏连不上本地主机。常见原因：本地主机没有装成功（重新运行安装脚本）；浏览器在主机注册之前就已经打开（重启浏览器）；或者杀毒软件 / 终端防护把内置的 `node` 隔离了（把安装目录加入白名单：Windows 上是 `%LOCALAPPDATA%\Browy\`，macOS 和 Linux 上是 `~/.browy/`）。
+</Aside>
+
+<Aside type="caution" title="“Host unreachable, reinstall →”">
+重连尝试已经放弃。点击提示条里的 **Reinstall host**，它指向你第一次安装时用的同一条安装命令（Windows 上是 `install.ps1`，macOS / Linux 上是 `install.sh`）。重新安装会保留你的聊天记录和设置。
+</Aside>
+
+<Aside type="note" title="“Browy started debugging this browser”">
+会话进行时，Chrome 会显示它标准的调试提示条。Browy 就是通过这种方式读取和操作页面的。关闭这个提示条会断开智能体。完整说明见[权限 → debugger](/zh-cn/permissions/)。
+</Aside>
+
+## 下一步
+
+<CardGrid>
+  <LinkCard title="你的第一次对话" href="/zh-cn/first-chat/" description="在侧边栏里试试五个示例提示。" />
+  <LinkCard title="权限" href="/zh-cn/permissions/" description="每个 Chrome 权限是做什么用的。" />
+  <LinkCard title="隐私与数据" href="/zh-cn/privacy/" description="哪些数据留在你的电脑上，哪些会发出去。" />
+</CardGrid>

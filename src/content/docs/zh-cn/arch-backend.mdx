@@ -89,7 +89,7 @@ Browy 把会话存储委托给 GitHub Copilot CLI 自己的会话机制（在
 - `~/.browy/data/files/`：沙箱化的文件临时空间，`save_file` /
   `read_file` 智能体工具操作的就是这个目录
 - `~/.browy/data/notes.json`：跨对话的持久键值记忆
-- `~/.browy/host/host.log`：单文件循环 5 MB 日志
+- `~/.browseragent/native-host.log`：单文件循环 5 MB 日志
 
 ## 工具分发
 
@@ -110,8 +110,8 @@ Browy 把会话存储委托给 GitHub Copilot CLI 自己的会话机制（在
 ## 日志和轮转
 
 `src/native-host.ts` 把 `console.*` 重定向到单文件
-`~/.browy/host/host.log`。文件大小超过约 5 MB 时轮转（重命名为
-`host.log.1`，重开一个）。一次只保留一份轮转；下一次轮转会覆盖旧的。
+`~/.browseragent/native-host.log`。主机启动时如果文件超过约 5 MB，会把它重命名为
+`native-host.log.1`，再重开一个。只保留一份旧副本；下一次轮转会覆盖它。
 
 会话出问题时这是第一个要看的地方。它装的是主机的诊断输出，不是
 对话记录。

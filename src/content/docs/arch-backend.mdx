@@ -100,7 +100,7 @@ The agent also has its own scratch surfaces:
 - `~/.browy/data/files/`: sandboxed file scratch the `save_file` /
   `read_file` agent tools operate against
 - `~/.browy/data/notes.json`: persistent key-value memory across chats
-- `~/.browy/host/host.log`: single rotating 5 MB log file
+- `~/.browseragent/native-host.log`: single rotating 5 MB log file
 
 ## Tool dispatch
 
@@ -124,9 +124,9 @@ be filtered against the user's
 ## Logging & rotation
 
 `src/native-host.ts` rebinds `console.*` to a single
-`~/.browy/host/host.log` writer. The file rotates when it crosses
-~5 MB (rename to `host.log.1`, start fresh). One rotation at a time;
-old rotations get overwritten on the next round.
+`~/.browseragent/native-host.log` writer. When the host starts and the
+file is over ~5 MB, it is renamed to `native-host.log.1` and a fresh
+one begins. Only one old copy is kept; the next rotation overwrites it.
 
 This is the first place to look when a session misbehaves. It contains
 the host's diagnostic output, not transcripts.
