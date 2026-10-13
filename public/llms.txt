@@ -1,6 +1,6 @@
 # Browy
 
-> Browy is an open-source browser agent that runs as a Chromium extension for Chrome, Edge and Brave. It drives the user's real, already-logged-in tabs through chat, from a side panel or a DevTools panel REPL. It runs on an existing GitHub Copilot subscription rather than a separate model API key, so there is no second bill.
+> Browy is an open-source browser agent that runs as a Chromium extension for Chrome, Edge and Brave. It drives the user's real, already-logged-in tabs through chat, from a side panel or a DevTools panel REPL. It runs on the user's existing GitHub Copilot subscription, using the models that plan includes.
 
 Browy is two pieces: a browser extension, and a local native-messaging host
 written in Node that wraps the GitHub Copilot SDK. The extension holds
@@ -18,6 +18,7 @@ Licence: Apache-2.0. Source: https://github.com/BrowyHQ/browy
 ## Start here
 
 - [What Browy is and how to install it](https://browyhq.github.io/): overview, the two-part install, and what it can do.
+- [AI browser agents compared](https://browyhq.github.io/compare/): Browy, Browser Use, Skyvern, Nanobrowser, Stagehand, Claude in Chrome and ChatGPT side by side, by where each runs, whose browser it drives, how the model is paid for and its license, and the job each one fits best.
 - [Install guide](https://browyhq.github.io/install/): one-line installer for Windows, macOS and Linux, plus the Chrome Web Store link for the extension half.
 - [Your first chat](https://browyhq.github.io/first-chat/): a worked example of driving a page from the side panel.
 - [FAQ](https://browyhq.github.io/faq/): requirements, supported browsers, what happens to your data, and common install failures.

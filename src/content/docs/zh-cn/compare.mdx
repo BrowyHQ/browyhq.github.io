@@ -1,0 +1,116 @@
+---
+title: "AI 浏览器智能体对比：Browser Use、Skyvern、Nanobrowser 与 Browy"
+description: "Browy、Browser Use、Skyvern、Nanobrowser、Stagehand、Claude in Chrome 和 ChatGPT 的对比：每一个驱动的是谁的浏览器，模型又怎么付费。"
+---
+
+import { YouTube } from 'astro-embed';
+
+<p style="opacity:0.7;font-size:0.9em;margin-top:-0.5em">作者 <a href="https://github.com/ritabratamaiti">Ritabrata Maiti</a> · 事实核对于 <time datetime="2026-10-13">2026 年 10 月 13 日</time></p>
+
+Browy 是我做的，它是本页七个智能体里的第一个。
+
+这七个都能读网页，也都能替你在网页上点来点去。真正有区别的是两件事：它们驱动的是谁的浏览器，以及模型的钱由谁来付。
+
+## 七个浏览器智能体并排对比
+
+| | 最适合 | 运行在哪里 | 用谁的浏览器和登录态 | 模型怎么付费 | 是否开源 | 交互方式 |
+|---|---|---|---|---|---|---|
+| **Browy** | 在你已登录的标签页里帮忙，就在 DevTools 旁边 | 你的浏览器里，外加一个小型本地主机 | 你自己的 Chrome、Edge 或 Brave，带着你的会话 | 你的 GitHub Copilot 订阅，免费版也可以 | 是，Apache-2.0 | 侧边栏对话和 DevTools 面板 REPL |
+| **Browser Use** | 需要写脚本并大规模运行的智能体 | 你的机器或 Browser Use Cloud | 全新的浏览器、你的 Chrome 配置，或云端浏览器 | 你自己的 API key，或 Browser Use 的额度 | 是，MIT | Python 库、CLI、云端 API |
+| **Skyvern** | 登录之后每周都要跑的任务 | 你的机器（pip 或 Docker）或 Skyvern Cloud | 它自己的浏览器，或你正在运行的 Chrome | 自托管时用你自己的 key；Cloud 有免费和付费套餐 | 是，AGPL-3.0 | 带工作流编辑器的 Web 应用、SDK、API |
+| **Nanobrowser** | 任意模型提供商，包括本地模型 | 你的浏览器里 | 你的 Chrome 或 Edge | 你自己的 API key，或通过 Ollama 用本地模型 | 是，Apache-2.0 | 侧边栏对话 |
+| **Stagehand** | 写在你自己代码里的浏览器步骤 | 你的机器或 Browserbase | 它启动或连接的浏览器，或云端浏览器 | 你自己的 key，或它们的模型网关 | 是，MIT | Python、Go 和 TypeScript 的 SDK |
+| **Claude in Chrome** | Claude 用户，尤其是要跑定时任务的 | Chrome 里 | 你的 Chrome | 付费的 Claude 订阅 | 否 | 侧边栏、Claude Code、Claude Cowork |
+| **ChatGPT** | 把任务交出去，然后走开 | OpenAI 的云端、桌面应用或 Chrome | 云端浏览器、应用内置的浏览器，或你的 Chrome | 你的 ChatGPT 订阅；云端浏览器需要 Go 以外的付费订阅 | 否 | 网页版、桌面版和手机上的 ChatGPT |
+
+## Browy，我为你已登录的浏览器做的智能体
+
+Browy 在你自己的 Chrome、Edge 或 Brave 里工作，就在你已经打开的标签页里，用的是你已经登录的会话。让它审一下你眼前的 pull request，或者设置一个 Gmail 过滤器，它会从你正在看的页面开始，而不是从登录页开始。它读取页面的无障碍树并给每个控件编号，然后按编号点击和输入。填表单时，除非你让它提交，它会在提交之前停下。
+
+它运行在你已有的 GitHub Copilot 订阅上，和你的编辑器、终端用的是同一个。你用 GitHub 登录，然后从这个订阅提供的 Claude、GPT 和 Gemini 模型里挑选，对话中途也能用 `/model` 或在设置里切换。Copilot 免费版也能用。
+
+它也是本页唯一一个在 Chrome DevTools 里有自己面板的智能体。在任意标签页打开 DevTools，Browy 面板会给你一个带斜杠命令和 JavaScript 模式的 REPL，就在你常用的 Network 和 Console 标签旁边。智能体自己就能读取这个标签页的网络日志和控制台，所以你可以问它哪个 API 调用最慢，它会把 URL、状态码和耗时告诉你。
+
+Browy 采用 Apache-2.0 协议，智能体循环就在一个你可以直接读的文件里。从 v0.1.10 起，那些作用于你的机器而不是页面的工具，从 `bash` 到 Browy 自己的 `run_script`，在你去设置里打开之前都保持关闭。
+
+上手只要三步：添加扩展，运行一条安装命令，再用 GitHub 登录。它适合已经在为 GitHub Copilot 付费、想在已登录的标签页里用上智能体的开发者，也包括他们自己正在开发的那些网站。
+
+## Browser Use，适合你在代码里跑的智能体
+
+大多数人说"浏览器智能体"时，指的就是 Browser Use 这个开源项目，这个位置是它自己挣来的。Magnus Müller 和 Gregor Žunič 最早把它做成一个 Python 库：你给一个 `Agent` 一个任务和一个模型，它打开浏览器，一页一页地做下去，直到得出答案。现在它有三种形态：MIT 协议的库；一个命令行工具，可以让 Claude Code 或 Codex 这类编程智能体控制你的浏览器；还有 Browser Use Cloud，替你同时运行智能体和浏览器。
+
+它适合想把智能体放进自己程序里的开发者，可以自定义工具、要求结构化输出，模型也随你挑：OpenAI、Anthropic、Browser Use 自己的 BU2 模型，或者通过 Ollama 跑的本地模型。
+
+它最擅长的是没人盯着时也在跑的工作。这个库可以跑在你自己的程序里或你自己的服务器上；需要同时开很多浏览器时，Browser Use Cloud 的浏览器每小时 0.02 美元，自带代理和验证码处理。这个库还能打开你真实的 Chrome 配置和里面的登录态（你可能得先退出 Chrome）。
+
+如果你更愿意在已经登录的标签页里直接求助，而不是写脚本，这正是 Browy 要做的事，而且它跑在你已经付费的 Copilot 订阅上。Browser Use 的代码在 GitHub 上：[browser-use/browser-use](https://github.com/browser-use/browser-use)。
+
+## Skyvern，适合每周都要跑的工作流
+
+Skyvern 用大语言模型加计算机视觉来操作网站，所以它能在从没见过的网站上把事情做完。它的工作流编辑器能把步骤串成可以反复运行的流程：登录、筛选发票、逐张遍历、每张都下载下来。你可以用 `pip` 或 Docker 自己部署，配上你自己的模型 key；也可以用 Skyvern Cloud，它有 5,000 积分的免费档，付费套餐每月 29 美元起。代码采用 AGPL-3.0 协议，只有反机器人检测的功能例外，那部分只在云端提供。
+
+它是为那些登录之后要一遍又一遍做同一件事的团队做的。它 README 里的例子包括发票门户、求职申请、政府表单和保险报价。
+
+它的强项是重复性工作。Skyvern 能处理 2FA 验证码、保存登录凭据、在云端自动解 CAPTCHA，还能接入 Zapier、Make 和 n8n。它也能通过远程调试驱动你自己的 Chrome，带着你的 cookie 和登录态。
+
+如果只是在已登录的标签页里做一次性的事，Browy 更轻便，因为你在页面旁边打开它，直接问就行。Skyvern 的代码在 GitHub 上：[Skyvern-AI/skyvern](https://github.com/Skyvern-AI/skyvern)。
+
+## Nanobrowser，什么模型都能接的扩展
+
+Nanobrowser 是和 Browy 最接近的开源同类。它是一个 Apache-2.0 协议的扩展，在侧边栏里提供对话，并在你的浏览器里运行一对智能体：一个规划者（planner）和一个导航者（navigator），每个都可以用不同的模型。它的 README 把 Browser Use 列为它所依托的项目之一。0.2.0 版在 10 月 2 日发布。
+
+它适合这样的人：想在自己平常用的浏览器里用智能体，在已经登录的地方保持登录，而且更愿意自己选模型提供商。
+
+它的长处是模型选择。它支持 OpenAI、Anthropic、Gemini、DeepSeek、Grok、OpenRouter 等，也能通过 Ollama 用本地模型，这样页面上的文字完全不必离开你的机器。你从 Chrome Web Store 添加它，在设置里粘贴一个 API key，再给每个智能体选好模型。它官方支持 Chrome 和 Edge。
+
+如果你已经在为 GitHub Copilot 付费，Browy 给你的是同一类侧边栏，背后是这个订阅里的模型，另外还多了一个 DevTools 里的面板。Nanobrowser 的代码在 GitHub 上：[nanobrowser/nanobrowser](https://github.com/nanobrowser/nanobrowser)。
+
+## Stagehand，Browserbase 出的 SDK
+
+Stagehand 出现在这里，是因为当你在写代码而不是聊天时，它是 Browser Use 之外最主要的选择。它是 Browserbase 出的 MIT 协议 SDK，支持 TypeScript、Python 和 Go，用几个 AI 调用把一个 Playwright 风格的浏览器包了起来。`act` 按你用自然语言描述的意思执行一个操作，`observe` 找到页面元素并返回真实的选择器，`extract` 按你定义的 schema 把数据取出来。它可以在你的机器上启动 Chrome，也可以连接一个你已经在运行的 Chromium 浏览器，或者使用 Browserbase 的云端浏览器。
+
+它很适合正在做产品或数据管道、需要用到浏览器的开发者，尤其是想控制单个步骤、而不是交给一整个智能体循环的人。
+
+它作为一块积木时最出色。它就在你的代码库里，所以能像你的其他代码一样被测试和部署；在 Browserbase 上它还能缓存重复的操作。它 README 里的登录示例通过选择器来填字段，让密码根本不经过模型。Browserbase 有免费套餐，付费套餐每月 20 美元起。
+
+如果你想要的是一个拿来就用、而不是自己搭的智能体，Browy 就在你已登录的标签页里工作，跑在你已经付费的 Copilot 订阅上。Stagehand 的代码在 GitHub 上：[browserbase/stagehand](https://github.com/browserbase/stagehand)。
+
+## Claude in Chrome，Anthropic 在你自己 Chrome 里的智能体
+
+Claude in Chrome 出现在这里，是因为在模型公司做的产品里，它和 Browy 最像：一个在你自己已登录的 Chrome 里、从侧边栏工作的扩展。它会读你正在看的页面，替你一步步操作，包括填表单；它也是 Claude Code 和 Claude Cowork 使用的浏览器。所有付费的 Claude 订阅都能用，从 Pro 到 Enterprise，而且它只支持桌面版 Chrome。
+
+它适合已经在为 Claude 付费的人，也适合用 Claude Code 的开发者：让它在真实的浏览器里检查自己的成果，连控制台报错和网络请求都能看到。
+
+它最擅长无人值守的工作。你用别的标签页时，它会在后台继续干活，还能按计划每天或每周运行任务。它的经典版侧边栏还能学会你录制过一次的工作流。在控制方面，你可以按网站逐个授权，它在动手之前有一道安全检查，Team 和 Enterprise 的管理员可以为所有人统一开启或关闭它。
+
+如果你订阅的是 GitHub Copilot 而不是 Claude，或者你用的是 Edge 或 Brave，Browy 会在你自己已登录的浏览器里给你同一类侧边栏，而你的 Copilot 订阅提供的模型里就有 Claude。Anthropic 的介绍页是 [Claude in Chrome](https://claude.com/claude-in-chrome)。
+
+## ChatGPT 的云端浏览器和 Chrome 扩展，来自 OpenAI
+
+ChatGPT 出现在这里，是因为 OpenAI 已经停用了 Atlas 浏览器，把浏览器相关的工作搬进了 ChatGPT 本身，而很多人第一次尝试浏览器智能体，就是在 ChatGPT 里。在 Go 以外的付费订阅上，ChatGPT Work 可以在一台单独的云端电脑上用浏览器运行任务。你离开对话之后，这个任务还会继续，需要你登录或确认时它会暂停。macOS 和 Windows 上的 ChatGPT 桌面应用有自己的内置浏览器，而 OpenAI 的 ChatGPT Chrome 扩展可以让这个应用在你现有的 Chrome 配置和已登录的会话里工作。这个扩展只支持 Chrome，需要和桌面应用配合使用。
+
+它适合本来就天天用 ChatGPT 的人，也适合想把任务交出去、过一会儿再回来拿结果的人。
+
+它最擅长委托任务。你可以在手机上发起一个云端浏览器任务，它会在你不在的时候继续做；密码则是输进一个模型看不到的登录表单里的。
+
+如果你更想看着工作在你自己的标签页里、在 DevTools 旁边发生，Browy 正是为此而做的，而且它跑在你已经付费的 Copilot 订阅上。OpenAI 在 [Using cloud browser in ChatGPT](https://help.openai.com/en/articles/20001280-using-cloud-browser-in-chatgpt) 里介绍了云端浏览器，扩展则是 [Chrome Web Store 上的 ChatGPT](https://chromewebstore.google.com/detail/chatgpt/hehggadaopoacecdllhhajmbjkdcmajg)。
+
+## 我会怎么选
+
+如果你已经在为 GitHub Copilot 付费，想要一个在你已登录的标签页里工作的智能体，就从 Browy 开始。我做 Browy 就是为了这样的人，它也是这里唯一一个同时待在 DevTools 里的智能体。
+
+其他几个是为不同的工作做的：
+
+- 需要无人值守、大规模运行、写在你自己代码里的智能体，用 Browser Use；如果你更想自己拼小积木，用 Stagehand。
+- 登录之后有人每周都要重跑的工作流，还涉及 2FA 和保存的凭据，看看 Skyvern。如果你在为 Claude 付费，Claude in Chrome 可以按计划运行任务。
+- 想用本地模型，试试 Nanobrowser。
+- 想把任务交出去然后走开，用 ChatGPT 的云端浏览器。
+
+下面是 Browy 实时填写一张 26 个字段的表单，数据来自另一个标签页里的论文：
+
+<figure class="browy-frame">
+  <YouTube id="bnellxgwJwY" title="Browy 根据另一个标签页里的论文，填写 26 个字段的表单" />
+  <figcaption>一句话，实时录制：Browy 从另一个标签页的论文里读出作者，填好全部 26 个字段，并在提交前停下。<a href="/demo/paper-form/">试试同一个表单。</a></figcaption>
+</figure>
+
+[安装指南](/zh-cn/install/)大约两分钟就能带你从这里走到第一次对话。

@@ -63,6 +63,7 @@ export default defineConfig({
           translations: { 'zh-CN': '从这里开始' },
           items: [
             { label: 'What is Browy?', translations: { 'zh-CN': 'Browy 是什么？' }, slug: 'index' },
+            { label: 'Compare browser agents', translations: { 'zh-CN': '浏览器智能体对比' }, slug: 'compare' },
             { label: 'Install', translations: { 'zh-CN': '安装' }, slug: 'install' },
             { label: 'China setup', translations: { 'zh-CN': '中国开发者指南' }, slug: 'china-setup' },
             { label: 'First chat', translations: { 'zh-CN': '第一次对话' }, slug: 'first-chat' },

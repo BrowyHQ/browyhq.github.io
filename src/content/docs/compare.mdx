@@ -1,0 +1,225 @@
+---
+title: "AI browser agents compared: Browser Use, Skyvern, Nanobrowser, Browy"
+description: "Browy, Browser Use, Skyvern, Nanobrowser, Stagehand, Claude in Chrome and ChatGPT, compared on whose browser each one drives and how you pay for its model."
+---
+
+import { YouTube } from 'astro-embed';
+
+<p style="opacity:0.7;font-size:0.9em;margin-top:-0.5em">By <a href="https://github.com/ritabratamaiti">Ritabrata Maiti</a> · Facts checked <time datetime="2026-10-13">October 13, 2026</time></p>
+
+I built Browy, the first of the seven agents on this page.
+
+All seven can read a web page and click through it for you. The differences
+that matter are whose browser they drive and who pays for the model.
+
+## Seven browser agents side by side
+
+| | Best for | Where it runs | Whose browser and logins | How you pay for the model | Open source | Interface |
+|---|---|---|---|---|---|---|
+| **Browy** | Help in the tabs you're signed into, next to DevTools | Inside your browser, with a small local host | Your own Chrome, Edge or Brave, with your sessions | Your GitHub Copilot plan, Free included | Yes, Apache-2.0 | Side panel chat and a DevTools panel REPL |
+| **Browser Use** | Agents you script and run at scale | Your machine or Browser Use Cloud | A fresh browser, your Chrome profile, or a cloud browser | Your own API key, or Browser Use credits | Yes, MIT | Python library, CLI, cloud API |
+| **Skyvern** | Weekly jobs behind a login | Your machine (pip or Docker) or Skyvern Cloud | Its own browser, or your running Chrome | Your own key when self-hosted; Cloud has free and paid plans | Yes, AGPL-3.0 | Web app with a workflow builder, SDKs, API |
+| **Nanobrowser** | Any model provider, local models included | Inside your browser | Your Chrome or Edge | Your own API keys, or a local model through Ollama | Yes, Apache-2.0 | Side panel chat |
+| **Stagehand** | Browser steps inside your own code | Your machine or Browserbase | A browser it launches or attaches to, or a cloud one | Your own key, or their model gateway | Yes, MIT | SDK for Python, Go and TypeScript |
+| **Claude in Chrome** | Claude users, especially for scheduled tasks | Inside Chrome | Your Chrome | A paid Claude plan | No | Side panel, Claude Code, Claude Cowork |
+| **ChatGPT** | Handing off a task and walking away | OpenAI's cloud, the desktop app, or Chrome | A cloud browser, the app's browser, or your Chrome | Your ChatGPT plan; the cloud browser needs a paid plan other than Go | No | ChatGPT on web, desktop and mobile |
+
+## Browy, the agent I built for your signed-in browser
+
+Browy works in your own Chrome, Edge or Brave, in the tabs you already have
+open and the sessions you're already signed into. Ask it to review the pull
+request in front of you or set up a Gmail filter, and it starts from the page
+you're on, not from a login screen. It reads the page's accessibility tree and
+numbers each control, then clicks and types by number. When it fills a form,
+it stops before submitting unless you ask it to submit.
+
+It runs on the GitHub Copilot plan you already have, the same one your editor
+and terminal use. You sign in with GitHub, then choose from that plan's
+Claude, GPT and Gemini models and switch between them mid-chat with `/model`
+or in Settings. Copilot Free works too.
+
+It's also the only agent on this page with its own panel inside Chrome
+DevTools. Open DevTools on any tab and the Browy panel gives you a REPL with
+slash commands and a JavaScript mode, next to the Network and Console tabs you
+already use. The agent can read that tab's network log and console itself, so
+you can ask which API call is slowest and get the URL, status and timing back.
+
+Browy is Apache-2.0, and the agent loop is one file you can read. Since
+v0.1.10, the tools that reach your machine rather than the page, from `bash`
+to Browy's own `run_script`, stay off until you switch them on in Settings.
+
+Getting started takes three steps: add the extension, run one install command,
+and sign in with GitHub. It suits developers who already pay for GitHub
+Copilot and want an agent in the tabs they're signed into, including the ones
+for sites they're building.
+
+## Browser Use, for agents you run from code
+
+Browser Use is the open-source project most people mean when they say
+"browser agent," and it earned that spot. Magnus Müller and Gregor Žunič
+built it as a Python library: you hand an `Agent` a task and a model, it opens
+a browser, and it works through pages until it has an answer. It now comes in
+three forms: the MIT-licensed library, a command-line tool that gives a coding
+agent like Claude Code or Codex control of your browser, and Browser Use
+Cloud, which runs the agent and the browser for you.
+
+It suits developers who want an agent inside their own program, with custom
+tools and structured output, running whichever model they prefer: OpenAI,
+Anthropic, Browser Use's own BU2 model, or a local model through Ollama.
+
+Where it shines is work that runs while nobody is watching. The library runs
+inside your own program or on your own servers, and when you need many
+browsers at once, Browser Use Cloud sells them at $0.02 an hour with proxies
+and CAPTCHA handling built in. The library can also open your real Chrome
+profile with its logins (you may have to quit Chrome first).
+
+If you'd rather ask for help in the tabs you're already signed into than write
+a script, that's the job Browy is built for, and it runs on the Copilot plan
+you already pay for. Browser Use's code is on GitHub at
+[browser-use/browser-use](https://github.com/browser-use/browser-use).
+
+## Skyvern, for workflows you run every week
+
+Skyvern drives websites with language models and computer vision, so it can
+work through a site it has never seen. Its workflow builder chains steps into
+something you can rerun: log in, filter the invoices, loop over them, download
+each one. You can run it yourself with `pip` or Docker and your own model key,
+or use Skyvern Cloud, which starts with a free tier of 5,000 credits and has
+paid plans from $29 a month. The code is AGPL-3.0, except for the anti-bot
+features, which live only in the cloud.
+
+It's built for teams with the same job to do behind a login, again and again.
+The examples in its README include invoice portals, job applications,
+government forms and insurance quotes.
+
+It shines at repetition. Skyvern handles 2FA codes, stores credentials, solves
+CAPTCHAs in its cloud and connects to Zapier, Make and n8n. It can also drive
+your own Chrome over remote debugging, with your cookies and logins.
+
+For one-off work in the tabs you're already signed into, Browy is the lighter
+fit, because you open it beside the page and ask. Skyvern's code is on GitHub
+at [Skyvern-AI/skyvern](https://github.com/Skyvern-AI/skyvern).
+
+## Nanobrowser, the extension that takes any model
+
+Nanobrowser is the closest open-source relative of Browy. It's an Apache-2.0
+extension with a chat in the side panel, and it runs a pair of agents in your
+browser, a planner and a navigator, each of which can use a different model.
+Its README credits Browser Use as one of the projects it builds on. Version
+0.2.0 came out on October 2.
+
+It suits people who want an agent in the browser they already use, signed in
+where they're already signed in, and who'd rather choose the model provider
+themselves.
+
+Its strength is model choice. It works with OpenAI, Anthropic, Gemini,
+DeepSeek, Grok, OpenRouter and more, and with local models through Ollama, so
+a page's text never has to leave your machine. You add it from the Chrome Web
+Store, paste an API key into its settings and pick a model for each agent. It
+officially supports Chrome and Edge.
+
+If you already pay for GitHub Copilot, Browy gives you the same kind of side
+panel with that plan's models behind it, and adds a panel inside DevTools.
+Nanobrowser's code is on GitHub at
+[nanobrowser/nanobrowser](https://github.com/nanobrowser/nanobrowser).
+
+## Stagehand, the SDK from Browserbase
+
+Stagehand is here because it's the main alternative to Browser Use when you're
+writing code rather than chatting. It's an MIT-licensed SDK from Browserbase
+for TypeScript, Python and Go, and it wraps a Playwright-style browser in a few
+AI calls. `act` performs an action you describe in plain English, `observe`
+finds elements and hands back real selectors, and `extract` pulls data out
+against a schema you define. It can launch Chrome on your machine, attach to a
+Chromium browser you already have running, or use Browserbase's cloud
+browsers.
+
+It's a good fit for developers building a product or a pipeline that needs a
+browser, who want control over single steps rather than a whole agent loop.
+
+It's at its best as a building block. It lives in your codebase, so it gets
+tested and deployed like the rest of your code, and on Browserbase it can cache
+repeated actions. The login example in its README keeps passwords away from the
+model by filling fields through selectors. Browserbase has a free plan, and its
+paid plans start at $20 a month.
+
+If you want an agent to use rather than one to build, Browy works in the tabs
+you're signed into, on the Copilot plan you already pay for. Stagehand's code
+is on GitHub at
+[browserbase/stagehand](https://github.com/browserbase/stagehand).
+
+## Claude in Chrome, Anthropic's agent in your own Chrome
+
+Claude in Chrome is here because it's the closest thing to Browy from a model
+company: an extension that works in your own signed-in Chrome from a side
+panel. It reads the page you're on and works through it for you, forms
+included, and it also serves as the browser for Claude Code and Claude Cowork.
+It's available on every paid Claude plan, from Pro to Enterprise, and it
+supports desktop Chrome only.
+
+It suits people who already pay for Claude, and developers using Claude Code
+who want it to check its work in a real browser, console errors and network
+requests included.
+
+Where it shines is unattended work. It keeps working in the background while
+you use other tabs, and it can run tasks on a schedule, daily or weekly. Its
+classic side panel can also learn a workflow you record once. For control, you
+get site-by-site permissions and a safety check before it acts, and Team and
+Enterprise admins can switch it on or off for everyone.
+
+If your subscription is GitHub Copilot rather than Claude, or you work in Edge
+or Brave, Browy gives you the same kind of side panel in your own signed-in
+browser, with Claude among the models your Copilot plan offers. Anthropic's
+page for it is [Claude in Chrome](https://claude.com/claude-in-chrome).
+
+## ChatGPT's cloud browser and Chrome extension, from OpenAI
+
+ChatGPT is here because OpenAI has retired its Atlas browser and moved browser
+work into ChatGPT itself, which is where a lot of people will try a browser
+agent first. On paid plans other than Go, ChatGPT Work can run a task in a
+cloud browser on a separate computer. That task keeps going after you leave
+the conversation, and it pauses when it needs you to sign in or confirm
+something. The ChatGPT desktop app for macOS and Windows has a browser of its
+own, and OpenAI's ChatGPT extension for Chrome lets the app work in your
+existing Chrome profile and signed-in sessions. The extension supports Chrome
+only and works together with the desktop app.
+
+It suits people who already live in ChatGPT, and anyone who wants to hand off
+a task and come back later to a result.
+
+It shines at delegation. You can start a cloud browser task from your phone,
+and it carries on without you, and you type passwords into a sign-in form that
+the model never sees.
+
+If you'd rather watch the work happen in your own tabs, next to DevTools,
+Browy is built for exactly that, and it runs on the Copilot plan you already
+pay for. OpenAI explains the cloud browser in
+[Using cloud browser in ChatGPT](https://help.openai.com/en/articles/20001280-using-cloud-browser-in-chatgpt),
+and the extension is
+[ChatGPT on the Chrome Web Store](https://chromewebstore.google.com/detail/chatgpt/hehggadaopoacecdllhhajmbjkdcmajg).
+
+## How I'd pick
+
+If you already pay for GitHub Copilot and want an agent in the tabs you're
+signed into, start with Browy. That's who I built it for, and it's the only
+agent here that also lives inside DevTools.
+
+The others are built for different jobs:
+
+- For agents that run unattended and at scale, from your own code, use Browser
+  Use, or Stagehand if you'd rather assemble smaller building blocks.
+- For workflows behind a login that someone reruns every week, with 2FA and
+  stored credentials, look at Skyvern. If you pay for Claude, Claude in Chrome
+  can run tasks on a schedule.
+- For local models, try Nanobrowser.
+- To hand a task off and walk away, use ChatGPT's cloud browser.
+
+Here's Browy filling a 26-field form from a paper in another tab, in real time:
+
+<figure class="browy-frame">
+  <YouTube id="bnellxgwJwY" title="Browy fills a 26-field form from the paper in your other tab" />
+  <figcaption>One sentence, in real time: Browy reads the authors from a paper in another tab, fills all 26 fields, and stops before submit. <a href="/demo/paper-form/">Try the same form.</a></figcaption>
+</figure>
+
+The [install guide](/install/) takes you from here to your first chat in about
+two minutes.
