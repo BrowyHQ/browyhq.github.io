@@ -11,15 +11,15 @@ evaluation, and so on).
 
 The Copilot SDK also exposes a set of **host tools** (`bash`,
 `read_file`, `write_file`, `grep`, `glob`, `web_fetch`) that reach your
-machine's filesystem and shell. These are off by default. Turn them on
-one at a time in Settings.
+machine's filesystem and shell. Browy's own `run_script`, which runs
+Node.js on your computer, belongs with them. These are off by default.
+Turn them on one at a time in Settings.
 
 <Aside type="note">
 The authoritative list lives in
 [`src/agent/tools/browser.ts`](https://github.com/BrowyHQ/browy/blob/main/src/agent/tools/browser.ts).
-Search for `register({` to see every tool. The host-tool allowlist is
-in [`src/agent/loop.ts`](https://github.com/BrowyHQ/browy/blob/main/src/agent/loop.ts)
-(search for `HOST_TOOL_ALLOWLIST`).
+Search for `register({` to see every tool. The list of opt-in tools is
+in [`src/agent/tool-policy.ts`](https://github.com/BrowyHQ/browy/blob/main/src/agent/tool-policy.ts).
 </Aside>
 
 ## Default vs opt-in
@@ -27,7 +27,7 @@ in [`src/agent/loop.ts`](https://github.com/BrowyHQ/browy/blob/main/src/agent/lo
 | | Default | Where it runs | Toggle |
 |---|---|---|---|
 | **Browser tools** (everything below) | ON | The active tab via CDP | Turn off individually in Settings |
-| **Host tools** (`bash`, `read_file`, `write_file`, `grep`, `glob`, `web_fetch`) | OFF | Your machine, with your user privileges | Turn on individually in Settings → Tools → host (advanced) |
+| **Host tools** (`run_script`, `bash`, `read_file`, `write_file`, `grep`, `glob`, `web_fetch`) | OFF | Your machine, with your user privileges | Turn on individually in Settings → Tools → host (advanced) |
 
 ## Categories
 
@@ -85,7 +85,6 @@ in [`src/agent/loop.ts`](https://github.com/BrowyHQ/browy/blob/main/src/agent/lo
 | Tool | What it does |
 |---|---|
 | `evaluate_js` | Run JavaScript in the page (top-level `await` works). For shadow-DOM walks, custom waits, structured extraction. |
-| `run_script` | Fetch a URL and execute the response as JS in the page (for one-off helpers, vendored snippets). |
 | `set_viewport` | Resize the viewport (e.g. test mobile breakpoints). |
 | `pdf_export` | Save the current page as a PDF. |
 
@@ -129,7 +128,7 @@ context.
 
 ## Configurable per-tool toggles
 
-Every browser tool can be turned off individually in **Settings →
+Most browser tools can be turned off individually in **Settings →
 Tools** (right-click the Browy toolbar icon → Options). Toggles are
 grouped by category: _inspect_, _navigate_, _interact_, and _devtools_.
 They persist in `chrome.storage.local`. Disabled tools are stripped from
@@ -140,8 +139,8 @@ Common reasons to disable a tool:
 
 <CardGrid>
   <Card title="Stricter sandbox" icon="seti:lock">
-    Turn off `evaluate_js` and `run_script` if you don't want the agent
-    running JavaScript in the inspected page. The structured tools
+    Turn off `evaluate_js` if you don't want the agent running
+    JavaScript in the inspected page. The structured tools
     (`click_index`, `type_index`, `navigate`, etc.) keep working.
   </Card>
   <Card title="Read-only mode" icon="seti:eye">
@@ -150,8 +149,8 @@ Common reasons to disable a tool:
     them.
   </Card>
   <Card title="No JS evaluation" icon="seti:javascript">
-    Some teams disable `evaluate_js`, `run_script`, and `query_dom` to
-    limit the agent to the structured accessibility-tree tools only.
+    Some teams disable `evaluate_js` and `query_dom` to limit the
+    agent to the structured accessibility-tree tools only.
   </Card>
 </CardGrid>
 
@@ -163,9 +162,15 @@ next chat (or after `/clear`).
 
 The Copilot SDK includes `bash`, `read_file`, `write_file`, `grep`,
 `glob`, and `web_fetch`, the same set the `copilot` CLI uses in a
-terminal.They reach your filesystem and shell, so Browy ships them
+terminal. They reach your filesystem and shell, so Browy ships them
 off; flip them on per-tool under Settings → Tools → host (advanced)
 when you want them.
+
+Browy's own `run_script` is listed with them. It runs Node.js on your
+computer with your user's privileges, so it can read and write files,
+make network requests and start shell commands. Until 0.1.10 it was a
+browser tool that was on by default. It's now off until you switch it
+on, like the rest.
 
 If you only need a terminal coding agent, the
 [GitHub Copilot CLI](https://docs.github.com/en/copilot/github-copilot-in-the-cli)

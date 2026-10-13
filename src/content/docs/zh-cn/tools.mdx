@@ -10,14 +10,14 @@ Browy 默认打开所有浏览器驱动类工具。如果你想要更严格的�
 
 Copilot SDK 还暴露了一组**主机工具**（`bash`、`read_file`、
 `write_file`、`grep`、`glob`、`web_fetch`），这些工具能访问你机器的
-文件系统和 shell。它们默认是关的，需要在设置里按工具显式开启。
+文件系统和 shell。Browy 自己的 `run_script` 会在你的电脑上运行 Node.js，也归在这一组。它们默认是关的，需要在设置里按工具显式开启。
 
 <Aside type="note">
 工具清单的权威列表在
 [`src/agent/tools/browser.ts`](https://github.com/BrowyHQ/browy/blob/main/src/agent/tools/browser.ts)
-里。搜索 `register({` 可以看到每一个工具。主机工具白名单在
-[`src/agent/loop.ts`](https://github.com/BrowyHQ/browy/blob/main/src/agent/loop.ts)
-里（搜索 `HOST_TOOL_ALLOWLIST`）。
+里。搜索 `register({` 可以看到每一个工具。需要手动开启的工具清单在
+[`src/agent/tool-policy.ts`](https://github.com/BrowyHQ/browy/blob/main/src/agent/tool-policy.ts)
+里。
 </Aside>
 
 ## 默认开启 vs 选择性开启
@@ -25,7 +25,7 @@ Copilot SDK 还暴露了一组**主机工具**（`bash`、`read_file`、
 | | 默认 | 在哪运行 | 开关 |
 |---|---|---|---|
 | **浏览器工具**（下面所有的） | 开启 | 通过 CDP 在当前激活的标签页里 | 在设置里按工具关闭 |
-| **主机工具**（`bash`、`read_file`、`write_file`、`grep`、`glob`、`web_fetch`） | 关闭 | 在你的机器上，以你的用户权限 | 在 设置 → 工具 → 主机（进阶）里按工具启用 |
+| **主机工具**（`run_script`、`bash`、`read_file`、`write_file`、`grep`、`glob`、`web_fetch`） | 关闭 | 在你的机器上，以你的用户权限 | 在 设置 → 工具 → 主机（进阶）里按工具启用 |
 
 ## 分类
 
@@ -83,7 +83,6 @@ Copilot SDK 还暴露了一组**主机工具**（`bash`、`read_file`、
 | 工具 | 作用 |
 |---|---|
 | `evaluate_js` | 在页面里执行 JavaScript（支持顶层 `await`）。用于 shadow DOM 遍历、自定义等待、结构化抽取。 |
-| `run_script` | 抓一个 URL，把响应当作 JS 在页面里执行（一次性辅助脚本、内联片段）。 |
 | `set_viewport` | 调整视口大小（比如测试移动端断点）。 |
 | `pdf_export` | 把当前页保存为 PDF。 |
 
@@ -126,7 +125,7 @@ Copilot SDK 还暴露了一组**主机工具**（`bash`、`read_file`、
 
 ## 按工具开关
 
-每个浏览器工具都可以在 **设置 → 工具** 里单独关掉（右键 Browy
+大多数浏览器工具都可以在 **设置 → 工具** 里单独关掉（右键 Browy
 工具栏图标 → 选项）。开关按类别分组：_inspect_、_navigate_、
 _interact_、_devtools_。它们存在 `chrome.storage.local` 里。关掉的
 工具会从 SDK 的白名单和发给模型的函数定义列表里去掉，所以智能体
@@ -136,17 +135,14 @@ _interact_、_devtools_。它们存在 `chrome.storage.local` 里。关掉的
 
 <CardGrid>
   <Card title="更严格的沙箱" icon="seti:lock">
-    不想让智能体在被检查的页面里跑 JavaScript 时，关掉 `evaluate_js`
-    和 `run_script`。结构化工具（`click_index`、`type_index`、
-    `navigate` 等）仍然能正常用。
+    不想让智能体在被检查的页面里跑 JavaScript 时，关掉 `evaluate_js`。结构化工具（`click_index`、`type_index`、`navigate` 等）仍然能正常用。
   </Card>
   <Card title="只读模式" icon="seti:eye">
     关掉 _interact_ 和 _navigate_ 里的所有工具，只留 _inspect_。
     智能体可以回答关于页面的问题，但不能改它。
   </Card>
   <Card title="不允许 JS 执行" icon="seti:javascript">
-    有些团队会同时关掉 `evaluate_js`、`run_script` 和 `query_dom`，
-    把智能体限制在结构化的可访问性树工具上。
+    有些团队会同时关掉 `evaluate_js` 和 `query_dom`，把智能体限制在结构化的可访问性树工具上。
   </Card>
 </CardGrid>
 
@@ -160,6 +156,8 @@ Copilot SDK 包括 `bash`、`read_file`、`write_file`、`grep`、`glob`、
 `web_fetch`，和 `copilot` CLI 在终端里用的是同一组工具。它们能访问
 你的文件系统和 shell，所以 Browy 默认把它们关掉；想用的时候在
 设置 → 工具 → 主机（进阶）里按工具打开。
+
+Browy 自己的 `run_script` 也列在这里。它以你的用户权限在你的电脑上运行 Node.js，可以读写文件、发网络请求、启动 shell 命令。0.1.10 之前它是默认开启的浏览器工具；现在和其他主机工具一样，默认关闭，需要你手动打开。
 
 如果你只是需要一个终端里的编程智能体，
 [GitHub Copilot CLI](https://docs.github.com/en/copilot/github-copilot-in-the-cli)

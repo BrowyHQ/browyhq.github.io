@@ -17,11 +17,11 @@ import { Badge, LinkCard, CardGrid, Aside } from '@astrojs/starlight/components'
   `/console`、`/perf`、`/eval`）。
 - 本地原生消息主机包装 GitHub Copilot CLI。自备 Copilot 订阅。
 - 默认开启 30 多种浏览器工具：截图、点击、输入、导航、标签页、
-  `evaluate_js`、`run_script`、网络与控制台日志、沙箱磁盘、
+  `evaluate_js`、网络与控制台日志、沙箱磁盘、
   持久化记忆、`await_user`。
-- 可选的主机端工具（`bash`、`read_file`、`write_file`、`grep`、
-  `glob`、`web_fetch`），默认关闭，按工具粒度在
-  设置 → 工具中开启。
+- 可选的主机端工具（`run_script`、`bash`、`read_file`、`write_file`、
+  `grep`、`glob`、`web_fetch`），默认关闭，按工具粒度在
+  设置 → 工具中开启。`run_script` 从 0.1.10 起归入这一组。
 - 多浏览器支持：Chrome、Edge、Brave（以及其他基于 Chromium 的浏览器）。
 - Windows 一行命令的 PowerShell 安装脚本。
 
