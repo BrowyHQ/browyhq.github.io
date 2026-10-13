@@ -1,6 +1,6 @@
 ---
 title: "Architecture: Browy Chromium extension (frontend)"
-description: "How the Browy MV3 extension is laid out: service worker, side panel, DevTools panel, content scripts, and the native-messaging port that connects everything to the Node host on your machine."
+description: "How the Browy MV3 extension is laid out: service worker, side panel, DevTools panel, options page, and the native-messaging port that connects everything to the Node host on your machine."
 ---
 
 import { Aside, CardGrid, Card, LinkCard } from '@astrojs/starlight/components';
@@ -14,12 +14,12 @@ surfaces (side panel, DevTools panel, options page) and talks to the
 ```
 extension/
 ├── manifest.json           ← MV3 manifest, permissions, background SW
-├── background.js           ← service worker, port owner, tool dispatch
+├── background.js           ← service worker, port owner, CDP bridge
 ├── sidepanel.html / .js    ← chat UI (default surface)
+├── marked.min.js           ← Markdown renderer for the side panel
 ├── devtools.html / .js     ← registers the DevTools panel
 ├── panel.html / .js / .css ← the actual DevTools CLI surface
 ├── options.html / .js      ← Settings (model, tools, install help)
-├── content/                ← injected scripts (snapshot, evaluate_js)
 └── icons/                  ← toolbar + store assets
 ```
 
@@ -27,22 +27,31 @@ extension/
 
 A single `chrome.runtime.connectNative('com.browy.host')` port lives
 on the service worker. It's the one and only channel to the host.
-All three UI surfaces post `chrome.runtime.sendMessage` to the
-service worker, which forwards as native-messaging frames.
+Each UI surface opens its own `chrome.runtime.connect` port to the
+service worker (`sidepanel-<random>`, `devtools-panel-<random>` or
+`options`). The service worker forwards their messages to the host
+and routes each reply to the surface that owns its `sessionId`. Host
+messages without a session id, such as `models.current` and
+`auth.status`, go to every surface.
 
 <Aside type="note">
-MV3 service workers can be killed by Chrome at any moment. The SW
-re-establishes the port on demand and re-emits a `host_ready` event.
-The side panel and DevTools panel both wait for `host_ready` (with a
-safety timeout) before enabling their inputs.
+The native-messaging port keeps the MV3 service worker alive while
+it's open. If the host crashes, the service worker reconnects with a
+backoff (1 second, doubling up to 15) while any surface is still
+connected. After each `hello` / `hello.ack` handshake it sends every
+surface `__host_ready`, and each one answers with its own
+`session.start`. The side panel lets you type while the host is
+starting and holds your message until `session.ready` arrives.
 </Aside>
 
 ## UI surfaces
 
 <CardGrid>
   <Card title="Side panel: `sidepanel.html`" icon="seti:html">
-    The default chat UI. Persistent chat history, model badge, model
-    picker, slash commands, past-chats drawer. Most users live here.
+    The default chat UI: streamed replies with their tool steps, a
+    past-chats overlay that loads transcripts from the host, Markdown
+    export and a settings button that opens the options page. Most
+    users live here.
   </Card>
   <Card title="DevTools panel: `panel.html`" icon="seti:plan">
     The terminal-style REPL. Registered by `devtools.js` via
@@ -59,16 +68,24 @@ safety timeout) before enabling their inputs.
 
 ## Tool execution
 
-When the host says *"call `snapshot` with these args"*, the SW:
+Tools run in the host. When one needs the page, the host sends a
+`cdp.send` message, and the SW:
 
-1. Routes the call to the right surface (the surface that owns the
-   active session). Usually it's the side panel or DevTools panel.
-2. The surface uses `chrome.debugger.attach(target, '1.3')` against
-   the focused tab if it isn't already attached.
-3. Runs the relevant CDP command (`Accessibility.getFullAXTree`,
-   `Input.dispatchMouseEvent`, `Network.enable`, etc.) and shapes
-   the result into the tool's expected return type.
-4. Posts the result back over the port.
+1. Picks the tab: the `tabId` in the message if the host pinned one,
+   else the tab bound to the session (a DevTools panel's inspected
+   tab), else the active tab in the last-focused window.
+2. Calls `chrome.debugger.attach({tabId}, '1.3')` if it isn't
+   already attached.
+3. Runs the command with `chrome.debugger.sendCommand`
+   (`Runtime.evaluate` for an `inspect_page` snapshot,
+   `Input.dispatchMouseEvent` for `click_index`, `Network.enable`,
+   etc.) and leaves shaping the result to the host.
+4. Posts `{type: 'tool.result', sessionId, callId, ok, result}` back
+   over the port.
+
+`tab.new`, `tab.activate`, `tab.list` and `tab.getActive` go through
+`chrome.tabs` the same way, and events from attached tabs flow back
+to the host as `cdp.event`.
 
 The Yellow Banner of Doom (Chrome's *"Browy started debugging…"*
 notice) is Chrome's mandatory disclosure for any extension using the
@@ -77,32 +94,41 @@ DevTools Protocol. We don't try to suppress it. See
 
 ## Storage
 
-Everything user-visible is in `chrome.storage.local`:
+The extension keeps its own state in `chrome.storage.local`:
 
-- **Chats**: `chat:<id>` → `{messages, sessionId, createdAt, title}`
-- **Active chat**: `active_chat_id`
-- **Settings**: `settings.model`, `settings.theme`,
-  `settings.reasoning_effort`, `settings.tools` (per-tool toggles)
-- **Last tab**: `lastActiveTabId`, used to restore which tab the
-  agent acts on after Chrome restarts
+- **Current chat**: `browy.sessionId` for the side panel and
+  `browy.dt.sessionId.<tabId>` for each inspected tab's DevTools
+  panel. The id is also the chat's Copilot session id.
+- **Chat display cache**: `browy.chat.<id>` (rendered HTML),
+  `browy.chatMeta.<id>` → `{id, title, updated, preview}` and
+  `browy.chatIndex` (ids, newest first)
+- **Settings**: `settings.tools` (per-tool toggles)
+- **UI flags**: `browy.firstSendDone` (hides the starter prompts
+  after your first message) and `browy.hostUpdateSnoozeUntil`
+  (snoozes the backend-update banner)
 
-Nothing leaves the local profile. There is no remote sync.
+The transcripts themselves live in the Copilot CLI's session store
+under `~/.copilot/`, and the host saves your model choice in
+`~/.browy/data/prefs.json`. `chrome.storage.local` is stored in this
+browser profile and is cleared when the extension is removed.
 
 ## Content scripts
 
-The `extension/content/` scripts are injected on demand for the
-`evaluate_js` and `query_dom` tools. Most agent perception goes
-through CDP rather than content scripts, because CDP gives access to
-shadow DOM, iframes, and the accessibility tree without
-cross-origin friction.
+The manifest declares no content scripts. Code that has to run in the
+page, such as the `inspect_page` snapshot, `evaluate_js` and
+`query_dom`, reaches the tab from the host as CDP `Runtime.evaluate`
+calls. The snapshot script walks open shadow roots and same-origin
+iframes, and tags each interactive element with `data-browy-id` so
+the `*_index` tools can find it again.
 
 ## Build
 
 The extension ships as-is, with no bundler step. `extension/` is a
-plain Chromium extension folder. The installer copies it to your
-Downloads directory; you load it with `chrome://extensions` →
-*Load unpacked*. The same files are also packaged into the CRX served
-by the Chrome Web Store and Edge Add-ons listings.
+plain Chromium extension folder. The installer copies it to
+`Browy-Extension` in your Downloads folder, so you can sideload it
+with `chrome://extensions` → *Load unpacked*. `npm run pack:extension`
+zips the same folder for the Chrome Web Store, whose listing covers
+Chrome, Edge and Brave.
 
 ## See also
 

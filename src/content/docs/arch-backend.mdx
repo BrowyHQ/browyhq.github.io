@@ -1,6 +1,6 @@
 ---
 title: "Architecture: Browy native messaging host (backend)"
-description: How the Browy native messaging host wraps the GitHub Copilot SDK, dispatches tools over the native messaging port to the extension, manages per-port sessions, and writes its rotating diagnostic log.
+description: How the Browy native messaging host wraps the GitHub Copilot SDK, runs the agent's tools and sends their CDP commands to the extension, tracks a session per panel, and writes its rotating diagnostic log.
 ---
 
 import { Aside, CardGrid, Card, LinkCard } from '@astrojs/starlight/components';
@@ -29,60 +29,81 @@ Edge / Brave as a **native messaging host** under the application id
 
 The extension speaks to the host over a single bidirectional
 length-prefixed JSON channel (Chrome's native messaging protocol).
-Every tool the agent decides to call comes back to the extension as a
-`tool_call` message; the extension executes it (usually via
-`chrome.debugger` + CDP) and posts a `tool_result` back.
+The agent's tools run in the host. When a tool needs the page, the
+host sends the extension a `cdp.send` message (or `tab.new`,
+`tab.activate`, `tab.list`, `tab.getActive`); the extension's service
+worker runs it through `chrome.debugger` or `chrome.tabs` and posts a
+`tool.result` back.
 
 ## Components
 
 <CardGrid>
   <Card title="`src/native-host.ts`" icon="seti:typescript">
-    Process entry. Owns stdio framing, log file, the per-port
-    `Runner` instances, and the sign-out / sign-in helpers.
+    Process entry. Chrome starts one for each `connectNative` port.
+    It opens the log file, starts the Copilot SDK and attaches one
+    `Runner` to the stdio transport. It also holds the Copilot sign-in
+    check and the helper that opens a terminal to sign in.
   </Card>
   <Card title="`src/agent/loop.ts`" icon="seti:typescript">
     The agent loop. Calls into the Copilot SDK
     (`createSession` / `resumeSession`), feeds it the prompt + tool
-    inventory, streams assistant text and `tool_call` events back to
-    the extension, and routes tool results back into the SDK.
+    inventory, streams assistant text and tool-call events back to
+    the extension through the `Runner`, and routes tool results back
+    into the SDK.
   </Card>
   <Card title="`src/agent/tools/browser.ts`" icon="seti:json">
-    The browser-tool registry: every tool the LLM can call
-    (`snapshot`, `click`, `type`, `network_log`, …). Each tool is
-    declared inline with its JSON schema and a thin handler that
-    forwards the call to the extension over the port.
+    The tool registry: every Browy tool the LLM can call
+    (`inspect_page`, `click_index`, `type_index`,
+    `get_network_requests`, …). Each one is a `register({ def, run })`
+    call: a JSON-schema definition and a `run(args, ctx)` function
+    that does the work in the host, driving the tab through `ctx.cdp`.
   </Card>
-  <Card title="`src/runner.ts`" icon="seti:plan">
-    Per-port lifecycle. One `Runner` per connected port (one per
-    side panel / DevTools panel). Owns its session id, model, and
-    pending tool calls.
+  <Card title="`src/agent/runner.ts`" icon="seti:plan">
+    Session routing. One `Runner` per host process keeps a session
+    for each connected panel, keyed by the panel's session id, and
+    passes messages between the panels and the one `Agent`. It runs
+    one chat turn at a time across all panels. Each session's pending
+    CDP calls live in its `ExtensionContext`
+    (`src/agent/extension-context.ts`).
   </Card>
   <Card title="`src/transports/`" icon="seti:folder">
-    Stdio framing (`stdio.ts`) and the test bridges that let the
-    same host run under unit tests without Chrome.
+    Stdio framing (`native-messaging.ts`): a 4-byte little-endian
+    length, then UTF-8 JSON. The `Runner` only sees the `Transport`
+    interface from `src/protocol.ts`, where the host's message types
+    are defined.
   </Card>
   <Card title="`src/cli-bin.ts`" icon="seti:shell">
-    Standalone entry: the `browy` binary. Today it's the
-    installer / register / unregister CLI.
+    Standalone entry: the `browy` command (`dist/cli-bin.js`). The
+    installers run its `install-host` subcommand to register the
+    native host with Chrome, Edge and Brave, and `uninstall-host`
+    removes it. It also has `run`, a terminal agent that needs no
+    browser, plus `repl` and `chat`.
   </Card>
 </CardGrid>
 
 ## Lifecycle of a single message
 
 1. User types in the side panel and hits send.
-2. Extension posts `{type: 'user', text, sessionId}` over the port.
-3. Host's `Runner` calls `sdk.resumeSession(sessionId, ...)` (or
-   `createSession` first time) with the message + the configured
-   tool list.
-4. The SDK streams assistant text and tool calls back. Host forwards
-   text chunks (`{type: 'delta'}`) and tool calls (`{type: 'tool_call'}`)
-   to the extension as they arrive.
-5. Extension executes each tool (`snapshot` → `chrome.debugger` →
-   CDP `Accessibility.getFullAXTree`, etc.) and posts
-   `{type: 'tool_result', id, result}`.
-6. Host hands the result back to the SDK; the loop continues until
-   the model says it's done.
-7. Host posts `{type: 'turn_done'}`.
+2. The side panel posts `{type: 'chat.send', sessionId, text}` to
+   the service worker, which forwards it over the native port.
+3. Host's `Runner` binds the agent to that session id and calls
+   `agent.chat(text)`. If no Copilot session is open for the id, the
+   agent calls the SDK's `resumeSession(id, ...)` (or
+   `createSession({sessionId: id, ...})` the first time) with the
+   filtered tool list, then sends your text with the current tab's
+   context and a fresh page snapshot attached.
+4. The SDK streams events back. Host forwards text chunks as
+   `{type: 'chat.delta'}`. When the SDK calls a tool, the host posts
+   `{type: 'chat.tool_call'}` to the panel, runs the tool, then posts
+   `{type: 'chat.tool_result'}`.
+5. Each CDP command the tool needs goes to the extension as
+   `{type: 'cdp.send', sessionId, callId, method, params}`
+   (`inspect_page`, for example, is one `Runtime.evaluate`). The
+   service worker runs it with `chrome.debugger.sendCommand` and
+   posts `{type: 'tool.result', sessionId, callId, ok, result}`.
+6. Host hands the tool's result back to the SDK; the loop continues
+   until the SDK reports `session.idle`.
+7. Host posts `{type: 'chat.done', sessionId, text}`.
 
 The whole exchange is synchronous from the model's perspective; from
 the user's perspective it streams in real time.
@@ -90,9 +111,10 @@ the user's perspective it streams in real time.
 ## Sessions and persistence
 
 Browy delegates session storage to the GitHub Copilot CLI's session
-machinery (in `~/.copilot/`). The host keeps a small mapping of
-`extensionChatId → copilotSessionId` in `chrome.storage.local` (on the
-extension side, not the host), so resuming a chat hits the right
+machinery (in `~/.copilot/`). The host uses the id the extension
+mints for a chat (`sp-…` in the side panel, `dt-…` in the DevTools
+panel) as the Copilot session id. The extension keeps the current one
+in `chrome.storage.local`, so reopening a panel resumes the same
 Copilot session.
 
 The agent also has its own scratch surfaces:
@@ -107,26 +129,33 @@ The agent also has its own scratch surfaces:
 Tool definitions live in `src/agent/tools/browser.ts`. Each one
 declares:
 
-- `name`, `description`, JSON-schema `parameters` (consumed by the SDK)
-- `handler(input, ctx)`: runs in the host, typically forwards the
-  call to the extension via `ctx.port.send({type: 'tool_call', …})`
-  and awaits the matching `tool_result` reply
+- `def`: `name`, `description`, JSON-schema `parameters` (consumed by the SDK)
+- `run(args, ctx)`: runs in the host. Browser tools call
+  `ctx.cdp.send(method, params)`; `src/agent/extension-context.ts`
+  sends each call to the extension as a `cdp.send` message and awaits
+  the matching `tool.result` reply
 
-This means the **execution** of every browser tool happens in the
-extension (where the page lives), not in the host. The host is the
+This means the tool logic runs in the host, and only the CDP commands
+run in the extension, where the page lives. Tools like `save_file`,
+`note_set` and `run_script` run entirely in the host. The host is the
 orchestrator and the bridge to the LLM.
 
-`src/agent/loop.ts` builds the tool inventory passed to the SDK on
-each connect. Today it's the full browser-tool list; in v0.1.2 it will
-be filtered against the user's
-[Settings → Tools](/tools/#configurable-per-tool-toggles) toggles.
+`src/agent/loop.ts` wraps each tool with the SDK's `defineTool` and
+builds the tool list when it creates or resumes a Copilot session.
+`toolPolicy()` in `src/agent/tool-policy.ts` filters it against the
+user's [Settings → Tools](/tools/#configurable-per-tool-toggles)
+toggles, which the extension sends with every `session.start`. A tool
+you switch off is dropped from the definitions and from the SDK's
+`availableTools` allowlist, and the opt-in host tools stay out until
+you switch them on.
 
 ## Logging & rotation
 
-`src/native-host.ts` rebinds `console.*` to a single
-`~/.browseragent/native-host.log` writer. When the host starts and the
-file is over ~5 MB, it is renamed to `native-host.log.1` and a fresh
-one begins. Only one old copy is kept; the next rotation overwrites it.
+`src/native-host.ts` rebinds `console.*` so it writes to
+`~/.browseragent/native-host.log` as well as stderr. When the host
+starts and the file is over ~5 MB, it is renamed to
+`native-host.log.1` and a fresh one begins. Only one old copy is
+kept; the next rotation overwrites it.
 
 This is the first place to look when a session misbehaves. It contains
 the host's diagnostic output, not transcripts.
@@ -134,7 +163,7 @@ the host's diagnostic output, not transcripts.
 ## See also
 
 <CardGrid>
-  <LinkCard title="Architecture: extension (frontend)" href="/arch-frontend/" description="Service worker, side panel, DevTools panel, content scripts." />
+  <LinkCard title="Architecture: extension (frontend)" href="/arch-frontend/" description="Service worker, side panel, DevTools panel, options page." />
   <LinkCard title="Architecture: DevTools CLI" href="/arch-cli/" description="Slash commands, completion, model picker, REPL state." />
   <LinkCard title="Tools the agent has" href="/tools/" description="Full reference of each tool, plus the per-tool Settings toggles." />
 </CardGrid>

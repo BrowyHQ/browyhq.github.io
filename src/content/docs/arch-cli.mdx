@@ -5,7 +5,7 @@ description: "How the Browy DevTools panel REPL is built: slash commands, autoco
 
 import { CardGrid, Card, LinkCard, Aside } from '@astrojs/starlight/components';
 
-The DevTools CLI is a small, dependency-free TypeScript-style
+The DevTools CLI is a small, dependency-free plain JavaScript
 implementation living in `extension/panel.{html,js,css}`. It mounts
 inside the DevTools panel registered by `extension/devtools.js`.
 
@@ -19,23 +19,27 @@ This page is for contributors curious about how it's built.
 | `extension/devtools.html` | Tiny shell that loads `devtools.js` |
 | `extension/devtools.js` | Calls `chrome.devtools.panels.create('Browy', icon, 'panel.html')` |
 | `extension/panel.html` | Toolbar + log + autocomplete listbox + textarea |
-| `extension/panel.css` | The retro green-on-black aesthetic |
+| `extension/panel.css` | Styles modeled on the DevTools Console, light or dark to match your DevTools theme |
 | `extension/panel.js` | All behavior: REPL, slash commands, port glue |
 
 ## The REPL loop
 
-`panel.js` keeps a single `<div id="log">` of "rows" (banner / dim /
-ok / err / model / tool / output). The textarea below is the prompt.
-On `Enter`:
+`panel.js` keeps a single `<div id="log">` of "rows" (user / assistant /
+tool / info / dim / ok / warn / err / banner). The textarea below is
+the prompt. On `Enter`, the panel echoes your input as a row, then:
 
 1. If the input starts with `/`, dispatch to the slash-command
-   registry (`COMMANDS` array near line 200 of `panel.js`).
-2. Otherwise, send `{type: 'user', text, sessionId}` over the port to
-   the [native host](/arch-backend/), append a row, and stream
-   `delta` chunks into a single growing assistant row.
+   registry (`COMMANDS` array near line 250 of `panel.js`).
+2. In `/js` mode, evaluate the line in the inspected page with
+   `chrome.devtools.inspectedWindow.eval`.
+3. Otherwise, send `{type: 'chat.send', sessionId, text}` over the
+   port to the [native host](/arch-backend/) and stream
+   `chat.delta` chunks into a single growing assistant row. Tool
+   calls show up as cards that fill in when `chat.tool_result`
+   arrives.
 
-On `Esc` mid-flight, the panel posts `{type: 'cancel'}` to the host
-and shows a dim "cancelled" row.
+On `Esc` mid-flight, the panel posts `{type: 'chat.cancel', sessionId}`
+to the host and shows a "cancel requested" warning row.
 
 ## Slash-command registry
 
@@ -43,10 +47,14 @@ Each command is a `{name, help, run}` triple:
 
 ```js
 const COMMANDS = [
-  { name: '/help',  help: 'Show available commands',           run: cmdHelp },
-  { name: '/clear', help: 'Clear the scrollback (Ctrl+L)',     run: () => clearLog() },
-  { name: '/model', help: 'Show or pick the active model',     run: cmdModel },
-  { name: '/login', help: 'Sign in to GitHub Copilot',         run: cmdLogin },
+  { name: '/help',     help: 'Show available commands',                run: cmdHelp },
+  { name: '/clear',    help: 'Clear the scrollback (Ctrl+L)',          run: () => clearLog() },
+  { name: '/new',      help: 'Start a new conversation',               run: cmdReset },
+  { name: '/reset',    help: 'Abandon this session and start fresh',   run: cmdReset },
+  { name: '/model',    help: 'Show current model + pick from list: /model [id]', run: cmdModel },
+  { name: '/login',    help: 'Sign in to GitHub Copilot',              run: cmdLogin },
+  // 16 more: /sessions, /copy, /version, /theme, /feedback, /url, /title,
+  // /tabs, /eval, /js, /dom, /snapshot, /export, /cancel, /history, /exit
 ];
 ```
 
@@ -57,27 +65,34 @@ dispatch time. New commands plug in by appending one entry.
 
 The listbox `#ac` shows matching `COMMANDS` entries as you type a
 slash. Arrow keys move the selection, `Tab` / `Enter` accepts.
-Implemented as a simple substring match on `name` plus its first-line
-`help`.
+Implemented as a prefix match on `name`.
 
 ## Model picker
 
 `/model` with no argument fetches the model list from the host
-(`{type: 'list_models'}` → host calls Copilot SDK `listModels()`) and
-renders each as a clickable row. Clicking sends `/model <id>` for you.
-The toolbar's `#model` badge updates on `model_changed`.
+(`{type: 'models.list'}` → host calls the Copilot SDK's `listModels()`)
+and renders each as a clickable row. Clicking a row sends
+`{type: 'models.set', id}`, the same message `/model <id>` sends.
+The toolbar's `#model` badge updates on `session.ready` and
+`models.current`.
 
 ## History
 
-Up / down arrows when the input is empty browse a stack of past
-prompts. Stored in-memory only. DevTools panels are recreated on
-every page reload, so history is per-session.
+`↑` steps back through past prompts when the cursor is on the first
+line of the input, and `↓` steps forward when it's on the last line.
+Stored in-memory only. The panel page is rebuilt each time DevTools
+is closed and reopened, so history lasts as long as that DevTools
+window.
 
 ## Per-target binding
 
-Because each DevTools panel is bound to a single inspected target,
-the panel's `sessionId` is namespaced with the inspected URL. Open
-DevTools on three tabs → three independent agent sessions.
+Each DevTools panel inspects a single tab. The panel keeps its
+`sessionId` in `chrome.storage.local` under
+`browy.dt.sessionId.<tabId>` and binds the session to that tab with
+`inspectedTabId` in `session.start`. Open DevTools on three tabs →
+three separate conversations. They share one agent in the host, which
+runs one turn at a time. Close and reopen DevTools on the same tab and
+you're back in the same conversation.
 
 This is intentional: it makes the DevTools CLI a per-page tool, in
 the same way the inspector is per-page.

@@ -1,6 +1,6 @@
 ---
 title: "架构：Browy 本地原生消息主机（后端）"
-description: Browy 原生消息主机如何包装 GitHub Copilot SDK、通过原生消息 port 把工具分发给扩展、管理按 port 的会话，以及如何写它循环的诊断日志。
+description: Browy 原生消息主机如何包装 GitHub Copilot SDK、在主机里运行智能体的工具并把它们的 CDP 命令发给扩展、为每个面板维护一个会话，以及如何写它循环的诊断日志。
 ---
 
 import { Aside, CardGrid, Card, LinkCard } from '@astrojs/starlight/components';
@@ -26,63 +26,46 @@ Chrome / Edge / Brave 上，应用 id 是 `com.browy.host`。它运行在你的
                                     └───────────────────┘
 ```
 
-扩展和主机之间通过一条双向、长度前缀的 JSON 通道通信（Chrome 的
-原生消息协议）。智能体决定调用的每一个工具都会作为 `tool_call` 消息
-返回给扩展；扩展执行它（通常通过 `chrome.debugger` + CDP），然后
-回发一个 `tool_result`。
+扩展和主机之间通过一条双向、长度前缀的 JSON 通道通信（Chrome 的原生消息协议）。智能体的工具在主机里运行。工具需要操作页面时，主机给扩展发一条 `cdp.send` 消息（或者 `tab.new`、`tab.activate`、`tab.list`、`tab.getActive`）；扩展的 service worker 通过 `chrome.debugger` 或 `chrome.tabs` 执行它，然后回发一个 `tool.result`。
 
 ## 组件
 
 <CardGrid>
   <Card title="`src/native-host.ts`" icon="seti:typescript">
-    进程入口。负责 stdio 分帧、日志文件、每个 port 一个的 `Runner`
-    实例，以及登出 / 登录辅助逻辑。
+    进程入口。Chrome 每次 `connectNative` 建一个 port，就启动一个这样的进程。它打开日志文件、启动 Copilot SDK，并把一个 `Runner` 挂到 stdio 传输上。它还负责检查 Copilot 登录状态，以及打开终端让你登录的辅助逻辑。
   </Card>
   <Card title="`src/agent/loop.ts`" icon="seti:typescript">
-    智能体循环。调用 Copilot SDK（`createSession` / `resumeSession`），
-    把 prompt 和工具清单喂给它，把助手文字和 `tool_call` 事件流式
-    回传到扩展，把工具结果路由回 SDK。
+    智能体循环。调用 Copilot SDK（`createSession` / `resumeSession`），把 prompt 和工具清单喂给它，通过 `Runner` 把助手文字和工具调用事件流式回传到扩展，把工具结果路由回 SDK。
   </Card>
   <Card title="`src/agent/tools/browser.ts`" icon="seti:json">
-    浏览器工具登记表：大模型可以调用的每一个工具（`snapshot`、
-    `click`、`type`、`network_log` 等）。每个工具直接和它的 JSON
-    schema 一起声明，加上一个薄的 handler，把调用通过 port 转发给扩展。
+    工具登记表：大模型可以调用的每一个 Browy 工具（`inspect_page`、`click_index`、`type_index`、`get_network_requests` 等）。每个工具都是一次 `register({ def, run })` 调用：一份 JSON schema 定义，加上一个 `run(args, ctx)` 函数。这个函数在主机里干活，通过 `ctx.cdp` 操作标签页。
   </Card>
-  <Card title="`src/runner.ts`" icon="seti:plan">
-    按 port 的生命周期。每个连上的 port 一个 `Runner`（每个侧边栏 /
-    DevTools 面板一个）。拥有自己的 session id、模型、未完成的工具调用。
+  <Card title="`src/agent/runner.ts`" icon="seti:plan">
+    会话路由。每个主机进程一个 `Runner`，它为每个连上的面板维护一个会话（以面板的 session id 为键），在这些面板和唯一的 `Agent` 之间传递消息。所有面板加起来同一时间只跑一轮对话。每个会话未完成的 CDP 调用放在它自己的 `ExtensionContext`（`src/agent/extension-context.ts`）里。
   </Card>
   <Card title="`src/transports/`" icon="seti:folder">
-    Stdio 分帧（`stdio.ts`）和测试桥，让同一个主机能在不需要 Chrome
-    的情况下跑单元测试。
+    Stdio 分帧（`native-messaging.ts`）：先是 4 字节小端长度，然后是 UTF-8 JSON。`Runner` 只看得到 `src/protocol.ts` 里的 `Transport` 接口，主机的消息类型也都定义在那个文件里。
   </Card>
   <Card title="`src/cli-bin.ts`" icon="seti:shell">
-    独立入口：`browy` 二进制。当前是安装 / 注册 / 反注册的 CLI。
+    独立入口：`browy` 命令（`dist/cli-bin.js`）。安装脚本运行它的 `install-host` 子命令，把原生主机注册到 Chrome、Edge 和 Brave；`uninstall-host` 负责移除。它还有 `run`（一个不需要浏览器的终端智能体），以及 `repl` 和 `chat`。
   </Card>
 </CardGrid>
 
 ## 一条消息的生命周期
 
 1. 用户在侧边栏输入并按发送。
-2. 扩展通过 port 发出 `{type: 'user', text, sessionId}`。
-3. 主机的 `Runner` 调用 `sdk.resumeSession(sessionId, ...)`（首次
-   调用是 `createSession`），带上消息和配置好的工具列表。
-4. SDK 流式返回助手文字和工具调用。主机把文字块（`{type: 'delta'}`）
-   和工具调用（`{type: 'tool_call'}`）实时转发给扩展。
-5. 扩展执行每个工具（`snapshot` → `chrome.debugger` → CDP
-   `Accessibility.getFullAXTree` 等），然后发出
-   `{type: 'tool_result', id, result}`。
-6. 主机把结果交还给 SDK；循环继续，直到模型说自己做完了。
-7. 主机发 `{type: 'turn_done'}`。
+2. 侧边栏把 `{type: 'chat.send', sessionId, text}` 发给 service worker，由它通过原生 port 转发。
+3. 主机的 `Runner` 把智能体绑定到这个 session id，然后调用 `agent.chat(text)`。如果这个 id 还没有打开的 Copilot 会话，智能体会带上过滤后的工具列表调用 SDK 的 `resumeSession(id, ...)`（第一次则是 `createSession({sessionId: id, ...})`），然后把你的文字连同当前标签页的上下文和一份新的页面快照一起发出去。
+4. SDK 流式返回事件。主机把文字块作为 `{type: 'chat.delta'}` 转发。SDK 调用工具时，主机先给面板发 `{type: 'chat.tool_call'}`，运行工具，再发 `{type: 'chat.tool_result'}`。
+5. 工具需要的每条 CDP 命令都以 `{type: 'cdp.send', sessionId, callId, method, params}` 的形式发给扩展（比如 `inspect_page` 就是一次 `Runtime.evaluate`）。service worker 用 `chrome.debugger.sendCommand` 执行它，然后回发 `{type: 'tool.result', sessionId, callId, ok, result}`。
+6. 主机把工具的结果交还给 SDK；循环继续，直到 SDK 报告 `session.idle`。
+7. 主机发 `{type: 'chat.done', sessionId, text}`。
 
 整个交换在模型那一侧是同步的；在用户这一侧是实时流式的。
 
 ## 会话和持久化
 
-Browy 把会话存储委托给 GitHub Copilot CLI 自己的会话机制（在
-`~/.copilot/`）。主机在扩展端（不在主机端）的 `chrome.storage.local`
-里维护一份 `extensionChatId → copilotSessionId` 的映射，这样恢复
-某一段对话时能命中正确的 Copilot 会话。
+Browy 把会话存储委托给 GitHub Copilot CLI 自己的会话机制（在 `~/.copilot/`）。主机直接把扩展为一段对话生成的 id（侧边栏是 `sp-…`，DevTools 面板是 `dt-…`）用作 Copilot 会话 id。扩展把当前的 id 存在 `chrome.storage.local` 里，所以重新打开面板会恢复同一个 Copilot 会话。
 
 智能体自己也有几个临时面：
 
@@ -95,23 +78,16 @@ Browy 把会话存储委托给 GitHub Copilot CLI 自己的会话机制（在
 
 工具定义在 `src/agent/tools/browser.ts`。每一个工具声明：
 
-- `name`、`description`、JSON-schema `parameters`（SDK 会消费）
-- `handler(input, ctx)`：在主机里运行，通常把调用通过
-  `ctx.port.send({type: 'tool_call', …})` 转发给扩展，等待匹配的
-  `tool_result` 回复
+- `def`：`name`、`description`、JSON-schema `parameters`（SDK 会消费）
+- `run(args, ctx)`：在主机里运行。浏览器工具调用 `ctx.cdp.send(method, params)`；`src/agent/extension-context.ts` 把每次调用作为一条 `cdp.send` 消息发给扩展，并等待匹配的 `tool.result` 回复
 
-也就是说，每个浏览器工具的**执行**发生在扩展里（页面所在的地方），
-不在主机里。主机是调度者，是连接大模型的桥。
+也就是说，工具的逻辑在主机里运行，只有 CDP 命令在扩展里（页面所在的地方）执行。`save_file`、`note_set`、`run_script` 这类工具完全在主机里运行。主机是调度者，是连接大模型的桥。
 
-`src/agent/loop.ts` 在每次连接时构造交给 SDK 的工具清单。今天它是
-完整的浏览器工具列表；v0.1.2 起会按用户的
-[设置 → 工具](/zh-cn/tools/#configurable-per-tool-toggles)开关过滤。
+`src/agent/loop.ts` 用 SDK 的 `defineTool` 包装每个工具，并在创建或恢复 Copilot 会话时构造工具清单。`src/agent/tool-policy.ts` 里的 `toolPolicy()` 按用户的[设置 → 工具](/zh-cn/tools/#按工具开关)开关过滤这份清单，扩展会在每次 `session.start` 时把这些开关发过来。你关掉的工具会从工具定义和 SDK 的 `availableTools` 白名单里同时去掉；需要手动开启的主机工具在你打开之前一直不在清单里。
 
 ## 日志和轮转
 
-`src/native-host.ts` 把 `console.*` 重定向到单文件
-`~/.browseragent/native-host.log`。主机启动时如果文件超过约 5 MB，会把它重命名为
-`native-host.log.1`，再重开一个。只保留一份旧副本；下一次轮转会覆盖它。
+`src/native-host.ts` 重新绑定了 `console.*`，让它同时写到 `~/.browseragent/native-host.log` 和 stderr。主机启动时如果文件超过约 5 MB，会把它重命名为 `native-host.log.1`，再重开一个。只保留一份旧副本；下一次轮转会覆盖它。
 
 会话出问题时这是第一个要看的地方。它装的是主机的诊断输出，不是
 对话记录。
@@ -119,7 +95,7 @@ Browy 把会话存储委托给 GitHub Copilot CLI 自己的会话机制（在
 ## 另见
 
 <CardGrid>
-  <LinkCard title="架构：扩展（前端）" href="/zh-cn/arch-frontend/" description="Service worker、侧边栏、DevTools 面板、content script。" />
+  <LinkCard title="架构：扩展（前端）" href="/zh-cn/arch-frontend/" description="Service worker、侧边栏、DevTools 面板、选项页。" />
   <LinkCard title="架构：DevTools CLI" href="/zh-cn/arch-cli/" description="斜杠命令、自动补全、模型选择器、REPL 状态。" />
   <LinkCard title="可用工具" href="/zh-cn/tools/" description="每一个工具的完整参考，以及对应的设置开关。" />
 </CardGrid>

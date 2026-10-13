@@ -5,9 +5,7 @@ description: "Browy DevTools 面板的 REPL 是怎么搭出来的：斜杠命令
 
 import { CardGrid, Card, LinkCard, Aside } from '@astrojs/starlight/components';
 
-DevTools CLI 是一个小型的、无外部依赖的 TypeScript 风格实现，
-住在 `extension/panel.{html,js,css}` 里。它挂载到由
-`extension/devtools.js` 注册的 DevTools 面板里。
+DevTools CLI 是一个小型的、无外部依赖的纯 JavaScript 实现，住在 `extension/panel.{html,js,css}` 里。它挂载到由 `extension/devtools.js` 注册的 DevTools 面板里。
 
 如果你只是想知道*怎么用*，请看
 [DevTools CLI 页面](/zh-cn/devtools-cli/)。这一页是给好奇它怎么搭
@@ -20,23 +18,18 @@ DevTools CLI 是一个小型的、无外部依赖的 TypeScript 风格实现，
 | `extension/devtools.html` | 一个小壳，加载 `devtools.js` |
 | `extension/devtools.js` | 调用 `chrome.devtools.panels.create('Browy', icon, 'panel.html')` |
 | `extension/panel.html` | 工具栏 + 日志 + 自动补全列表 + 文本框 |
-| `extension/panel.css` | 复古黑底绿字的视觉风格 |
+| `extension/panel.css` | 仿照 DevTools Console 的样式，跟随你的 DevTools 主题显示浅色或深色 |
 | `extension/panel.js` | 全部行为：REPL、斜杠命令、port 黏合 |
 
 ## REPL 循环
 
-`panel.js` 维护一个 `<div id="log">`，里面装的是若干"行"（banner /
-dim / ok / err / model / tool / output）。下面的文本框是 prompt。
-按 `Enter` 时：
+`panel.js` 维护一个 `<div id="log">`，里面装的是若干"行"（user / assistant / tool / info / dim / ok / warn / err / banner）。下面的文本框是 prompt。按 `Enter` 时，面板先把你的输入作为一行显示出来，然后：
 
-1. 如果输入以 `/` 开头，派发到斜杠命令登记表（`panel.js` 大约第 200
-   行附近的 `COMMANDS` 数组）。
-2. 否则，把 `{type: 'user', text, sessionId}` 通过 port 发给
-   [原生主机](/zh-cn/arch-backend/)，加一行，把 `delta` 块流式追加
-   到一行不断增长的助手输出里。
+1. 如果输入以 `/` 开头，派发到斜杠命令登记表（`panel.js` 大约第 250 行附近的 `COMMANDS` 数组）。
+2. 在 `/js` 模式下，用 `chrome.devtools.inspectedWindow.eval` 在被检查的页面里执行这一行。
+3. 否则，把 `{type: 'chat.send', sessionId, text}` 通过 port 发给[原生主机](/zh-cn/arch-backend/)，把 `chat.delta` 块流式追加到一行不断增长的助手输出里。工具调用会显示成卡片，等 `chat.tool_result` 到了再补全。
 
-回合进行中按 `Esc`，面板会发 `{type: 'cancel'}` 给主机，并显示一条
-dim 的"cancelled"行。
+回合进行中按 `Esc`，面板会发 `{type: 'chat.cancel', sessionId}` 给主机，并显示一条 "cancel requested" 警告行。
 
 ## 斜杠命令登记表
 
@@ -44,10 +37,14 @@ dim 的"cancelled"行。
 
 ```js
 const COMMANDS = [
-  { name: '/help',  help: 'Show available commands',           run: cmdHelp },
-  { name: '/clear', help: 'Clear the scrollback (Ctrl+L)',     run: () => clearLog() },
-  { name: '/model', help: 'Show or pick the active model',     run: cmdModel },
-  { name: '/login', help: 'Sign in to GitHub Copilot',         run: cmdLogin },
+  { name: '/help',     help: 'Show available commands',                run: cmdHelp },
+  { name: '/clear',    help: 'Clear the scrollback (Ctrl+L)',          run: () => clearLog() },
+  { name: '/new',      help: 'Start a new conversation',               run: cmdReset },
+  { name: '/reset',    help: 'Abandon this session and start fresh',   run: cmdReset },
+  { name: '/model',    help: 'Show current model + pick from list: /model [id]', run: cmdModel },
+  { name: '/login',    help: 'Sign in to GitHub Copilot',              run: cmdLogin },
+  // 16 more: /sessions, /copy, /version, /theme, /feedback, /url, /title,
+  // /tabs, /eval, /js, /dom, /snapshot, /export, /cancel, /history, /exit
 ];
 ```
 
@@ -56,27 +53,19 @@ const COMMANDS = [
 
 ## 自动补全
 
-列表框 `#ac` 在你输入斜杠时显示匹配的 `COMMANDS` 条目。方向键
-移动选中项，`Tab` / `Enter` 确认。实现方式是对 `name` 加 `help` 第
-一行做简单子串匹配。
+列表框 `#ac` 在你输入斜杠时显示匹配的 `COMMANDS` 条目。方向键移动选中项，`Tab` / `Enter` 确认。实现方式是对 `name` 做前缀匹配。
 
 ## 模型选择器
 
-`/model` 不带参数时从主机获取模型列表（`{type: 'list_models'}` →
-主机调用 Copilot SDK 的 `listModels()`），把每个模型渲染成一个可
-点击的行。点击会替你发 `/model <id>`。工具栏的 `#model` 徽章在
-收到 `model_changed` 事件时更新。
+`/model` 不带参数时从主机获取模型列表（`{type: 'models.list'}` → 主机调用 Copilot SDK 的 `listModels()`），把每个模型渲染成一个可点击的行。点击某一行会发出 `{type: 'models.set', id}`，和 `/model <id>` 发的是同一条消息。工具栏的 `#model` 徽章在收到 `session.ready` 和 `models.current` 时更新。
 
 ## 历史
 
-输入框为空时上下方向键浏览以前 prompt 的栈。只存在内存里。DevTools
-面板在页面刷新时会被重建，所以历史是按会话的。
+光标在输入框第一行时，`↑` 往回翻以前的 prompt；光标在最后一行时，`↓` 往前翻。只存在内存里。每次关掉再打开 DevTools，面板页面都会重建，所以历史只在这个 DevTools 窗口开着的时候有效。
 
 ## 按目标绑定
 
-因为每个 DevTools 面板绑定一个被检查的目标，面板的 `sessionId` 用
-被检查的 URL 做命名空间。在三个标签页里打开 DevTools，就是三个
-独立的智能体会话。
+每个 DevTools 面板只检查一个标签页。面板把自己的 `sessionId` 存在 `chrome.storage.local` 的 `browy.dt.sessionId.<tabId>` 下，并在 `session.start` 里用 `inspectedTabId` 把会话绑定到这个标签页。在三个标签页里打开 DevTools，就是三段独立的对话。它们共用主机里的同一个智能体，同一时间只跑一轮。在同一个标签页上关掉再打开 DevTools，你会回到同一段对话。
 
 这是故意的：让 DevTools CLI 成为按页面的工具，和 inspector 是按
 页面的方式保持一致。

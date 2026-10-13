@@ -1,6 +1,6 @@
 ---
 title: "架构：Browy Chromium 扩展（前端）"
-description: "Browy MV3 扩展是怎么布局的：service worker、侧边栏、DevTools 面板、content script，以及把所有这些连到机器上 Node 主机的原生消息 port。"
+description: "Browy MV3 扩展是怎么布局的：service worker、侧边栏、DevTools 面板、选项页，以及把所有这些连到机器上 Node 主机的原生消息 port。"
 ---
 
 import { Aside, CardGrid, Card, LinkCard } from '@astrojs/starlight/components';
@@ -14,34 +14,28 @@ DevTools 面板、选项页），通过一个原生消息 port 和
 ```
 extension/
 ├── manifest.json           ← MV3 清单：权限、后台 SW
-├── background.js           ← service worker，port 的拥有者、工具分发
+├── background.js           ← service worker，port 的拥有者、CDP 桥
 ├── sidepanel.html / .js    ← 对话 UI（默认表面）
+├── marked.min.js           ← 侧边栏的 Markdown 渲染器
 ├── devtools.html / .js     ← 注册 DevTools 面板
 ├── panel.html / .js / .css ← DevTools CLI 真正的表面
 ├── options.html / .js      ← 设置（模型、工具、安装帮助）
-├── content/                ← 注入的脚本（快照、evaluate_js）
 └── icons/                  ← 工具栏 + 商店素材
 ```
 
 ## Port
 
-一个 `chrome.runtime.connectNative('com.browy.host')` 的 port 跑在
-service worker 上。这是连接主机的唯一通道。三个 UI 表面通过
-`chrome.runtime.sendMessage` 发给 service worker，由 SW 转发为
-原生消息帧。
+一个 `chrome.runtime.connectNative('com.browy.host')` 的 port 跑在 service worker 上。这是连接主机的唯一通道。每个 UI 表面各自用 `chrome.runtime.connect` 向 service worker 开一个 port（`sidepanel-<random>`、`devtools-panel-<random>` 或 `options`）。service worker 把它们的消息转发给主机，再按 `sessionId` 把每条回复送回拥有这个会话的表面。不带 session id 的主机消息，比如 `models.current` 和 `auth.status`，会发给所有表面。
 
 <Aside type="note">
-MV3 service worker 随时可能被 Chrome 杀掉。SW 会按需重建 port，
-并重新发出 `host_ready` 事件。侧边栏和 DevTools 面板在启用输入前
-都会等 `host_ready`（带安全超时）。
+原生消息 port 开着的时候，会让 MV3 service worker 一直保持运行。如果主机崩溃，只要还有表面连着，service worker 就会按退避策略重连（从 1 秒开始，每次翻倍，最长 15 秒）。每次 `hello` / `hello.ack` 握手之后，它会给每个表面发 `__host_ready`，每个表面再各自回一条 `session.start`。主机还在启动时，侧边栏也允许你输入，并把你的消息先留着，等 `session.ready` 到了再发。
 </Aside>
 
 ## UI 表面
 
 <CardGrid>
   <Card title="侧边栏：`sidepanel.html`" icon="seti:html">
-    默认的对话 UI。持久化对话历史、模型徽章、模型选择器、斜杠命令、
-    历史抽屉。大多数用户都待在这里。
+    默认的对话 UI：带工具步骤的流式回复、从主机加载对话记录的历史对话浮层、Markdown 导出，以及一个打开选项页的设置按钮。大多数用户都待在这里。
   </Card>
   <Card title="DevTools 面板：`panel.html`" icon="seti:plan">
     终端风格的 REPL。由 `devtools.js` 通过
@@ -57,16 +51,14 @@ MV3 service worker 随时可能被 Chrome 杀掉。SW 会按需重建 port，
 
 ## 工具执行
 
-当主机说*"用这些参数调用 `snapshot`"*，SW 会：
+工具在主机里运行。工具需要操作页面时，主机发一条 `cdp.send` 消息，SW 会：
 
-1. 把这次调用路由到正确的表面（拥有当前会话的那个表面）。一般就是
-   侧边栏或 DevTools 面板。
-2. 该表面对当前聚焦的标签页调用 `chrome.debugger.attach(target, '1.3')`，
-   如果还没附加的话。
-3. 执行对应的 CDP 命令（`Accessibility.getFullAXTree`、
-   `Input.dispatchMouseEvent`、`Network.enable` 等），把结果塑形成
-   该工具期望的返回类型。
-4. 通过 port 把结果回传。
+1. 选定标签页：如果主机在消息里固定了 `tabId` 就用它，否则用绑定到这个会话的标签页（DevTools 面板正在检查的那个），再否则用最近聚焦窗口里的活动标签页。
+2. 如果还没附加，就调用 `chrome.debugger.attach({tabId}, '1.3')`。
+3. 用 `chrome.debugger.sendCommand` 执行命令（`inspect_page` 快照用的是 `Runtime.evaluate`，`click_index` 用的是 `Input.dispatchMouseEvent`，还有 `Network.enable` 等），把结果的整理交给主机。
+4. 通过 port 回发 `{type: 'tool.result', sessionId, callId, ok, result}`。
+
+`tab.new`、`tab.activate`、`tab.list` 和 `tab.getActive` 同样通过 `chrome.tabs` 处理；已附加标签页上的事件会以 `cdp.event` 的形式流回主机。
 
 那个 Chrome 的*"Browy started debugging..."*黄色横幅，是 Chrome 对
 任何使用 DevTools Protocol 的扩展的强制披露。我们不去试图隐藏它。
@@ -74,29 +66,22 @@ MV3 service worker 随时可能被 Chrome 杀掉。SW 会按需重建 port，
 
 ## 存储
 
-所有用户可见的状态都在 `chrome.storage.local`：
+扩展自己的状态存在 `chrome.storage.local`：
 
-- **对话**：`chat:<id>` → `{messages, sessionId, createdAt, title}`
-- **活动对话**：`active_chat_id`
-- **设置**：`settings.model`、`settings.theme`、
-  `settings.reasoning_effort`、`settings.tools`（按工具的开关）
-- **上次标签页**：`lastActiveTabId`，Chrome 重启之后用来恢复智能体
-  作用在哪个标签页
+- **当前对话**：侧边栏是 `browy.sessionId`，每个被检查标签页的 DevTools 面板是 `browy.dt.sessionId.<tabId>`。这个 id 也是这段对话的 Copilot 会话 id。
+- **对话显示缓存**：`browy.chat.<id>`（渲染好的 HTML）、`browy.chatMeta.<id>` → `{id, title, updated, preview}` 和 `browy.chatIndex`（id 列表，最新的在前）
+- **设置**：`settings.tools`（按工具的开关）
+- **界面标记**：`browy.firstSendDone`（你发出第一条消息后隐藏入门提示）和 `browy.hostUpdateSnoozeUntil`（暂时隐藏后端更新提示条）
 
-什么都不离开本地的浏览器配置。没有远程同步。
+对话记录本身存在 Copilot CLI 的会话存储里（`~/.copilot/` 下），你选的模型由主机保存在 `~/.browy/data/prefs.json`。`chrome.storage.local` 存在当前这个浏览器配置里，扩展被移除时会一起清掉。
 
 ## Content scripts
 
-`extension/content/` 里的脚本是按需注入的，给 `evaluate_js` 和
-`query_dom` 工具用。智能体的大部分感知走的是 CDP 而不是 content
-script，因为 CDP 能跨 shadow DOM、iframe 和可访问性树，没有跨域摩擦。
+清单里没有声明任何 content script。需要在页面里运行的代码，比如 `inspect_page` 快照、`evaluate_js` 和 `query_dom`，都是主机通过 CDP 的 `Runtime.evaluate` 送到标签页里执行的。快照脚本会遍历开放的 shadow root 和同源 iframe，并给每个可交互元素打上 `data-browy-id`，让 `*_index` 工具之后还能找到它。
 
 ## 构建
 
-扩展不需要打包步骤，原样发布。`extension/` 就是一个普通的 Chromium
-扩展目录。安装脚本把它复制到你的下载目录，你用
-`chrome://extensions` → *加载已解压的扩展程序* 加载它。同样这些
-文件也会被打包成 CRX，由 Chrome Web Store 和 Edge Add-ons 商店分发。
+扩展不需要打包步骤，原样发布。`extension/` 就是一个普通的 Chromium 扩展目录。安装脚本把它复制到下载目录里的 `Browy-Extension`，方便你用 `chrome://extensions` → *加载已解压的扩展程序* 侧载。`npm run pack:extension` 会把同一个目录打成 zip 交给 Chrome Web Store，商店里的这一个页面同时覆盖 Chrome、Edge 和 Brave。
 
 ## 另见
 

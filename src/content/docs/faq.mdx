@@ -11,7 +11,7 @@ Common questions. Don't see yours? [Open an issue](https://github.com/BrowyHQ/br
 
 **Yes.** Browy is open source under Apache-2.0. The code, the host, and the extension are free.
 
-You bring your own [GitHub Copilot](https://github.com/features/copilot) subscription for the LLM. If you already have Copilot (free tier or paid), Browy adds nothing on top. The same Copilot quota you already use in your editor or in the terminal.
+You bring your own [GitHub Copilot](https://github.com/features/copilot) subscription for the LLM. Every Copilot plan, Copilot Free included, covers the Copilot CLI, and Browy's backend ships with its own copy of the CLI. Browy's model calls draw on your plan's monthly allowance of GitHub AI Credits, the same allowance Copilot uses in your editor and in the terminal.
 
 ## How does Browy compare to Browser-Use?
 
@@ -19,17 +19,17 @@ Both are open-source browser-automation agents. Different deployment model:
 
 | | **Browy** | [Browser-Use](https://github.com/browser-use/browser-use) |
 |---|---|---|
-| Surface | Browser extension (Chrome / Edge / Brave) | Python library |
-| Runs against | Your **real** logged-in browser profile | Fresh Playwright sandbox |
-| LLM | Your GitHub Copilot subscription | Your OpenAI / Anthropic / etc. API key |
-| UI | Side panel chat + DevTools CLI | Programmatic |
-| Best for | Day-to-day tab automation, "do this with my logged-in account" tasks | Headless scraping, batch jobs, CI |
+| Surface | Browser extension (Chrome / Edge / Brave) | Python library, a CLI for coding agents and a hosted cloud |
+| Runs against | Your **real** logged-in browser profile | A local browser, which can reuse your Chrome profile, or one of their cloud browsers |
+| LLM | Your GitHub Copilot subscription | A model you pick: a provider's model on your own API key, their BU2 model or a local model through Ollama |
+| UI | Side panel chat + DevTools CLI | Your Python code, or a coding agent driving their CLI |
+| Best for | Day-to-day tab automation, "do this with my logged-in account" tasks | Building browser agents into your own code and running them at scale on their cloud |
 
 Browy's main draw is **session reuse**: your cookies, your logins, your password manager, your other extensions. You don't re-auth into Gmail, Slack, or GitHub for every task.
 
 ## How does Browy compare to Skyvern?
 
-[Skyvern](https://github.com/Skyvern-AI/skyvern) is an open-source browser-automation tool with a hosted SaaS option. Browy runs locally as a Chrome extension plus a native messaging host. If you want a turnkey hosted product, pick Skyvern. If you want an extension that drives your real browser profile from chat, pick Browy.
+[Skyvern](https://github.com/Skyvern-AI/skyvern) is an open-source tool that automates browser workflows with LLMs and computer vision. You can use the hosted Skyvern Cloud, or run Skyvern yourself and point it at your own Chrome over remote debugging, logins included. You start its tasks and multi-step workflows from Python or TypeScript code, or from its web UI. Browy runs locally as a Chrome extension plus a native messaging host, and you chat with it in a side panel. If you want repeatable workflows or a hosted service, pick Skyvern. If you want to chat with an agent inside the browser you already use, pick Browy.
 
 ## Is Browy an alternative to Aider / Cline / Cursor?
 
@@ -39,31 +39,31 @@ No, they're complementary. Aider, Cline, and Cursor edit a repository on your di
 
 No. The LLM (GitHub Copilot) runs in the cloud. The browser-control side runs entirely on your machine.
 
-If you want a fully air-gapped setup, swap Copilot for a local model. We don't support that today, but the agent loop is decoupled from the LLM client; a local-model fork is plausible.
+If you want a fully air-gapped setup, swap Copilot for a local model. We don't support that today. The browser tools in `src/agent/tools/browser.ts` are plain `{ def, run }` objects that `src/agent/loop.ts` wraps for the Copilot SDK, so a local-model fork is plausible.
 
 ## What browsers are supported?
 
-Chromium-based: **Chrome, Edge, Brave, Arc, Vivaldi**, and most others. Safari and Firefox are not supported (different extension model + no `chrome.debugger` equivalent for cross-tab CDP).
+**Chrome, Edge and Brave.** Those are the browsers the installer registers Browy's native host with, on Windows (x64), macOS (Intel and Apple Silicon) and Linux (x64 and arm64). Safari and Firefox are not supported (different extension model + no `chrome.debugger` equivalent for cross-tab CDP).
 
 ## What models can Browy use?
 
-Any model your Copilot subscription exposes, currently Claude Opus 4.7, Sonnet 4.6, Haiku 4.5, GPT-5.5, GPT-5.4, Codex variants, Gemini, and Llama families. Switch on the fly with `/model` in the DevTools CLI or in Settings.
+Browy can use any model the Copilot CLI offers your account; its model list is the one the CLI returns. Copilot Free and Copilot Student get auto model selection only. Paid plans choose from models by OpenAI, Anthropic, Google and others, and GitHub keeps the current list on its [supported models](https://docs.github.com/en/copilot/reference/ai-models/supported-models) page. Switch on the fly with `/model` in the DevTools CLI or in Settings.
 
 ## Where does my data go?
 
-- Page content the agent reads → GitHub Copilot, the same path as `gh copilot` in a terminal
+- Page content the agent reads → GitHub Copilot, through the Copilot CLI that Browy runs: the same path as `copilot` in a terminal
 - Tool calls (clicks, typed text, evaluated JS) → executed locally in your browser via `chrome.debugger`
-- Session history → stored locally in `chrome.storage.local` (extension) and `~/.browy/host/` (native host logs)
+- Chat history → stored on your machine: transcripts in the Copilot CLI's session store under `~/.copilot/`, plus a display cache in `chrome.storage.local`. The host's log is `~/.browseragent/native-host.log`.
 
 Full detail at [Privacy & Data](/privacy/).
 
 ## Can I disable specific tools?
 
-**Yes.** Open the extension Settings → Tools. Every browser tool is on by default and can be turned off; disabled tools are stripped from the prompt the model sees. Host tools (`bash`, `read_file`, `write_file`, `grep`, `glob`, `web_fetch`) are off by default and can be turned on individually. See [Tools](/tools/).
+**Yes.** Open the extension Settings → Tools. Browser tools are on by default, and most of them have a switch to turn them off; disabled tools are stripped from the prompt the model sees. Host tools (`run_script`, `bash`, `read_file`, `write_file`, `grep`, `glob`, `web_fetch`) are off by default and can be turned on individually. See [Tools](/tools/).
 
 ## Can I run Browy without opening a browser tab?
 
-Not today. Browy is a browser agent: every tool it has acts on a live tab via `chrome.debugger`. If you want a terminal-only Copilot agent, the [GitHub Copilot CLI](https://docs.github.com/en/copilot/github-copilot-in-the-cli) covers that case directly.
+Not the browser agent: its browser tools act on a live tab through `chrome.debugger`. The backend's command line does include `browy run "<task>"`, a terminal agent that uses the Copilot CLI's own file, shell and web tools and needs no browser. If a terminal-only Copilot agent is all you want, the [GitHub Copilot CLI](https://docs.github.com/en/copilot/github-copilot-in-the-cli) covers that case directly.
 
 ## Is Browy a competitor to GitHub Copilot?
 

@@ -12,9 +12,7 @@ import { Aside } from '@astrojs/starlight/components';
 **是。** Browy 是 Apache-2.0 协议下的开源软件。代码、本地主机、
 扩展都是免费的。
 
-大模型部分需要你自带 [GitHub Copilot](https://github.com/features/copilot)
-订阅。如果你已经有 Copilot（免费版或付费版），Browy 不会再额外收费。
-和你在编辑器或终端里用的是同一份 Copilot 配额。
+大模型部分需要你自带 [GitHub Copilot](https://github.com/features/copilot) 订阅。所有 Copilot 套餐（包括 Copilot Free）都包含 Copilot CLI，Browy 的后端自带一份 CLI。Browy 的模型调用会消耗你套餐每月的 GitHub AI Credits 额度，和 Copilot 在你的编辑器和终端里用的是同一份额度。
 
 ## Browy 和 Browser-Use 怎么比？
 
@@ -22,21 +20,18 @@ import { Aside } from '@astrojs/starlight/components';
 
 | | **Browy** | [Browser-Use](https://github.com/browser-use/browser-use) |
 |---|---|---|
-| 形式 | 浏览器扩展（Chrome / Edge / Brave） | Python 库 |
-| 操作对象 | 你**真实**的、已登录的浏览器配置 | 全新的 Playwright 沙箱 |
-| 大模型 | 你的 GitHub Copilot 订阅 | 你的 OpenAI / Anthropic 等 API key |
-| UI | 侧边栏对话 + DevTools CLI | 编程接口 |
-| 适合的场景 | 日常标签页自动化、"用我已登录的账号做这件事"类任务 | Headless 爬取、批量任务、CI |
+| 形式 | 浏览器扩展（Chrome / Edge / Brave） | Python 库、给编程智能体用的 CLI，以及托管云服务 |
+| 操作对象 | 你**真实**的、已登录的浏览器配置 | 本地浏览器（可以复用你的 Chrome 配置），或者他们的云端浏览器 |
+| 大模型 | 你的 GitHub Copilot 订阅 | 你自己选的模型：用你自己的 API key 调各家服务商的模型、他们的 BU2 模型，或者通过 Ollama 跑本地模型 |
+| UI | 侧边栏对话 + DevTools CLI | 你的 Python 代码，或者由编程智能体驱动他们的 CLI |
+| 适合的场景 | 日常标签页自动化、"用我已登录的账号做这件事"类任务 | 把浏览器智能体做进你自己的代码里，并在他们的云上大规模运行 |
 
 Browy 的核心卖点是**会话复用**：你的 cookie、登录态、密码管理器、
 其他扩展全都还在。每一次任务都不用重新登 Gmail、Slack 或 GitHub。
 
 ## Browy 和 Skyvern 怎么比？
 
-[Skyvern](https://github.com/Skyvern-AI/skyvern) 是一个开源浏览器
-自动化工具，同时提供托管 SaaS。Browy 是一个本地运行的 Chrome 扩展
-加原生消息主机。想要开箱即用的托管产品选 Skyvern；想要一个驱动你
-真实浏览器配置的扩展，选 Browy。
+[Skyvern](https://github.com/Skyvern-AI/skyvern) 是一个开源工具，用大模型和计算机视觉自动化浏览器工作流。你可以用托管的 Skyvern Cloud，也可以自己部署 Skyvern，再通过远程调试让它连上你自己的 Chrome，登录状态都在。它的任务和多步骤工作流可以从 Python 或 TypeScript 代码里启动，也可以从它的网页界面启动。Browy 是一个本地运行的 Chrome 扩展加原生消息主机，你在侧边栏里和它对话。想要可重复的工作流或托管服务，选 Skyvern；想在你正在用的浏览器里直接和智能体对话，选 Browy。
 
 ## Browy 是 Aider / Cline / Cursor 的替代品吗？
 
@@ -51,46 +46,32 @@ Browy 驱动你的浏览器。代码用编程智能体、标签页用 Browy。�
 不能。大模型（GitHub Copilot）跑在云端。浏览器控制部分完全跑在
 你的机器上。
 
-如果你要完全隔离网络的环境，把 Copilot 换成本地模型可以解决。我们
-今天还不支持这个，但智能体循环和 LLM 客户端是解耦的，做一个本地
-模型分支是可行的。
+如果你要完全隔离网络的环境，把 Copilot 换成本地模型可以解决。我们今天还不支持这个。`src/agent/tools/browser.ts` 里的浏览器工具都是普通的 `{ def, run }` 对象，由 `src/agent/loop.ts` 包装给 Copilot SDK 使用，所以做一个本地模型分支是可行的。
 
 ## 支持哪些浏览器？
 
-基于 Chromium 的：**Chrome、Edge、Brave、Arc、Vivaldi**，以及大多数
-其他 Chromium 浏览器。Safari 和 Firefox 不支持（扩展模型不同，
-而且也没有 `chrome.debugger` 跨标签页 CDP 的等价物）。
+**Chrome、Edge 和 Brave。** 安装脚本会把 Browy 的原生主机注册到这三个浏览器，支持 Windows（x64）、macOS（Intel 和 Apple Silicon）和 Linux（x64 和 arm64）。Safari 和 Firefox 不支持（扩展模型不同，而且也没有 `chrome.debugger` 跨标签页 CDP 的等价物）。
 
 ## Browy 能用哪些模型？
 
-你的 Copilot 订阅暴露出来的任何模型，目前包括 Claude Opus 4.7、
-Sonnet 4.6、Haiku 4.5、GPT-5.5、GPT-5.4、Codex 各版本、Gemini、
-Llama 系列。在 DevTools CLI 里用 `/model` 或者在设置里随时切换。
+Browy 可以用 Copilot CLI 向你的账号提供的任何模型；它的模型列表就是 CLI 返回的那份。Copilot Free 和 Copilot Student 只能用自动模型选择。付费套餐可以从 OpenAI、Anthropic、Google 等厂商的模型里选，GitHub 在它的[支持的模型](https://docs.github.com/en/copilot/reference/ai-models/supported-models)页面上维护当前的完整列表。在 DevTools CLI 里用 `/model` 或者在设置里随时切换。
 
 ## 我的数据去哪里？
 
-- 智能体读取的页面内容 → GitHub Copilot，和在终端里跑 `gh copilot`
-  走的是同一条通道
+- 智能体读取的页面内容 → GitHub Copilot，经由 Browy 运行的 Copilot CLI，和在终端里跑 `copilot` 走的是同一条通道
 - 工具调用（点击、输入的文字、执行的 JS）→ 通过 `chrome.debugger`
   在你本地的浏览器里执行
-- 会话历史 → 存在本地的 `chrome.storage.local`（扩展）和
-  `~/.browy/host/`（原生主机日志）
+- 对话历史 → 存在你的电脑上：对话记录在 Copilot CLI 的会话存储里（`~/.copilot/` 下），另有一份显示缓存在 `chrome.storage.local`。主机日志是 `~/.browseragent/native-host.log`。
 
 完整说明见[隐私与数据](/zh-cn/privacy/)。
 
 ## 我能关掉某些工具吗？
 
-**能。** 打开扩展的 设置 → 工具。每一个浏览器工具默认开启，可以
-单独关闭；关掉的工具会从模型看到的 prompt 里被剥掉。主机工具
-（`bash`、`read_file`、`write_file`、`grep`、`glob`、`web_fetch`）
-默认关闭，可以按工具粒度开启。参见[可用工具](/zh-cn/tools/)。
+**能。** 打开扩展的 设置 → 工具。浏览器工具默认开启，其中大多数都有开关可以单独关闭；关掉的工具会从模型看到的 prompt 里被剥掉。主机工具（`run_script`、`bash`、`read_file`、`write_file`、`grep`、`glob`、`web_fetch`）默认关闭，可以按工具粒度开启。参见[可用工具](/zh-cn/tools/)。
 
 ## 能在不打开浏览器标签页的情况下用 Browy 吗？
 
-今天不行。Browy 是浏览器智能体：它所有的工具都通过 `chrome.debugger`
-作用在一个真实的标签页上。如果你要的是纯终端的 Copilot 智能体，
-[GitHub Copilot CLI](https://docs.github.com/en/copilot/github-copilot-in-the-cli)
-就是干这个的。
+浏览器智能体不行：它的浏览器工具要通过 `chrome.debugger` 作用在一个真实的标签页上。不过后端的命令行里有 `browy run "<task>"`，这是一个终端智能体，用的是 Copilot CLI 自带的文件、shell 和网页工具，不需要浏览器。如果你只想要一个纯终端的 Copilot 智能体，[GitHub Copilot CLI](https://docs.github.com/en/copilot/github-copilot-in-the-cli) 就是干这个的。
 
 ## Browy 是 GitHub Copilot 的竞品吗？
 
