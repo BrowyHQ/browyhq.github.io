@@ -60,8 +60,7 @@ head:
 ---
 
 import { Card, CardGrid, LinkCard, Aside, Badge } from '@astrojs/starlight/components';
-import placeholder from '../../assets/screenshots/panel-summarize.png';
-import { Image } from 'astro:assets';
+import { YouTube } from 'astro-embed';
 
 ## What Browy is
 
@@ -75,8 +74,8 @@ and a small **native messaging host** you install with one command. The
 [install guide](/install/) covers both.
 
 <figure class="browy-frame">
-  <Image src={placeholder} alt="Browy side panel chatting about the active tab" />
-  <figcaption>Side panel summarizing a Wikipedia article.</figcaption>
+  <YouTube id="bnellxgwJwY" title="Browy fills a 26-field form from the paper in your other tab" />
+  <figcaption>One sentence, in real time: Browy reads the authors from a paper in another tab, fills all 26 fields, and stops before submit. <a href="/demo/paper-form/">Try the same form.</a></figcaption>
 </figure>
 
 ## Why Browy

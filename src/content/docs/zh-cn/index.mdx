@@ -34,8 +34,7 @@ head:
 ---
 
 import { Card, CardGrid, LinkCard, Aside, Badge } from '@astrojs/starlight/components';
-import placeholder from '../../../assets/screenshots/panel-summarize.png';
-import { Image } from 'astro:assets';
+import { YouTube } from 'astro-embed';
 
 ## Browy 是什么
 
@@ -49,8 +48,8 @@ Browy 是一个 Chrome 侧边栏智能体。你和它对话，它读取当前标
 [安装指南](/zh-cn/install/)涵盖了两部分。
 
 <figure class="browy-frame">
-  <Image src={placeholder} alt="Browy 侧边栏正在对当前标签页内容进行对话" />
-  <figcaption>侧边栏在总结一篇维基百科文章。</figcaption>
+  <YouTube id="bnellxgwJwY" title="Browy 根据另一个标签页里的论文，填写 26 个字段的表单" />
+  <figcaption>一句话，实时录制：Browy 从另一个标签页的论文里读出作者，填好全部 26 个字段，并在提交前停下。<a href="/demo/paper-form/">试试同一个表单。</a></figcaption>
 </figure>
 
 <Aside type="tip" title="中国大陆开发者">
