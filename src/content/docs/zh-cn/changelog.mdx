@@ -23,6 +23,8 @@ import { Badge, LinkCard, CardGrid, Aside } from '@astrojs/starlight/components'
   `grep`、`glob`、`web_fetch`），默认关闭，按工具粒度在
   设置 → 工具中开启。`run_script` 从 0.1.10 起归入这一组。
 - 多浏览器支持：Chrome、Edge、Brave（以及其他基于 Chromium 的浏览器）。
+- 停止会立即结束当前回合，对话会从停下的地方接着做。每个窗口里的 Browy
+  只操作本窗口的标签页，第二个窗口发来的消息会排队等候（0.1.11）。
 - Windows 一行命令的 PowerShell 安装脚本。
 
 ---

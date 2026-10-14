@@ -62,7 +62,9 @@ worker runs it through `chrome.debugger` or `chrome.tabs` and posts a
     Session routing. One `Runner` per host process keeps a session
     for each connected panel, keyed by the panel's session id, and
     passes messages between the panels and the one `Agent`. It runs
-    one chat turn at a time across all panels. Each session's pending
+    one chat turn at a time across all panels; a message sent from
+    another panel meanwhile waits in line and starts as soon as the
+    current turn ends. Each session's pending
     CDP calls live in its `ExtensionContext`
     (`src/agent/extension-context.ts`).
   </Card>

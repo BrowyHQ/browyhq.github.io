@@ -41,7 +41,7 @@ Chrome / Edge / Brave 上，应用 id 是 `com.browy.host`。它运行在你的
     工具登记表：大模型可以调用的每一个 Browy 工具（`inspect_page`、`click_index`、`type_index`、`get_network_requests` 等）。每个工具都是一次 `register({ def, run })` 调用：一份 JSON schema 定义，加上一个 `run(args, ctx)` 函数。这个函数在主机里干活，通过 `ctx.cdp` 操作标签页。
   </Card>
   <Card title="`src/agent/runner.ts`" icon="seti:plan">
-    会话路由。每个主机进程一个 `Runner`，它为每个连上的面板维护一个会话（以面板的 session id 为键），在这些面板和唯一的 `Agent` 之间传递消息。所有面板加起来同一时间只跑一轮对话。每个会话未完成的 CDP 调用放在它自己的 `ExtensionContext`（`src/agent/extension-context.ts`）里。
+    会话路由。每个主机进程一个 `Runner`，它为每个连上的面板维护一个会话（以面板的 session id 为键），在这些面板和唯一的 `Agent` 之间传递消息。所有面板加起来同一时间只跑一轮对话，这期间其他面板发来的消息会排队，等当前这轮结束后马上开始。每个会话未完成的 CDP 调用放在它自己的 `ExtensionContext`（`src/agent/extension-context.ts`）里。
   </Card>
   <Card title="`src/transports/`" icon="seti:folder">
     Stdio 分帧（`native-messaging.ts`）：先是 4 字节小端长度，然后是 UTF-8 JSON。`Runner` 只看得到 `src/protocol.ts` 里的 `Transport` 接口，主机的消息类型也都定义在那个文件里。

@@ -73,7 +73,9 @@ Tools run in the host. When one needs the page, the host sends a
 
 1. Picks the tab: the `tabId` in the message if the host pinned one,
    else the tab bound to the session (a DevTools panel's inspected
-   tab), else the active tab in the last-focused window.
+   tab), else the active tab in the side panel's own window (sent as
+   `windowId` with `session.start`), and the active tab in the
+   last-focused window only when the panel didn't say.
 2. Calls `chrome.debugger.attach({tabId}, '1.3')` if it isn't
    already attached.
 3. Runs the command with `chrome.debugger.sendCommand`
@@ -83,7 +85,7 @@ Tools run in the host. When one needs the page, the host sends a
 4. Posts `{type: 'tool.result', sessionId, callId, ok, result}` back
    over the port.
 
-`tab.new`, `tab.activate`, `tab.list` and `tab.getActive` go through
+`tab.new`, `tab.activate`, `tab.close`, `tab.list` and `tab.getActive` go through
 `chrome.tabs` the same way, and events from attached tabs flow back
 to the host as `cdp.event`.
 

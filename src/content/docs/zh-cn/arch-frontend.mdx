@@ -53,12 +53,12 @@ extension/
 
 工具在主机里运行。工具需要操作页面时，主机发一条 `cdp.send` 消息，SW 会：
 
-1. 选定标签页：如果主机在消息里固定了 `tabId` 就用它，否则用绑定到这个会话的标签页（DevTools 面板正在检查的那个），再否则用最近聚焦窗口里的活动标签页。
+1. 选定标签页：如果主机在消息里固定了 `tabId` 就用它，否则用绑定到这个会话的标签页（DevTools 面板正在检查的那个），再否则用侧边栏所在窗口里的活动标签页（侧边栏在 `session.start` 里以 `windowId` 告知）；只有面板没有告知窗口时，才用最近聚焦窗口里的活动标签页。
 2. 如果还没附加，就调用 `chrome.debugger.attach({tabId}, '1.3')`。
 3. 用 `chrome.debugger.sendCommand` 执行命令（`inspect_page` 快照用的是 `Runtime.evaluate`，`click_index` 用的是 `Input.dispatchMouseEvent`，还有 `Network.enable` 等），把结果的整理交给主机。
 4. 通过 port 回发 `{type: 'tool.result', sessionId, callId, ok, result}`。
 
-`tab.new`、`tab.activate`、`tab.list` 和 `tab.getActive` 同样通过 `chrome.tabs` 处理；已附加标签页上的事件会以 `cdp.event` 的形式流回主机。
+`tab.new`、`tab.activate`、`tab.close`、`tab.list` 和 `tab.getActive` 同样通过 `chrome.tabs` 处理；已附加标签页上的事件会以 `cdp.event` 的形式流回主机。
 
 那个 Chrome 的*"Browy started debugging..."*黄色横幅，是 Chrome 对
 任何使用 DevTools Protocol 的扩展的强制披露。我们不去试图隐藏它。
