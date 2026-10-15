@@ -27,6 +27,13 @@ const HEIGHT = 630;
 
 const posts = [
   {
+    slug: 'how-i-built-browy',
+    title: 'How I built Browy,\nan AI agent that\nlives in your browser',
+    subtitle: 'What runs where, and what broke along the way.',
+    accent: '#4ade80',
+    mascot: 'idle.png',
+  },
+  {
     slug: 'filling-forms-signed-in',
     title: 'Your browser already knows who you are.\nThe form does not.',
     subtitle: 'Filling forms from inside the session you are signed into.',

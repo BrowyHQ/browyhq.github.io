@@ -1,0 +1,184 @@
+---
+title: "我是怎么做出 Browy 的：一个住在你浏览器里的 AI 智能体"
+description: "Browy 是一个开源 AI 智能体，直接在你已经登录的浏览器里工作。这篇讲它的各个部分怎么拼在一起，以及这一路上坏过哪些东西。"
+slug: zh-cn/blog/how-i-built-browy
+template: doc
+tableOfContents: false
+sidebar:
+  hidden: true
+head:
+  - tag: meta
+    attrs:
+      property: og:type
+      content: article
+  - tag: meta
+    attrs:
+      property: article:published_time
+      content: "2026-10-15T00:00:00Z"
+  - tag: meta
+    attrs:
+      property: article:author
+      content: "Ritabrata Maiti"
+  - tag: meta
+    attrs:
+      property: og:image
+      content: "https://browyhq.github.io/og/how-i-built-browy.png"
+  - tag: meta
+    attrs:
+      name: twitter:image
+      content: "https://browyhq.github.io/og/how-i-built-browy.png"
+  - tag: meta
+    attrs:
+      name: keywords
+      content: "Browy, AI 浏览器智能体, 浏览器扩展, Chrome 扩展, 原生消息, Chrome DevTools Protocol, chrome.debugger, GitHub Copilot SDK, 浏览器自动化, 开源"
+  - tag: script
+    attrs:
+      type: application/ld+json
+    content: |
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "我是怎么做出 Browy 的：一个住在你浏览器里的 AI 智能体",
+        "description": "Browy 的扩展、本地 Node 主机和 GitHub Copilot SDK 怎么配合，为什么智能体要在你已经在用的浏览器里运行，以及塑造了它的三个 bug。",
+        "datePublished": "2026-10-15T00:00:00Z",
+        "dateModified": "2026-10-15T00:00:00Z",
+        "author": {
+          "@type": "Person",
+          "name": "Ritabrata Maiti",
+          "url": "https://github.com/ritabratamaiti"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Browy",
+          "url": "https://browyhq.github.io/"
+        },
+        "mainEntityOfPage": "https://browyhq.github.io/zh-cn/blog/how-i-built-browy/",
+        "image": "https://browyhq.github.io/og/how-i-built-browy.png",
+        "inLanguage": "zh-CN",
+        "keywords": ["浏览器智能体", "Chrome 扩展", "原生消息", "Chrome DevTools Protocol", "GitHub Copilot SDK"]
+      }
+---
+
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+<p style="opacity:0.7;font-size:0.9em;margin-top:-0.5em">作者 <a href="https://github.com/ritabratamaiti">Ritabrata Maiti</a> · <time datetime="2026-10-15">2026 年 10 月 15 日</time> · 阅读约 10 分钟</p>
+
+你给 Browy 发出第一条消息时，Chrome 会弹出一条横幅，说 Browy 已开始调试此浏览器。任何扩展都没法把它藏起来，Browy 也不例外。它之所以出现，是因为 Browy 通过 `chrome.debugger` 驱动你的标签页，这个 API 让扩展可以使用 Chrome DevTools Protocol，也就是你自己的 DevTools 用的那套协议。
+
+我后来挺喜欢这条横幅的，因为它对 Browy 的描述，比我平时自己说得还准。Browy 是一个住在你浏览器里的 AI 智能体，这里的“住在”是字面意思。它就在你已经打开的 Chrome、Edge 或 Brave 窗口里工作，你登录了什么，它就登录了什么。
+
+你在侧边栏里和它对话，或者在 DevTools 面板里给它敲命令，它就在你的标签页里读页面、点击、输入、填表、运行 JavaScript，你全程看着。模型来自你自己的 GitHub Copilot 订阅。它以 Apache-2.0 协议[开源](https://github.com/BrowyHQ/browy)，从 4 月起一直是我一个人在做。下面是它如何工作的完整版，bug 也都原样留着。
+
+## 你按下发送之后发生了什么
+
+你电脑上有三个程序参与其中，它们之间通过管道通信。
+
+第一个是你的浏览器，里面跑着 Browy 的扩展：一个用来对话的侧边栏，一个给更喜欢敲命令的人用的 DevTools 面板，还有一个设置页。它们都不直接和模型通信，而是和扩展的 service worker 通信，service worker 与第二个程序之间保持着一条连接。[前端架构页](/zh-cn/arch-frontend/)逐个文件讲解了这个扩展。
+
+这条连接就是 Chrome 的原生消息（native messaging）。Browy 的安装程序会以 `com.browy.host` 这个名字注册一份清单，service worker 调用 `chrome.runtime.connectNative('com.browy.host')` 时，Chrome 就会启动主机程序，并把扩展接到它的 stdin 和 stdout 上。每条消息是一个四字节的长度，后面跟着 JSON。这个打开着的 port 还能让 service worker 保持存活，否则 Manifest V3 会让它休眠。
+
+主机是一个 Node 程序，智能体就住在这里。它包装了 GitHub 的 [Copilot SDK](https://github.com/github/copilot-sdk)，SDK 会以无头模式启动第三个程序 [Copilot CLI](https://github.com/github/copilot-cli)，并通过另一对管道用 JSON-RPC 和它通信。CLI 用你的 Copilot 订阅调用模型，并保存每一段对话。Browy 自己的代码负责浏览器这一半：各种工具，以及模型每一轮看到的页面全貌。细节见[后端架构页](/zh-cn/arch-backend/)。
+
+每次你发消息，这份全貌都会重新拼一遍。主机会在你的文字后面附上一个 `<browser_context>` 块，里面有当前标签页的标题和 URL、视口、滚动位置，以及你选中的文字；后面再跟上一份页面快照，和智能体最近几次的工具调用。你的话放在最前面，这样历史列表里这段对话的摘要，显示的就是你问了什么。
+
+模型调用工具时，SDK 会在主机里运行对应的处理函数。如果这个工具需要操作页面，主机就沿着原生消息 port 发回一条 `cdp.send` 消息，指明一个 DevTools Protocol 方法和它的参数。service worker 选定标签页，如果还没挂上就挂上 `chrome.debugger`，执行命令，再把结果传回去。网络和控制台事件也走同一条路。主机负责协调，而每一个动作都发生在你的浏览器里。
+
+DevTools 面板是同一个智能体，只是前面换成了终端：斜杠命令、模型选择器，还有一个 `/js` 模式，把你输入的每一行直接放在被检查的页面里运行，完全不调用模型。每个面板只操作它所检查的那个标签页。REPL 是怎么做的，见 [DevTools CLI 页](/zh-cn/arch-cli/)。
+
+## 把页面变成一张编号列表
+
+让模型按 CSS 选择器去点东西，它会很乐意地编一个出来。就算选择器是对的，它也只描述了某个元素在某一刻的位置，一次重渲染就可能让它挪地方。
+
+所以 Browy 交给模型的是一张编号列表。一次 `Runtime.evaluate` 调用遍历整个页面，包括 shadow root 和同源 iframe，保留每一个可交互、可见、并且离视口不超过 2,000 像素的元素。它按阅读顺序排序，去掉几乎整个落在另一个元素里面的元素，最多保留 150 个，并给每个元素打上 `data-browy-id` 属性。模型看到的大概是这样：
+
+```
+[1]<a href=/expenses>My expenses</a>
+[4]<input type=text name=title placeholder="e.g. Client dinner" aria-name=Title />
+[5]<input type=number name=amount aria-name="Amount (SGD)" />
+[6]<input type=checkbox name=billable unchecked aria-name="Billable to client" />
+[*7]<button>Attach receipt</button>
+[~12]<button type=submit>Submit for approval</button>
+```
+
+`~` 表示这个元素在屏幕外，点击类工具会先把它滚动到可视范围内。`*` 表示上一份快照里还没有它，模型就是靠这个发现对话框弹出来了，或者表单多出了一部分。`aria-name` 是屏幕阅读器会读出来的名字，通常就是你自己会看的那个标签。
+
+执行 `click_index(12)` 时，主机找到打了标记的元素，用 `Input.dispatchMouseEvent` 往它的中心点发送真实的鼠标事件。点击前后，它各记录一次 URL、标题、可见文字的哈希、打开的对话框数量，以及元素的 ARIA 状态。点击半秒之后，它对比两次记录，用 `urlChanged`、`domChanged`、`modalAppeared`、`elementStateChanged` 这样的标志报告哪些东西变了。如果什么都没变，返回结果会直说，并提示可能是什么挡住了，比如一层遮罩，或者页面还在渲染。
+
+这套做法不是我发明的。带编号的快照参照的是 [browser-use](https://github.com/browser-use/browser-use) 的 DOM service 和序列化器，连去掉嵌套元素的规则都一样。感谢这个团队把这些公开地做了出来。
+
+## 关掉工具
+
+Browy 一共有 54 个浏览器工具，从 `click_index`、`fill_form` 到 `get_network_requests`、`replay_request`。其中大多数在 Browy 的设置里都有开关。关掉一个工具，它会从两个地方被移除：发给模型的工具定义，以及 SDK 的 `availableTools` 允许列表。模型根本不会知道这个工具存在。
+
+其中有两个会运行模型自己写的代码。`evaluate_js` 在页面里运行 JavaScript，用来做索引工具表达不了的事，它默认开启。`run_script` 在你的电脑上运行 Node.js，所以在你打开之前它是关着的。0.1.10 版之前它默认开启，对一个能碰到你电脑的工具来说，这个默认值是错的。
+
+Copilot CLI 也自带一些工具，比如 `bash` 和 `web_fetch`，它们作用于你的电脑，而不是标签页。和 `run_script` 一样，在你逐个打开之前，Browy 不会把它们放进允许列表。
+
+这些之所以重要，是因为 Browy 以你的身份登录着，却在读陌生人写的页面。任何页面都可能藏着冲着模型来的文字，Browy 的安全模型也默认有些页面会这么做。这些开关决定了这样的页面最多能怂恿智能体做到哪一步。
+
+## 为什么是你自己的浏览器
+
+很多智能体会启动一个全新的浏览器，而且常常是在服务器上，用的是一个什么都没登录的空配置文件。对于大规模处理公开页面，这是正确的设计。可我大部分重复性的工作，都发生在只有登录之后才存在的页面上：我正在审的 pull request、我的 Gmail 过滤器、一份报销单、某个期刊的投稿系统。全新的浏览器打开其中任何一个，都只会停在登录页。表单填写这一面，我在[之前一篇文章](/zh-cn/blog/filling-forms-signed-in/)里写过。
+
+Browy 绕开这个问题的办法，就是待在你的浏览器里。你问眼前这个 pull request，它读的就是眼前这个 pull request，就在你已经登录的那个标签页里。你的登录状态留在你登录的地方，也就是你的浏览器配置文件里，和你的 cookie、密码管理器在一起。页面要密码或者双因素验证码的时候，智能体应该调用 `await_user`，暂停下来，把这件事交给你。这个工具自己的描述里就写着，让模型用它，而不是往密码框里输入。
+
+你的对话历史也存在你自己的机器上，在 `~/.copilot/` 下面。离开你机器的，是模型需要看到的东西：你的消息，以及智能体读到的页面内容，按 GitHub 的条款，通过你的 Copilot 订阅发出去，和 Copilot CLI 在终端里发送它们的方式一样。
+
+代价是规模。Browy 只在一台机器上的一个浏览器里工作，而且只在你开口的时候才动。它不会通宵跑一百个任务，这一点我能接受。
+
+## 第二次安装，以及其他代价
+
+Browy 需要两个在浏览器之外运行的程序：跑智能体的 Node，和对接模型的 Copilot CLI。扩展没法自己安装它们，而原生消息只能连到已经在机器上注册过的程序。所以 Browy 的安装分两步：先从 Chrome Web Store 装扩展，再在 PowerShell 或终端里运行一行命令。侧边栏会显示适合你系统的命令，带一个复制按钮，主机一注册好，它会自己接上。我测下来是 3.6 秒。两条命令都在[安装指南](/zh-cn/install/)里。
+
+分成两半，也意味着两套更新节奏：扩展由 Web Store 自动更新，主机由你来更新，主机版本落后时，侧边栏会提醒你。
+
+然后是体积。Windows 版下载大约 140 MB，大部分是 Copilot CLI。8 月的时候，我把一个 106 MB 的原生二进制文件从每个下载包里删掉了，因为 SDK 是把 CLI 当成 Node 脚本来跑的，从来没有东西执行过那个二进制文件。到了 10 月，CLI 本身搬进了同一个包，变成了原生可执行文件。换过去之后，Windows 上 CLI 的启动时间从 5.8 秒降到 0.6 秒，Windows 下载包也从大约 80 MB 涨回了大约 140 MB。Browy 你只下载一次，但等它启动的次数要多得多，所以这笔交换我愿意做。
+
+Browy 也只支持 Chromium：Chrome、Edge 和 Brave。上面讲的一切都依赖 `chrome.debugger`，而 Firefox 和 Safari 没有给扩展提供对等的东西。
+
+还有本文开头那条调试横幅。只要 Browy 还占着某个标签页，它就一直在；点它上面的“取消”，智能体就会断开。
+
+## 从没送到的系统提示词
+
+10 月，我发现 Browy 打包的还是 1.0.36 版的 Copilot CLI，而当时的最新版是 1.0.95，也就是上一节说的那个原生二进制文件。升级意味着要拿新 CLI 把 Browy 的每一个 SDK 调用都核对一遍，结果翻出了一个更大的问题。
+
+SDK 是按具名字段来构造 `session.create` 请求的，系统提示词要放在一个叫 `systemMessage` 的字段里。而 Browy 从第一次提交起，一直是用 `systemPrompt` 传它的提示词。没有任何地方报错。JavaScript 不在乎选项对象里多一个键，SDK 也从来不读那个键。整整五个半月，每一段 Browy 对话跑的都是 Copilot CLI 的默认指令，加上 Browy 的工具列表。那些告诉模型它是 Browy、该怎么用编号工具、什么时候把登录交还给你的指令，从来没有送到模型那里。
+
+SDK 的 TypeScript 类型本来能抓到这个错误，因为 `SessionConfig` 里有 `systemMessage` 字段，没有 `systemPrompt`。可 Browy 是用 `require()` 加载 SDK 的，客户端的类型是 `any`，所以编译器从来没有拿两者比对过。
+
+最扎心的是同一个函数里往上大约三十行的一条注释，它在第一个版本里就已经在了。注释里写着，早先的 `includeDefaultTools: false` 这个参数，同样从来就不是真正的 SDK 选项。这类 bug 我抓到过一次，还专门写了下来，而第二个就待在这条注释往下三十行的地方。
+
+我猜 Browy 之所以大体上还算规矩，是因为工具描述确实送到了模型那里，而很多指引本来就写在工具描述里。
+
+修复只有一行，`systemMessage: { content: SYSTEM_PROMPT }`，但有个附带问题。我 4 月写的提示词让模型先填表、再提交；提示词一旦开始送达，这条规则就会第一次生效。所以同一个版本把它改写了。现在 Browy 只有在你要求它提交、发送、发布或购买时才会提交，否则就停下来，告诉你表单已经填好，等你检查。问它叫什么名字，它终于会回答“I'm Browy”。
+
+## 一直都在磁盘上的对话
+
+5 月，我卸载了开发版的扩展，想像新用户那样试一次干净安装。打开新装的扩展时，我以前的对话从历史列表里不见了。卸载扩展会清掉它的存储，所以我以为它们没了。
+
+其实没有。Copilot SDK 早已把每段对话的每一轮都写进了它在 `~/.copilot/` 下的会话存储里，就在我自己的磁盘上，而主机本来就会列出和读取这些会话。它只是不认得那些旧会话是 Browy 的。它只认以 `sp-`（侧边栏）或 `dt-`（DevTools）开头的会话 id，而我那些旧对话比这套命名规则还早。
+
+0.1.4 版只要看到三个标记中的任何一个，就认定这是 Browy 的会话：id 前缀、每个 Browy 会话创建时用的工作目录，或者 Browy 加在消息里的 `<browser_context>` 块。我放宽了列出对话时用的规则，但自动清理仍然交给原来那条严格的规则，这样来路不明的会话就不会被误删。
+
+8 月，对话又“丢”了一次：那句“No past chats yet”原来是一个四秒的超时，而刚启动的主机需要 7.7 到 40 秒才能应答。两次对话其实都好好的。这是本地智能体一个我事先没想到的好处：界面告诉我对话没了的时候，我可以打开那个文件夹自己看。
+
+## 它说已经填好的那张表
+
+每一轮，Browy 都会在一个 `<recent_actions>` 块里给模型看它自己最近的五次工具调用，包括每个工具的参数、成功与否、耗时，以及结果的开头部分。模型就是靠这个检查自己上一次点击有没有起作用。browser-use 里有同样的思路，ReAct、SeeAct 这类研究型智能体也一样。
+
+这份列表原来挂在主机的智能体对象上，而一个智能体对象服务所有对话。于是，一段新对话的第一条消息，带着的是上一段对话最近的五次调用。
+
+我是 10 月 13 日发现的，当时正在拍现在放在 Browy 首页上的那段演示视频。在一段全新的对话里，我让 Browy 填写它刚刚在另一段对话里填过的同一张表。它回答说表已经填好了。它一个工具都没调用。
+
+严格来说，模型并没有瞎编。它是在读。它的上下文显示，片刻之前 `fill_form` 返回了 ok，而且它完全有理由认为那就是它自己这段对话，于是它相信了这条记录。
+
+修复后，这份列表按对话分开存放，放在[一个独立的小模块](https://github.com/BrowyHQ/browy/blob/main/src/agent/recent-actions.ts)里；还加了一个新测试，只要新对话再次带着别的对话的工具调用开场，它就会失败。0.1.9 版当天就发布了。
+
+那段演示视频就出自同一次拍摄。它是 65 秒的实时录像：在侧边栏里输入一句话，一个标签页里开着一篇论文，另一个标签页里是一张有 26 个字段的论文投稿表。到最后，每个字段都填好了，提交按钮还在等我去按。
+
+---
+
+<CardGrid>
+  <LinkCard title="← 全部文章" href="/zh-cn/blog/" description="Browy 博客的全部文章索引。" />
+  <LinkCard title="架构：原生消息主机" href="/zh-cn/arch-backend/" description="主机如何包装 Copilot SDK，并把工具调用路由回扩展。" />
+</CardGrid>

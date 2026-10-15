@@ -48,6 +48,7 @@ Licence: Apache-2.0. Source: https://github.com/BrowyHQ/browy
 - [GitHub got pwned through one VSCode extension](https://browyhq.github.io/blog/vscode-extension-breach/): a supply-chain compromise reaching roughly 3,800 internal repositories.
 - [Every $20 AI subscription costs $100 to serve](https://browyhq.github.io/blog/ai-subscription-bomb/): the unit economics behind flat-rate assistant pricing.
 - [Google quietly declared war on the open web](https://browyhq.github.io/blog/google-vs-the-web/): AI Overviews becoming the default answer surface.
+- [How I built Browy, an AI agent that lives in your browser](https://browyhq.github.io/blog/how-i-built-browy/): how Browy's extension, local Node host and the GitHub Copilot SDK fit together, and why the agent runs in the user's own signed-in browser.
 
 ## Optional
 

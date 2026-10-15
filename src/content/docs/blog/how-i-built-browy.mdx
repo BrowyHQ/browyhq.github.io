@@ -1,0 +1,350 @@
+---
+title: "How I built Browy, an AI agent that lives in your browser"
+description: "Browy is an open-source AI agent that works inside the browser you're already signed into. Here's how the pieces fit together, and what broke along the way."
+slug: blog/how-i-built-browy
+template: doc
+tableOfContents: false
+sidebar:
+  hidden: true
+head:
+  - tag: meta
+    attrs:
+      property: og:type
+      content: article
+  - tag: meta
+    attrs:
+      property: article:published_time
+      content: "2026-10-15T00:00:00Z"
+  - tag: meta
+    attrs:
+      property: article:author
+      content: "Ritabrata Maiti"
+  - tag: meta
+    attrs:
+      property: og:image
+      content: "https://browyhq.github.io/og/how-i-built-browy.png"
+  - tag: meta
+    attrs:
+      name: twitter:image
+      content: "https://browyhq.github.io/og/how-i-built-browy.png"
+  - tag: meta
+    attrs:
+      name: keywords
+      content: "browy, ai browser agent, browser extension, chrome extension, native messaging, chrome devtools protocol, chrome.debugger, github copilot sdk, browser automation, open source"
+  - tag: script
+    attrs:
+      type: application/ld+json
+    content: |
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "How I built Browy, an AI agent that lives in your browser",
+        "description": "How Browy's extension, local Node host and the GitHub Copilot SDK fit together, why the agent runs inside the browser you already use, and three bugs that shaped it.",
+        "datePublished": "2026-10-15T00:00:00Z",
+        "dateModified": "2026-10-15T00:00:00Z",
+        "author": {
+          "@type": "Person",
+          "name": "Ritabrata Maiti",
+          "url": "https://github.com/ritabratamaiti"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Browy",
+          "url": "https://browyhq.github.io/"
+        },
+        "mainEntityOfPage": "https://browyhq.github.io/blog/how-i-built-browy/",
+        "image": "https://browyhq.github.io/og/how-i-built-browy.png",
+        "inLanguage": "en",
+        "keywords": ["browser agent", "chrome extension", "native messaging", "chrome devtools protocol", "github copilot sdk"]
+      }
+---
+
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+<p style="opacity:0.7;font-size:0.9em;margin-top:-0.5em">By <a href="https://github.com/ritabratamaiti">Ritabrata Maiti</a> · <time datetime="2026-10-15">October 15, 2026</time> · 10 min read</p>
+
+When you send Browy its first message, Chrome puts up a bar saying that Browy
+started debugging this browser. No extension can hide it, Browy included. It
+appears because Browy drives your tabs through `chrome.debugger`, which lets
+an extension speak the Chrome DevTools Protocol, the same protocol your own
+DevTools use.
+
+I've grown to like that bar, because it describes Browy better than I usually
+manage to. Browy is an AI agent that lives in your browser, and I mean that
+literally. It works in the Chrome, Edge or Brave window you already have open,
+signed in to everything you're signed in to.
+
+You chat with it in the side panel, or type at it in a DevTools panel, and it
+reads pages, clicks, types, fills forms and runs JavaScript in your tabs while
+you watch. The models come through your own GitHub Copilot subscription. It's
+[open source](https://github.com/BrowyHQ/browy) under Apache-2.0, and I've
+been building it on my own since April. This is the long version of how it
+works, with the bugs left in.
+
+## What happens when you hit send
+
+Three programs on your computer take part, and they talk over pipes.
+
+The first is your browser, running Browy's extension: a side panel for
+chatting, a DevTools panel for people who'd rather type commands, and a
+settings page. None of them talk to the model. They talk to the extension's
+service worker, which keeps one connection open to the second program. The
+[frontend architecture page](/arch-frontend/) walks through the extension file
+by file.
+
+That connection is Chrome's native messaging. Browy's installer registers a
+manifest under the name `com.browy.host`, and when the service worker calls
+`chrome.runtime.connectNative('com.browy.host')`, Chrome starts the host and
+wires the extension to its stdin and stdout. Each message is a four-byte
+length followed by JSON. The open port also keeps the service worker alive,
+which Manifest V3 would otherwise put to sleep.
+
+The host is a Node program, and it's where the agent lives. It wraps GitHub's
+[Copilot SDK](https://github.com/github/copilot-sdk), which starts the third
+program, the [Copilot CLI](https://github.com/github/copilot-cli), in headless
+mode and talks JSON-RPC to it over another pair of pipes. The CLI makes the
+model calls on your Copilot subscription and stores each chat. Browy's code
+covers the browser half: the tools, and the picture of the page the model gets
+on every turn. The [backend architecture page](/arch-backend/) has the
+details.
+
+That picture is rebuilt each time you send a message. The host appends a
+`<browser_context>` block to your text, with the active tab's title and URL,
+the viewport, the scroll position and any text you've selected, followed by a
+snapshot of the page and the agent's last few tool calls. Your words go first,
+so the chat's summary in the history list shows what you asked.
+
+When the model calls a tool, the SDK runs a handler in the host. If the tool
+needs the page, the host sends a `cdp.send` message back up the native port,
+naming a DevTools Protocol method and its parameters. The service worker picks
+the tab, attaches `chrome.debugger` if it isn't attached yet, runs the command
+and sends the result back down. Network and console events travel the same
+route. The host coordinates, and every action happens in your browser.
+
+The DevTools panel is the same agent with a terminal in front: slash commands,
+a model picker, and a `/js` mode that runs each line in the inspected page
+without calling the model. Each panel works on the tab it inspects. The
+[DevTools CLI page](/arch-cli/) covers how the REPL is built.
+
+## The page as a numbered list
+
+Ask a model to click something by CSS selector and it will happily invent one.
+Even a correct selector only says where an element sat at one moment, and a
+re-render can move it.
+
+So Browy hands the model a numbered list. One `Runtime.evaluate` call walks
+the page, shadow roots and same-origin iframes included, and keeps each
+element that's interactive, visible and within 2,000 pixels of the viewport.
+It sorts them in reading order, drops any that sit almost entirely inside
+another, stops at 150 and stamps each one with a `data-browy-id` attribute.
+The model sees something like this:
+
+```
+[1]<a href=/expenses>My expenses</a>
+[4]<input type=text name=title placeholder="e.g. Client dinner" aria-name=Title />
+[5]<input type=number name=amount aria-name="Amount (SGD)" />
+[6]<input type=checkbox name=billable unchecked aria-name="Billable to client" />
+[*7]<button>Attach receipt</button>
+[~12]<button type=submit>Submit for approval</button>
+```
+
+A `~` marks an element that's off screen, which the click tools scroll into
+view first. A `*` marks one that wasn't in the previous snapshot, which is how
+the model notices that a dialog opened or a new part of the form appeared. The
+`aria-name` is what a screen reader would announce, usually the label you'd
+read yourself.
+
+For `click_index(12)`, the host finds the stamped element and sends real mouse
+events to its center with `Input.dispatchMouseEvent`. Before and after, it
+records the URL, the title, a hash of the visible text, the number of open
+dialogs and the element's ARIA state. Half a second after the click it
+compares them and reports what changed, with flags like `urlChanged`,
+`domChanged`, `modalAppeared` and `elementStateChanged`. If nothing changed,
+the reply says so and suggests what might be in the way, such as an overlay or
+a page that's still rendering.
+
+I didn't invent this. The indexed snapshot is modeled on
+[browser-use](https://github.com/browser-use/browser-use)'s DOM service and
+serializer, down to the rule for dropping nested elements, and I'm grateful to
+that team for working it out in the open.
+
+## Turning tools off
+
+Browy has 54 browser tools, from `click_index` and `fill_form` to
+`get_network_requests` and `replay_request`. Most have a switch in Browy's
+settings. Turning one off removes it from two places, the tool definitions
+sent to the model and the SDK's `availableTools` allowlist, so the model never
+learns it exists.
+
+Two of them run code the model writes. `evaluate_js` runs JavaScript in
+the page, for the jobs the indexed tools can't express, and it's on.
+`run_script` runs Node.js on your computer, so it's off until you switch it
+on. It was on by default until version 0.1.10, which was the wrong default
+for a tool that reaches your machine.
+
+The Copilot CLI also brings tools of its own, like `bash` and `web_fetch`,
+which act on your computer instead of the tab. Browy keeps those out of the
+allowlist until you switch them on, one at a time, the same as `run_script`.
+
+This matters because Browy reads pages written by strangers while it's signed
+in as you. Any page can carry text aimed at the model, and Browy's security
+model assumes some pages will. The switches decide what a page like that could
+talk the agent into.
+
+## Why your own browser
+
+Plenty of agents start a fresh browser, often on a server, with an empty
+profile that isn't signed in to anything. For public pages at scale, that's
+the right design. Most of my repetitive work happens on pages that only exist
+because I'm signed in, though: the pull request I'm reviewing, my Gmail
+filters, an expense claim, a journal's submission portal. A fresh browser sent
+to any of them lands on a login screen. I wrote about the form-filling side of
+this in [an earlier post](/blog/filling-forms-signed-in/).
+
+Browy sidesteps that by staying in your browser. Ask about the pull request in
+front of you, and it reads the pull request in front of you, in the tab where
+you're already signed in. Your logins stay where you made them, in your
+browser profile, next to your cookies and your password manager. When a page
+wants a password or a 2FA code, the agent is meant to call `await_user`, which
+pauses and hands the job to you. That tool's own description tells the model
+to use it instead of typing into password fields.
+
+Your chat history is stored on your machine too, under `~/.copilot/`. What
+leaves it is what the model needs to see: your messages and the page content
+the agent reads, sent through your Copilot subscription under GitHub's terms,
+the same way the Copilot CLI sends them from a terminal.
+
+The trade is scale. Browy works in one browser on one machine, and only when
+you ask. It won't run a hundred jobs overnight, and I'm fine with that.
+
+## The second install, and other costs
+
+Browy needs two programs that live outside the browser, Node for the agent and
+the Copilot CLI for the model. An extension can't install those, and native
+messaging only reaches a program that's already registered on the machine. So
+Browy installs in two steps: the extension from the Chrome Web Store, then a
+one-line command in PowerShell or a terminal. The side panel shows the command
+for your system, with a copy button, and picks up the host by itself once it's
+registered. In my testing that took 3.6 seconds. The
+[install guide](/install/) has both commands.
+
+Having two halves also means two update schedules: the Web Store updates the
+extension, and you update the host, which the side panel prompts you to do
+when it falls behind.
+
+Then there's size. The Windows download is about 140 MB, most of it the
+Copilot CLI. In August I cut a 106 MB native binary out of every download,
+because the SDK ran the CLI as a Node script and nothing ever executed the
+binary. In October the CLI itself moved into that same package as a native
+executable. Switching to it cut the CLI's startup on Windows from 5.8 seconds
+to 0.6, and pushed the Windows download from about 80 MB back up to about 140.
+You download Browy once and wait for it to start far more often, so I'll take
+that trade.
+
+Browy is also Chromium only: Chrome, Edge and Brave. All of the above depends
+on `chrome.debugger`, and Firefox and Safari don't give extensions an
+equivalent.
+
+And there's the debugging bar from the top of this post. It stays up while
+Browy holds a tab, and clicking Cancel on it detaches the agent.
+
+## The system prompt that never arrived
+
+In October I noticed that Browy still bundled version 1.0.36 of the Copilot
+CLI, while the current release was 1.0.95, the native binary from the last
+section. Updating meant checking each SDK call Browy makes against the new
+CLI, and that turned up a bigger problem.
+
+The SDK builds its `session.create` request from named fields, and the system
+prompt goes in one called `systemMessage`. Browy had been passing its prompt
+as `systemPrompt` since the first commit. Nothing complained. JavaScript
+doesn't mind an extra key on an options object, and the SDK never looked for
+that one. For five and a half months, every Browy chat ran on the Copilot
+CLI's default instructions plus Browy's tool list. The instructions that tell
+the model it's Browy, how to use the indexed tools and when to hand a sign-in
+back to you never reached it.
+
+The SDK's TypeScript types would have caught it, since `SessionConfig` has a
+`systemMessage` field and no `systemPrompt`. But Browy loads the SDK with
+`require()` and holds the client as `any`, so the compiler never compared the
+two.
+
+The part that stings is a comment about thirty lines higher in the same
+function, shipped in the very first release. It notes that an earlier
+`includeDefaultTools: false` flag had never been a real SDK option either. I
+had caught this exact kind of bug once and written it down, and the second one
+sat thirty lines below my note.
+
+I suspect Browy mostly behaved anyway because the tool descriptions did reach
+the model, and a lot of the guidance lives there.
+
+The fix was one line, `systemMessage: { content: SYSTEM_PROMPT }`, with a
+catch. The prompt I'd written in April told the model to fill a form and then
+submit it, and once the prompt started arriving, that rule would have taken
+effect for the first time. So the same release rewrote it. Browy now submits
+only when you ask it to submit, send, post or buy, and otherwise stops and
+tells you the form is ready to check. Asked its name, it finally says "I'm
+Browy."
+
+## The chats that were on disk all along
+
+In May I removed my development copy of the extension to test a clean
+install, the way a new user would get it. When I opened the new copy, my older chats were
+missing from the history list. Uninstalling an extension wipes its storage, so
+I assumed they were gone.
+
+They weren't. The Copilot SDK had written every turn of every chat to its
+session store under `~/.copilot/`, on my own disk, and the host already knew
+how to list and read those sessions. It just didn't recognize the old ones as
+Browy's. It looked for session ids starting with `sp-` (side panel) or `dt-`
+(DevTools), and my older chats predated that scheme.
+
+Version 0.1.4 recognizes a Browy session by any of three marks: the id prefix,
+the working directory every Browy session is created with, or the
+`<browser_context>` block Browy adds to messages. I widened the rule for
+listing chats but left the narrow one in charge of automatic cleanup, so
+nothing of uncertain origin could be deleted by accident.
+
+Chats looked lost once more in August, when "No past chats yet" turned out to
+be a four-second timeout on a host that needed between 7.7 and 40 seconds to
+answer. Both times, the chats were fine. That's an upside of a local agent I
+hadn't planned for: when the interface said my chats were gone, I could open
+the folder and check.
+
+## The form it said it had filled
+
+On every turn, Browy shows the model its own last five tool calls in a
+`<recent_actions>` block, with each tool's arguments, whether it worked, how
+long it took and the start of its result. That's how the model checks whether
+its last click did anything. The same idea shows up in browser-use and in
+research agents like ReAct and SeeAct.
+
+The list lived on the host's agent object, and one agent serves every chat. So
+a new chat's first message arrived carrying the previous chat's last five
+calls.
+
+I found out on October 13, while filming the demo video that's now on Browy's
+homepage. In a brand-new chat, I asked Browy to fill the same form it had just
+filled in another chat. It replied that the form was filled. It hadn't called
+a single tool.
+
+The model wasn't making things up, exactly. It was reading. Its context showed
+`fill_form` coming back ok moments earlier, in what it had every reason to
+think was its own chat, and it believed the record.
+
+The fix keys the list by chat, in
+[a small module of its own](https://github.com/BrowyHQ/browy/blob/main/src/agent/recent-actions.ts),
+and a new test fails if a fresh chat ever starts with another chat's tool
+calls again. Version 0.1.9 shipped the same day.
+
+The demo video came out of that same filming session. It runs 65 seconds in
+real time: one sentence typed into the side panel, a paper open in one tab,
+and a 26-field paper submission form in the other. By the end every field is
+filled, and the submit button is still waiting for me.
+
+---
+
+<CardGrid>
+  <LinkCard title="← All posts" href="/blog/" description="Index of every post on the Browy blog." />
+  <LinkCard title="Architecture: native host" href="/arch-backend/" description="How the host wraps the Copilot SDK and routes tool calls back to the extension." />
+</CardGrid>
