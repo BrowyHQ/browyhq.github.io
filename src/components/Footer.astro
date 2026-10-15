@@ -1,8 +1,8 @@
 ---
 import Default from '@astrojs/starlight/components/Footer.astro';
 import EmailSignup from './EmailSignup.astro';
-import { KIT_FORM_ACTION } from '../signup';
+import { SIGNUP_ENDPOINT } from '../signup';
 ---
 
 <Default {...Astro.props}><slot /></Default>
-{KIT_FORM_ACTION && <EmailSignup action={KIT_FORM_ACTION} />}
+{SIGNUP_ENDPOINT && <EmailSignup action={SIGNUP_ENDPOINT} />}

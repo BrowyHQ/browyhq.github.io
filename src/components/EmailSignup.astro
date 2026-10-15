@@ -12,7 +12,7 @@ const COPY = {
 		label: 'Email address',
 		button: 'Email me',
 		sending: 'Sending…',
-		success: 'Thanks! Check your inbox and confirm your email to finish signing up.',
+		success: "Thanks! You're on the list.",
 		error: "That didn't work. Check the address and try again.",
 	},
 	'zh-CN': {
@@ -21,7 +21,7 @@ const COPY = {
 		label: '邮箱地址',
 		button: '订阅',
 		sending: '正在提交…',
-		success: '谢谢！请查收邮件，确认邮箱后即可完成订阅。',
+		success: '谢谢！你已成功订阅。',
 		error: '提交失败，请检查邮箱地址后再试一次。',
 	},
 };
@@ -49,10 +49,20 @@ const copy = COPY[lang];
 		<input
 			id="browy-signup-email"
 			type="email"
-			name="email_address"
+			name="email"
 			required
 			autocomplete="email"
 			placeholder="you@example.com"
+		/>
+		<input type="hidden" name="lang" value={lang} />
+		<input type="hidden" name="source" value={Astro.url.pathname} />
+		<input
+			class="trap"
+			type="text"
+			name="website"
+			aria-hidden="true"
+			tabindex="-1"
+			autocomplete="off"
 		/>
 		<button type="submit">{copy.button}</button>
 	</form>
@@ -68,6 +78,17 @@ const copy = COPY[lang];
 				message.dataset.state = state;
 				message.textContent = text;
 			};
+			// A plain form post comes back to this page ending in #subscribed or #signup-failed.
+			if (location.hash === '#subscribed') {
+				show('success', form.dataset.success);
+				form.remove();
+				box.scrollIntoView({ block: 'center' });
+				return;
+			}
+			if (location.hash === '#signup-failed') {
+				show('error', form.dataset.error);
+				box.scrollIntoView({ block: 'center' });
+			}
 			form.addEventListener('submit', async (event) => {
 				event.preventDefault();
 				const hadFocus = document.activeElement === button;
@@ -82,7 +103,7 @@ const copy = COPY[lang];
 						headers: { Accept: 'application/json' },
 					});
 				} catch {
-					// Kit is unreachable from script: post the form the ordinary way.
+					// The endpoint can't be reached from script: post the form the ordinary way.
 					form.submit();
 					return;
 				}
@@ -143,6 +164,14 @@ const copy = COPY[lang];
 	}
 	input:hover {
 		border-color: var(--sl-color-gray-3);
+	}
+	/* Honeypot for bots: off-screen, out of the tab order and hidden from screen readers. */
+	.trap {
+		position: absolute;
+		left: -10000px;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
 	}
 	button {
 		flex: none;
