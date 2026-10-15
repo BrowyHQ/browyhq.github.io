@@ -1,6 +1,6 @@
 ---
 title: Browy 中国开发者安装指南
-description: 从中国大陆安装和使用 Browy 的注意事项。Copilot 访问、通过 BROWY_RELEASE_URL 走 GitHub Releases 镜像、到 api.githubcopilot.com 的延迟说明、通过 Gitee 或 jsDelivr 访问源码。
+description: 从中国大陆安装和使用 Browy 的注意事项。Copilot 访问、用 BROWY_LOCAL_ZIP 或 BROWY_LOCAL_TARBALL 从自己下载的发行文件安装、到 api.githubcopilot.com 的延迟说明。
 ---
 
 import { Aside, Steps, CardGrid, Card, LinkCard, Tabs, TabItem } from '@astrojs/starlight/components';
@@ -23,14 +23,15 @@ Releases 和 GitHub Copilot 的网络质量。
   <Card title="GitHub 访问" icon="seti:github">
     本地主机安装脚本从 GitHub Releases 拉取二进制。下载速度因
     运营商和时段不同。如果完全无法访问
-    `objects.githubusercontent.com`，可以走 CDN 镜像，或者
-    手动下载 tar 包（见下文）。
+    `release-assets.githubusercontent.com`，可以用别的办法拿到发行文件
+    （Windows 是 `.zip`，macOS 和 Linux 是 `.tar.gz`），再用这个文件
+    安装（见下文）。
   </Card>
   <Card title="Copilot 访问" icon="setting">
-    Browy 使用你自己的 GitHub Copilot 订阅。Copilot 在大陆可以用
-    GitHub 计费系统接受的银行卡正常订阅，教育版的流程和其他国家一致。
-    从大陆到 `api.githubcopilot.com` 的延迟比香港 / 新加坡高一些，
-    但是可达。
+    Browy 使用你自己的 GitHub Copilot 订阅。GitHub 的
+    [贸易管制页面](https://docs.github.com/en/site-policy/other-site-policies/github-and-trade-controls)
+    没有把中国列入 Copilot 不能销售的地区。实际能不能用，要看你的网络。
+    从大陆到 `api.githubcopilot.com` 的延迟比香港 / 新加坡高一些。
   </Card>
 </CardGrid>
 
@@ -49,34 +50,50 @@ Releases 和 GitHub Copilot 的网络质量。
 
 ## 如果 GitHub 下载完全不可达
 
-安装脚本支持自定义发行包 URL。你可以把最新 tar 包镜像到任何你可控的
-主机上，然后让脚本去那里下载。
+安装脚本没有可以指定镜像地址的设置，但可以直接用你手上已有的文件安装。
+需要的文件都在 [GitHub 发行页面](https://github.com/BrowyHQ/browy/releases/latest)上：
+对应你系统的发行包，加上安装脚本。
+
+| 系统 | 发行包 | 安装脚本 |
+|---|---|---|
+| Windows（x64） | `Browy-<版本号>-win-x64.zip` | `install.ps1` |
+| macOS（Apple 芯片） | `Browy-<版本号>-darwin-arm64.tar.gz` | `install.sh` |
+| macOS（Intel 处理器） | `Browy-<版本号>-darwin-x64.tar.gz` | `install.sh` |
+| Linux（x86_64） | `Browy-<版本号>-linux-x64.tar.gz` | `install.sh` |
+| Linux（arm64） | `Browy-<版本号>-linux-arm64.tar.gz` | `install.sh` |
+
+最稳妥的做法是在一台能访问 GitHub 的机器上下载这两个文件，再拷贝过来。
+网上也有第三方的 GitHub 镜像和下载代理，但都不是我运营的，我也没法检查
+它们给你的文件，用不用风险自负。
+
+把两个文件放进同一个文件夹，在那里运行安装脚本。下面的例子用的是
+Downloads 文件夹和 0.1.13 版本，请换成你实际下载的版本和文件名。
 
 <Tabs syncKey="os">
 <TabItem label="Windows" icon="seti:windows">
 
 ```powershell
-$env:BROWY_RELEASE_URL = "https://your-mirror.example.com/browy-win-x64.tar.gz"
-irm https://github.com/BrowyHQ/browy/releases/latest/download/install.ps1 | iex
+cd $HOME\Downloads
+$env:BROWY_LOCAL_ZIP = "$PWD\Browy-0.1.13-win-x64.zip"
+Get-Content .\install.ps1 -Raw | iex
 ```
+
+设置了 `BROWY_LOCAL_ZIP` 之后，脚本会跳过向 GitHub 查询版本这一步，
+直接用这个 zip 安装。
 
 </TabItem>
 <TabItem label="macOS / Linux" icon="seti:apple">
 
 ```bash
-BROWY_RELEASE_URL="https://your-mirror.example.com/browy-linux-x64.tar.gz" \
-  bash <(curl -fsSL https://github.com/BrowyHQ/browy/releases/latest/download/install.sh)
+cd ~/Downloads
+BROWY_VERSION=0.1.13 BROWY_LOCAL_TARBALL="$PWD/Browy-0.1.13-linux-x64.tar.gz" bash install.sh
 ```
+
+`BROWY_VERSION` 也要一起设置。不设的话，脚本仍然会去 GitHub API 查询
+最新版本，查不到就直接退出。
 
 </TabItem>
 </Tabs>
-
-历史上能从大陆访问的几个公共 CDN：
-
-- **jsDelivr GitHub 代理**：`https://cdn.jsdelivr.net/gh/BrowyHQ/browy@latest/...`
-- **ghproxy**：`https://ghproxy.com/https://github.com/BrowyHQ/browy/...`
-
-这些都是第三方运营的服务，我们不做担保。企业环境建议自建镜像。
 
 ## 延迟说明
 
@@ -84,7 +101,7 @@ Browy 在正常使用中会发起两类网络调用。
 
 | 调用 | 端点 | 延迟来源 |
 |---|---|---|
-| 模型推理 | `api.githubcopilot.com` | 从你的机器到 GitHub Copilot 最近区域的往返时间。从大陆出去通常是一跳到太平洋，普通家用网络下大约 200 到 400 毫秒。 |
+| 模型推理 | `api.githubcopilot.com` | 从你的机器到 GitHub Copilot 最近区域的往返时间。从大陆出去通常是一跳到太平洋，具体会多出多少延迟取决于你的网络。 |
 | 工具执行 | 你的本地机器 | 没有网络。智能体直接在你眼前的页面上执行工具。 |
 
 大多数提示词的耗时主要来自模型调用本身。连续触发三四次工具调用的对话
@@ -111,6 +128,5 @@ Browy 在正常使用中会发起两类网络调用。
 
 ## 怎么联系到我们
 
-[在 GitHub 上提 issue](https://github.com/BrowyHQ/browy/issues) 或者
-[给维护者发邮件](mailto:hello@browy.dev)。如果暂时连不上 GitHub，
-邮件可以正常用。
+[在 GitHub 上提 issue](https://github.com/BrowyHQ/browy/issues)。
+安装问题和 bug 反馈都可以发在那里。

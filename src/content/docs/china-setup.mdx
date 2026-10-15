@@ -1,6 +1,6 @@
 ---
 title: China setup guide for Browy
-description: How to install and run Browy from mainland China. Copilot access, GitHub Releases mirror via BROWY_RELEASE_URL, latency notes to api.githubcopilot.com, source-code access through Gitee or jsDelivr.
+description: How to install and run Browy from mainland China. Copilot access, installing from a release file you downloaded yourself with BROWY_LOCAL_ZIP or BROWY_LOCAL_TARBALL, latency notes to api.githubcopilot.com.
 ---
 
 import { Aside, Steps, CardGrid, Card, LinkCard, Tabs, TabItem } from '@astrojs/starlight/components';
@@ -25,15 +25,17 @@ Yes, with two real-world caveats.
   <Card title="GitHub access" icon="seti:github">
     The native-host installer pulls binaries from GitHub Releases.
     Speeds vary by ISP and time of day. If you cannot reach
-    `objects.githubusercontent.com` you can mirror the release through
-    a CDN or download the tarball manually (see below).
+    `release-assets.githubusercontent.com`, get the release file some
+    other way (a `.zip` on Windows, a `.tar.gz` on macOS and Linux) and
+    install from it (see below).
   </Card>
   <Card title="Copilot access" icon="setting">
-    Browy uses your GitHub Copilot subscription. Copilot is sold to
-    individuals in mainland China when you can pay with a card the
-    GitHub billing system accepts. Education plans work the same way
-    as elsewhere. API calls to `api.githubcopilot.com` from the
-    mainland have higher latency than from HK / SG but are reachable.
+    Browy uses your GitHub Copilot subscription. GitHub's
+    [trade controls page](https://docs.github.com/en/site-policy/other-site-policies/github-and-trade-controls)
+    doesn't list China among the places Copilot can't be sold to.
+    Whether Copilot works for you in practice depends on your network.
+    Calls to `api.githubcopilot.com` from the mainland have higher
+    latency than from HK / SG.
   </Card>
 </CardGrid>
 
@@ -56,35 +58,53 @@ Yes, with two real-world caveats.
 
 ## If the GitHub download is unreachable
 
-The installer accepts a custom release URL. You can mirror the latest
-tarball to any host you control, then point the installer at it.
+The installer has no setting for a mirror URL, but it can install from
+a file you already have. Everything it needs is on the
+[GitHub release page](https://github.com/BrowyHQ/browy/releases/latest):
+the package for your system and the installer script.
+
+| System | Package | Installer |
+|---|---|---|
+| Windows (x64) | `Browy-<version>-win-x64.zip` | `install.ps1` |
+| macOS (Apple Silicon) | `Browy-<version>-darwin-arm64.tar.gz` | `install.sh` |
+| macOS (Intel) | `Browy-<version>-darwin-x64.tar.gz` | `install.sh` |
+| Linux (x86_64) | `Browy-<version>-linux-x64.tar.gz` | `install.sh` |
+| Linux (arm64) | `Browy-<version>-linux-arm64.tar.gz` | `install.sh` |
+
+The safest route is to download both files on a machine that can reach
+GitHub and copy them over. Third-party GitHub mirrors and download
+proxies exist, but I don't run any of them and can't check what they
+serve, so using one is at your own risk.
+
+Put both files in the same folder and run the installer from there.
+The examples use your Downloads folder and version 0.1.13, so swap in
+the version and file name you actually downloaded.
 
 <Tabs syncKey="os">
 <TabItem label="Windows" icon="seti:windows">
 
 ```powershell
-$env:BROWY_RELEASE_URL = "https://your-mirror.example.com/browy-win-x64.tar.gz"
-irm https://github.com/BrowyHQ/browy/releases/latest/download/install.ps1 | iex
+cd $HOME\Downloads
+$env:BROWY_LOCAL_ZIP = "$PWD\Browy-0.1.13-win-x64.zip"
+Get-Content .\install.ps1 -Raw | iex
 ```
+
+With `BROWY_LOCAL_ZIP` set, the script skips the GitHub version lookup
+and installs straight from the zip.
 
 </TabItem>
 <TabItem label="macOS / Linux" icon="seti:apple">
 
 ```bash
-BROWY_RELEASE_URL="https://your-mirror.example.com/browy-linux-x64.tar.gz" \
-  bash <(curl -fsSL https://github.com/BrowyHQ/browy/releases/latest/download/install.sh)
+cd ~/Downloads
+BROWY_VERSION=0.1.13 BROWY_LOCAL_TARBALL="$PWD/Browy-0.1.13-linux-x64.tar.gz" bash install.sh
 ```
+
+Set `BROWY_VERSION` as well. Without it, the script still asks the
+GitHub API for the latest version and stops when it can't get an answer.
 
 </TabItem>
 </Tabs>
-
-A few public CDN options that have historically worked from the mainland:
-
-- **jsDelivr GitHub proxy**: `https://cdn.jsdelivr.net/gh/BrowyHQ/browy@latest/...`
-- **ghproxy**: `https://ghproxy.com/https://github.com/BrowyHQ/browy/...`
-
-These are operated by third parties and we do not endorse them. If you
-are in an enterprise setting we recommend hosting your own mirror.
 
 ## Latency notes
 
@@ -92,7 +112,7 @@ Browy makes two kinds of network calls in normal use.
 
 | Call | Endpoint | Where the latency lives |
 |---|---|---|
-| Model inference | `api.githubcopilot.com` | Round-trip from your machine to GitHub Copilot's nearest region. From the mainland, this is usually a Pacific hop; expect 200-400 ms over a normal residential link. |
+| Model inference | `api.githubcopilot.com` | Round-trip from your machine to GitHub Copilot's nearest region. From the mainland, this is usually a Pacific hop, and how much delay that adds depends on your network. |
 | Tool execution | Your local machine | No network. The agent runs the tool on the page in front of you. |
 
 For most prompts the model call dominates. A chat that fires three or
@@ -124,6 +144,5 @@ or fail the same way they would for any user.
 
 ## Getting help
 
-[Open an issue on GitHub](https://github.com/BrowyHQ/browy/issues) or
-[email the maintainer](mailto:hello@browy.dev). If GitHub is unreachable
-at the moment, email works.
+[Open an issue on GitHub](https://github.com/BrowyHQ/browy/issues).
+That's the place for setup questions and bug reports.
