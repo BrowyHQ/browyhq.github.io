@@ -1,0 +1,182 @@
+---
+interface Props {
+	action: string;
+}
+
+const { action } = Astro.props;
+
+const COPY = {
+	en: {
+		heading: 'Browy updates by email',
+		text: "I'll write when there's a new version worth trying. Unsubscribe any time.",
+		label: 'Email address',
+		button: 'Email me',
+		sending: 'Sending…',
+		success: 'Thanks! Check your inbox and confirm your email to finish signing up.',
+		error: "That didn't work. Check the address and try again.",
+	},
+	'zh-CN': {
+		heading: '订阅 Browy 更新',
+		text: 'Browy 有值得一试的新版本时，我会写信告诉你。随时可以退订。',
+		label: '邮箱地址',
+		button: '订阅',
+		sending: '正在提交…',
+		success: '谢谢！请查收邮件，确认邮箱后即可完成订阅。',
+		error: '提交失败，请检查邮箱地址后再试一次。',
+	},
+};
+
+const lang = Astro.locals.starlightRoute.lang === 'zh-CN' ? 'zh-CN' : 'en';
+const copy = COPY[lang];
+---
+
+<section
+	class="browy-signup print:hidden"
+	aria-labelledby="browy-signup-heading"
+	lang={lang}
+	data-pagefind-ignore
+>
+	<h2 id="browy-signup-heading">{copy.heading}</h2>
+	<p class="text">{copy.text}</p>
+	<form
+		method="post"
+		action={action}
+		data-sending={copy.sending}
+		data-success={copy.success}
+		data-error={copy.error}
+	>
+		<label for="browy-signup-email" class="sr-only">{copy.label}</label>
+		<input
+			id="browy-signup-email"
+			type="email"
+			name="email_address"
+			required
+			autocomplete="email"
+			placeholder="you@example.com"
+		/>
+		<button type="submit">{copy.button}</button>
+	</form>
+	<p class="message" aria-live="polite"></p>
+	<script is:inline>
+		(() => {
+			const box = document.currentScript.parentElement;
+			const form = box.querySelector('form');
+			const button = form.querySelector('button');
+			const message = box.querySelector('[aria-live]');
+			const label = button.textContent;
+			const show = (state, text) => {
+				message.dataset.state = state;
+				message.textContent = text;
+			};
+			form.addEventListener('submit', async (event) => {
+				event.preventDefault();
+				const hadFocus = document.activeElement === button;
+				show('', '');
+				button.disabled = true;
+				button.textContent = form.dataset.sending;
+				let response;
+				try {
+					response = await fetch(form.action, {
+						method: 'POST',
+						body: new FormData(form),
+						headers: { Accept: 'application/json' },
+					});
+				} catch {
+					// Kit is unreachable from script: post the form the ordinary way.
+					form.submit();
+					return;
+				}
+				const result = await response.json().catch(() => null);
+				if (result && result.status === 'success') {
+					show('success', form.dataset.success);
+					form.remove();
+					return;
+				}
+				show('error', form.dataset.error);
+				button.textContent = label;
+				button.disabled = false;
+				if (hadFocus) button.focus();
+			});
+		})();
+	</script>
+</section>
+
+<style>
+	.browy-signup {
+		margin-top: 2.5rem;
+		padding-top: 1.5rem;
+		border-top: 1px solid var(--sl-color-hairline);
+	}
+	h2 {
+		font-size: var(--sl-text-lg);
+		font-weight: 600;
+		line-height: var(--sl-line-height-headings);
+		color: var(--sl-color-white);
+	}
+	.text {
+		margin-top: 0.5rem;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+	}
+	form {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		max-width: 28rem;
+		margin-top: 1rem;
+	}
+	input {
+		flex: 1 1 12rem;
+		min-width: 0;
+		height: 2.5rem;
+		padding-inline: 0.75rem;
+		appearance: none;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.5rem;
+		background-color: var(--sl-color-black);
+		color: var(--sl-color-white);
+		font-size: var(--sl-text-sm);
+	}
+	input::placeholder {
+		color: var(--sl-color-gray-3);
+		opacity: 1;
+	}
+	input:hover {
+		border-color: var(--sl-color-gray-3);
+	}
+	button {
+		flex: none;
+		height: 2.5rem;
+		padding-inline: 1.125rem;
+		border: 1px solid var(--sl-color-text-accent);
+		border-radius: 999rem;
+		background-color: var(--sl-color-text-accent);
+		color: var(--sl-color-black);
+		font-size: var(--sl-text-sm);
+		font-weight: 600;
+		white-space: nowrap;
+		cursor: pointer;
+	}
+	button:disabled {
+		cursor: progress;
+		opacity: 0.7;
+	}
+	input:focus-visible,
+	button:focus-visible {
+		outline: 2px solid var(--sl-color-text-accent);
+		outline-offset: 2px;
+	}
+	.message {
+		margin-top: 0.75rem;
+		font-size: var(--sl-text-sm);
+	}
+	.message:empty {
+		margin-top: 0;
+	}
+	.message[data-state='error'] {
+		color: var(--sl-color-red-high);
+	}
+	.message[data-state='success'] {
+		color: var(--sl-color-green-high);
+	}
+</style>

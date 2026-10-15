@@ -27,7 +27,7 @@ export default defineConfig({
         root: { label: 'English', lang: 'en' },
         'zh-cn': { label: '简体中文', lang: 'zh-CN' },
       },
-      // Global head injection — runs on every page. Per-page frontmatter
+      // Global head injection, runs on every page. Per-page frontmatter
       // `head:` blocks are appended after this and can override.
       head: [
         // Default social card so link previews aren't blank.
@@ -50,6 +50,8 @@ export default defineConfig({
       components: {
         Hero: './src/components/Hero.astro',
         SocialIcons: './src/components/SocialIcons.astro',
+        // Default footer plus the email signup box (see src/signup.ts).
+        Footer: './src/components/Footer.astro',
       },
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/BrowyHQ' },
