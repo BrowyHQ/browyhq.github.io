@@ -14,6 +14,8 @@ const COPY = {
 		sending: 'Sending…',
 		success: "Thanks! You're on the list.",
 		error: "That didn't work. Check the address and try again.",
+		ghBefore: 'Rather get them on GitHub? Watch ',
+		ghAfter: ' and choose Custom, then Releases.',
 	},
 	'zh-CN': {
 		heading: '订阅 Browy 更新',
@@ -23,6 +25,8 @@ const COPY = {
 		sending: '正在提交…',
 		success: '谢谢！你已成功订阅。',
 		error: '提交失败，请检查邮箱地址后再试一次。',
+		ghBefore: '更想在 GitHub 上收到？在 ',
+		ghAfter: ' 点 Watch，选择 Custom，再勾选 Releases。',
 	},
 };
 
@@ -67,6 +71,7 @@ const copy = COPY[lang];
 		<button type="submit">{copy.button}</button>
 	</form>
 	<p class="message" aria-live="polite"></p>
+	<p class="alt">{copy.ghBefore}<a href="https://github.com/BrowyHQ/browy">BrowyHQ/browy</a>{copy.ghAfter}</p>
 	<script is:inline>
 		(() => {
 			const box = document.currentScript.parentElement;
@@ -207,5 +212,10 @@ const copy = COPY[lang];
 	}
 	.message[data-state='success'] {
 		color: var(--sl-color-green-high);
+	}
+	.alt {
+		margin-top: 0.75rem;
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-3);
 	}
 </style>
