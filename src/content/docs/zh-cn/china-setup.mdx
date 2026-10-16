@@ -67,14 +67,14 @@ Releases 和 GitHub Copilot 的网络质量。
 它们给你的文件，用不用风险自负。
 
 把两个文件放进同一个文件夹，在那里运行安装脚本。下面的例子用的是
-Downloads 文件夹和 0.1.14 版本，请换成你实际下载的版本和文件名。
+Downloads 文件夹和 0.1.15 版本，请换成你实际下载的版本和文件名。
 
 <Tabs syncKey="os">
 <TabItem label="Windows" icon="seti:windows">
 
 ```powershell
 cd $HOME\Downloads
-$env:BROWY_LOCAL_ZIP = "$PWD\Browy-0.1.14-win-x64.zip"
+$env:BROWY_LOCAL_ZIP = "$PWD\Browy-0.1.15-win-x64.zip"
 Get-Content .\install.ps1 -Raw | iex
 ```
 
@@ -86,7 +86,7 @@ Get-Content .\install.ps1 -Raw | iex
 
 ```bash
 cd ~/Downloads
-BROWY_VERSION=0.1.14 BROWY_LOCAL_TARBALL="$PWD/Browy-0.1.14-linux-x64.tar.gz" bash install.sh
+BROWY_VERSION=0.1.15 BROWY_LOCAL_TARBALL="$PWD/Browy-0.1.15-linux-x64.tar.gz" bash install.sh
 ```
 
 `BROWY_VERSION` 也要一起设置。不设的话，脚本仍然会去 GitHub API 查询
