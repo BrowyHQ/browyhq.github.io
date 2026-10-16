@@ -77,7 +77,7 @@ proxies exist, but I don't run any of them and can't check what they
 serve, so using one is at your own risk.
 
 Put both files in the same folder and run the installer from there.
-The examples use your Downloads folder and version 0.1.15, so swap in
+The examples use your Downloads folder and version 0.1.16, so swap in
 the version and file name you actually downloaded.
 
 <Tabs syncKey="os">
@@ -85,7 +85,7 @@ the version and file name you actually downloaded.
 
 ```powershell
 cd $HOME\Downloads
-$env:BROWY_LOCAL_ZIP = "$PWD\Browy-0.1.15-win-x64.zip"
+$env:BROWY_LOCAL_ZIP = "$PWD\Browy-0.1.16-win-x64.zip"
 Get-Content .\install.ps1 -Raw | iex
 ```
 
@@ -97,7 +97,7 @@ and installs straight from the zip.
 
 ```bash
 cd ~/Downloads
-BROWY_VERSION=0.1.15 BROWY_LOCAL_TARBALL="$PWD/Browy-0.1.15-linux-x64.tar.gz" bash install.sh
+BROWY_VERSION=0.1.16 BROWY_LOCAL_TARBALL="$PWD/Browy-0.1.16-linux-x64.tar.gz" bash install.sh
 ```
 
 Set `BROWY_VERSION` as well. Without it, the script still asks the
