@@ -160,11 +160,17 @@ next chat (or after `/clear`).
 
 ## Host tools (opt-in)
 
-The Copilot SDK includes `bash`, `read_file`, `write_file`, `grep`,
-`glob`, and `web_fetch`, the same set the `copilot` CLI uses in a
-terminal. They reach your filesystem and shell, so Browy ships them
+The Copilot CLI that Browy runs on has its own tools for files, the
+shell and the web, the ones it uses in a terminal. Browy's switches for
+them are `bash`, `read_file`, `write_file`, `grep`, `glob`, and
+`web_fetch`. They reach your filesystem and shell, so Browy ships them
 off; flip them on per-tool under Settings → Tools → host (advanced)
 when you want them.
+
+The CLI names some of these tools differently: `read_file` turns on its
+`view` tool, `write_file` turns on `create` and `edit`, and `bash` turns
+on its shell, which is PowerShell on Windows. Before 0.1.14 those three
+switches matched no tool, so turning them on did nothing.
 
 Browy's own `run_script` is listed with them. It runs Node.js on your
 computer with your user's privileges, so it can read and write files,

@@ -152,10 +152,16 @@ _interact_、_devtools_。它们存在 `chrome.storage.local` 里。关掉的
 
 ## 主机工具（选择性开启）
 
-Copilot SDK 包括 `bash`、`read_file`、`write_file`、`grep`、`glob`、
-`web_fetch`，和 `copilot` CLI 在终端里用的是同一组工具。它们能访问
+Browy 运行在 Copilot CLI 之上，CLI 自带一组处理文件、shell 和网络的
+工具，也就是它在终端里用的那些。Browy 给它们的开关是 `bash`、
+`read_file`、`write_file`、`grep`、`glob`、`web_fetch`。它们能访问
 你的文件系统和 shell，所以 Browy 默认把它们关掉；想用的时候在
 设置 → 工具 → 主机（进阶）里按工具打开。
+
+其中几个工具在 CLI 里叫别的名字：`read_file` 打开的是它的 `view`
+工具，`write_file` 打开 `create` 和 `edit`，`bash` 打开它的 shell，
+在 Windows 上是 PowerShell。0.1.14 之前，这三个开关对不上任何工具，
+打开了也不起作用。
 
 Browy 自己的 `run_script` 也列在这里。它以你的用户权限在你的电脑上运行 Node.js，可以读写文件、发网络请求、启动 shell 命令。0.1.10 之前它是默认开启的浏览器工具；现在和其他主机工具一样，默认关闭，需要你手动打开。
 

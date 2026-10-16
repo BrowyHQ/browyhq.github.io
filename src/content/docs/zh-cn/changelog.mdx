@@ -21,10 +21,20 @@ import { Badge, LinkCard, CardGrid, Aside } from '@astrojs/starlight/components'
   持久化记忆、`await_user`。
 - 可选的主机端工具（`run_script`、`bash`、`read_file`、`write_file`、
   `grep`、`glob`、`web_fetch`），默认关闭，按工具粒度在
-  设置 → 工具中开启。`run_script` 从 0.1.10 起归入这一组。
+  设置 → 工具中开启。`run_script` 从 0.1.10 起归入这一组。从 0.1.14 起，
+  `read_file`、`write_file` 和 `bash` 这三个开关会打开 Copilot CLI
+  自己的工具：`view`、`create` 和 `edit`，以及它的 shell（Windows 上是
+  PowerShell）。
 - 多浏览器支持：Chrome、Edge、Brave（以及其他基于 Chromium 的浏览器）。
 - 停止会立即结束当前回合，对话会从停下的地方接着做。每个窗口里的 Browy
   只操作本窗口的标签页，第二个窗口发来的消息会排队等候（0.1.11）。
+- 对话直接从它的 Copilot 会话渲染。长对话先显示最近的几轮，对话列表
+  立即打开，Browy 也不会自行删除任何对话（0.1.14）。
+- 工具在真实网站上更可靠：会给 shadow DOM 和同源 iframe 里的元素编号，
+  富文本编辑器只输入一次，`extract_text` 能读取单页应用，工具失败时
+  会把原因告诉模型（0.1.14）。
+- 电脑睡眠、后端崩溃、Copilot 退出或没有响应、标签页被关掉时，Browy
+  都能恢复，并说明发生了什么（0.1.14）。
 - Windows 一行命令的 PowerShell 安装脚本。
 
 ---

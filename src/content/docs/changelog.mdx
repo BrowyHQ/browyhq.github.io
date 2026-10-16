@@ -23,12 +23,24 @@ First public release.
   persistent memory, `await_user`.
 - Optional host tools (`run_script`, `bash`, `read_file`, `write_file`,
   `grep`, `glob`, `web_fetch`), off by default, enable per-tool under
-  Settings → Tools. `run_script` joined them in 0.1.10.
+  Settings → Tools. `run_script` joined them in 0.1.10. Since 0.1.14 the
+  `read_file`, `write_file` and `bash` switches turn on the Copilot CLI's
+  own tools: `view`, `create` and `edit`, and its shell, which is
+  PowerShell on Windows.
 - Multi-browser support: Chrome, Edge, Brave (and other Chromium
   builds).
 - Stop ends a turn right away, and the chat picks up where it left
   off. Each window's Browy works on that window's tabs, and a message
   sent from a second window waits its turn (0.1.11).
+- Chats are drawn straight from their Copilot session. Long chats open
+  on their newest turns, the chats list opens at once, and Browy never
+  deletes a chat on its own (0.1.14).
+- Tools hold up on real sites: shadow DOM and same-origin iframes get
+  indexes, rich-text editors take typing once, `extract_text` reads
+  single-page apps, and a failing tool tells the model why (0.1.14).
+- Browy recovers when the computer sleeps, the backend crashes, Copilot
+  quits or stops answering, or a tab goes away, and says what happened
+  (0.1.14).
 - One-line PowerShell installer for Windows.
 
 ---
