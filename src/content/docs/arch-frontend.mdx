@@ -96,14 +96,14 @@ DevTools Protocol. We don't try to suppress it. See
 
 ## Storage
 
-The extension keeps its own state in `chrome.storage.local`:
+Each window's side panel remembers its chat in `chrome.storage.session`
+under `browy.sessionId.<windowId>`. The extension also uses `chrome.storage.local` for:
 
-- **Current chat**: `browy.sessionId` for the side panel and
+- **Current chat**: `browy.sessionId` for the first side panel after a browser restart and
   `browy.dt.sessionId.<tabId>` for each inspected tab's DevTools
   panel. The id is also the chat's Copilot session id.
-- **Chat display cache**: `browy.chat.<id>` (rendered HTML),
-  `browy.chatMeta.<id>` → `{id, title, updated, preview}` and
-  `browy.chatIndex` (ids, newest first)
+- **Chat display cache**: `browy.view.<id>` for the last turns displayed
+  and `browy.viewIndex` for the list of cached chats.
 - **Settings**: `settings.tools` (per-tool toggles)
 - **UI flags**: `browy.firstSendDone` (hides the starter prompts
   after your first message) and `browy.hostUpdateSnoozeUntil`

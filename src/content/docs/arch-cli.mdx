@@ -89,9 +89,9 @@ window.
 Each DevTools panel inspects a single tab. The panel keeps its
 `sessionId` in `chrome.storage.local` under
 `browy.dt.sessionId.<tabId>` and binds the session to that tab with
-`inspectedTabId` in `session.start`. Open DevTools on three tabs →
-three separate conversations. They share one agent in the host, which
-runs one turn at a time. Close and reopen DevTools on the same tab and
+`inspectedTabId` in `session.start`. Open DevTools on two different
+tabs and both chats can run at once. Each active chat gets its own
+Copilot CLI worker. Close and reopen DevTools on the same tab and
 you're back in the same conversation.
 
 This is intentional: it makes the DevTools CLI a per-page tool, in

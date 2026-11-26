@@ -41,7 +41,7 @@ Chrome / Edge / Brave 上，应用 id 是 `com.browy.host`。它运行在你的
     工具登记表：大模型可以调用的每一个 Browy 工具（`inspect_page`、`click_index`、`type_index`、`get_network_requests` 等）。每个工具都是一次 `register({ def, run })` 调用：一份 JSON schema 定义，加上一个 `run(args, ctx)` 函数。这个函数在主机里干活，通过 `ctx.cdp` 操作标签页。
   </Card>
   <Card title="`src/agent/runner.ts`" icon="seti:plan">
-    会话路由。每个主机进程一个 `Runner`，它为每个连上的面板维护一个会话（以面板的 session id 为键），在这些面板和唯一的 `Agent` 之间传递消息。所有面板加起来同一时间只跑一轮对话，这期间其他面板发来的消息会排队，等当前这轮结束后马上开始。每个会话未完成的 CDP 调用放在它自己的 `ExtensionContext`（`src/agent/extension-context.ts`）里。
+    每个主机进程有一个 `Runner`，按会话 id 把消息送回对应的面板。第一轮使用预先启动的 Copilot CLI。在另一个标签页发出的任务可以启动独立进程，同时运行。从同一个标签页开始的任务会按顺序执行。每一轮都用自己的 `ExtensionContext` 管理尚未返回的浏览器调用。工具不能切换到另一轮正在使用的标签页。
   </Card>
   <Card title="`src/transports/`" icon="seti:folder">
     Stdio 分帧（`native-messaging.ts`）：先是 4 字节小端长度，然后是 UTF-8 JSON。`Runner` 只看得到 `src/protocol.ts` 里的 `Transport` 接口，主机的消息类型也都定义在那个文件里。
@@ -54,7 +54,7 @@ Chrome / Edge / Brave 上，应用 id 是 `com.browy.host`。它运行在你的
 ## 一条消息的生命周期
 
 1. 用户在侧边栏输入并按发送。
-2. 侧边栏把 `{type: 'chat.send', sessionId, text}` 发给 service worker，由它通过原生 port 转发。
+2. 侧边栏把 `{type: 'chat.send', sessionId, text}` 发给 service worker，由它补上目标标签页和当前浏览器设置，再通过原生 port 转发。
 3. 主机的 `Runner` 把智能体绑定到这个 session id，然后调用 `agent.chat(text)`。如果这个 id 还没有打开的 Copilot 会话，智能体会带上过滤后的工具列表调用 SDK 的 `resumeSession(id, ...)`（第一次则是 `createSession({sessionId: id, ...})`），然后把你的文字连同当前标签页的上下文和一份新的页面快照一起发出去。
 4. SDK 流式返回事件。主机把文字块作为 `{type: 'chat.delta'}` 转发。SDK 调用工具时，主机先给面板发 `{type: 'chat.tool_call'}`，运行工具，再发 `{type: 'chat.tool_result'}`。
 5. 工具需要的每条 CDP 命令都以 `{type: 'cdp.send', sessionId, callId, method, params}` 的形式发给扩展（比如 `inspect_page` 就是一次 `Runtime.evaluate`）。service worker 用 `chrome.debugger.sendCommand` 执行它，然后回发 `{type: 'tool.result', sessionId, callId, ok, result}`。
@@ -65,7 +65,7 @@ Chrome / Edge / Brave 上，应用 id 是 `com.browy.host`。它运行在你的
 
 ## 会话和持久化
 
-Browy 把会话存储委托给 GitHub Copilot CLI 自己的会话机制（在 `~/.copilot/`）。主机直接把扩展为一段对话生成的 id（侧边栏是 `sp-…`，DevTools 面板是 `dt-…`）用作 Copilot 会话 id。扩展把当前的 id 存在 `chrome.storage.local` 里，所以重新打开面板会恢复同一个 Copilot 会话。
+Browy 把会话记录存放在 GitHub Copilot CLI 的会话目录（`~/.copilot/`）中。主机直接把扩展为对话生成的 id（侧边栏是 `sp-…`，DevTools 面板是 `dt-…`）用作 Copilot 会话 id。浏览器运行期间，每个窗口会记住自己的侧边栏对话。重启浏览器后，第一个打开的面板会恢复 `chrome.storage.local` 中最后保存的对话。
 
 智能体自己也有几个临时面：
 

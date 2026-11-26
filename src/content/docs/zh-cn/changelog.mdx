@@ -8,7 +8,13 @@ import { Badge, LinkCard, CardGrid, Aside } from '@astrojs/starlight/components'
 完整的 commit 历史见
 [GitHub releases](https://github.com/BrowyHQ/browy/releases)。
 
-## v0.1.18 <Badge text="最新" variant="success" />
+## v0.1.19 <Badge text="最新" variant="success" />
+
+现在可以让两段 Browy 对话同时操作不同的标签页。发出第一个任务后，切换标签页，点击 **New chat** 开始第二个任务。在 **Chats** 里可以回到任一对话，单独停止它。如果两个任务都从同一个标签页开始，后发的任务会排队。
+
+[同时更新后端和扩展](https://github.com/BrowyHQ/browy/releases/tag/v0.1.19)，在侧边栏切换对话时，原来的任务就能继续运行。如果你加载的是解压后的扩展，请重新运行安装程序，然后在扩展管理页点击 Browy 的**重新加载**按钮。
+
+## v0.1.18
 
 [下载 0.1.18](https://github.com/BrowyHQ/browy/releases/tag/v0.1.18) 即可使用下方的浏览器功能。后端移除了一个没有用到、但依赖项存在安全公告的 Azure 登录库。如果扩展已经是 0.1.17，只需重新运行后端安装程序。
 

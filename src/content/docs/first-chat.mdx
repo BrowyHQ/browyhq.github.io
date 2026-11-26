@@ -126,8 +126,8 @@ The side panel's titlebar (top right) hosts four controls:
 | Button | What it does |
 |---|---|
 | **Stop** (red ■) | Stop the turn in flight. Browy keeps what it said so far, and your next message picks up from there. Same as `Esc`. |
-| **New chat** | Save the current conversation to history and start fresh. |
-| **Chats** | Open the past-chats overlay, a searchable list of every prior session, with delete + click-to-resume. |
+| **New chat** | Start a conversation. A task in the previous chat keeps running. |
+| **Chats** | Find a saved conversation or return to a running task. |
 | **Settings** | Opens the extension Options page (model picker, [tool toggles](/tools/#configurable-per-tool-toggles), authentication, diagnostics). |
 
 The status bar underneath shows the active browser, tab title, and an
@@ -148,6 +148,8 @@ tables).
 
 ## During a turn
 
+To run two tasks at once, send the first message, select a different browser tab, and choose **New chat**. Each task keeps the tab you selected when you sent its message. If both start on the same tab, the second waits. Open **Chats**, select a running task, and click **Stop** to stop just that task. Closing the panel stops the tasks it owns.
+
 - **Streaming text** appears live as the model generates it.
 - **Tool calls** render as inline cards (`▸ click_index { index: 14 }`).
   Click to expand and see arguments and result. Failed tool calls are
@@ -163,15 +165,12 @@ missing).
 
 ## Past chats
 
-Each conversation is saved to `chrome.storage.local` with its title,
-preview, and timestamp. Open the **Chats** overlay to:
+Copilot saves the conversation on your machine. The side panel caches a recent view so a chat can open while the backend loads its transcript. Open **Chats** to:
 
 - Filter by title or preview text
 - Click a row to resume (the agent re-binds to that session id)
 - Delete (×) to remove a conversation from history
 - **+ new chat** to start a fresh one
-
-Chats are local to your browser profile and never leave your machine.
 
 ## What's next?
 

@@ -65,7 +65,7 @@ const COMMANDS = [
 
 ## 按目标绑定
 
-每个 DevTools 面板只检查一个标签页。面板把自己的 `sessionId` 存在 `chrome.storage.local` 的 `browy.dt.sessionId.<tabId>` 下，并在 `session.start` 里用 `inspectedTabId` 把会话绑定到这个标签页。在三个标签页里打开 DevTools，就是三段独立的对话。它们共用主机里的同一个智能体，同一时间只跑一轮。在同一个标签页上关掉再打开 DevTools，你会回到同一段对话。
+每个 DevTools 面板只检查一个标签页。面板把自己的 `sessionId` 存在 `chrome.storage.local` 的 `browy.dt.sessionId.<tabId>` 下，并在 `session.start` 里用 `inspectedTabId` 把会话绑定到这个标签页。在两个不同的标签页里打开 DevTools，两段对话可以同时运行，各自使用独立的 Copilot CLI 进程。在同一个标签页上关掉再打开 DevTools，你会回到同一段对话。
 
 这是故意的：让 DevTools CLI 成为按页面的工具，和 inspector 是按
 页面的方式保持一致。

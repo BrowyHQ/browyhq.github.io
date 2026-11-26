@@ -59,14 +59,12 @@ worker runs it through `chrome.debugger` or `chrome.tabs` and posts a
     that does the work in the host, driving the tab through `ctx.cdp`.
   </Card>
   <Card title="`src/agent/runner.ts`" icon="seti:plan">
-    Session routing. One `Runner` per host process keeps a session
-    for each connected panel, keyed by the panel's session id, and
-    passes messages between the panels and the one `Agent`. It runs
-    one chat turn at a time across all panels; a message sent from
-    another panel meanwhile waits in line and starts as soon as the
-    current turn ends. Each session's pending
-    CDP calls live in its `ExtensionContext`
-    (`src/agent/extension-context.ts`).
+    One `Runner` routes each chat to the panel that owns it. The first
+    turn uses the prewarmed Copilot CLI. A turn on a different tab can
+    start a separate worker while the first is running. Turns that start
+    on the same tab run in order. Each turn keeps its pending browser
+    calls in its own `ExtensionContext`. A tool can't switch to a tab
+    another turn is using.
   </Card>
   <Card title="`src/transports/`" icon="seti:folder">
     Stdio framing (`native-messaging.ts`): a 4-byte little-endian
@@ -87,7 +85,8 @@ worker runs it through `chrome.debugger` or `chrome.tabs` and posts a
 
 1. User types in the side panel and hits send.
 2. The side panel posts `{type: 'chat.send', sessionId, text}` to
-   the service worker, which forwards it over the native port.
+   the service worker, which adds the target tab and current browser
+   settings before forwarding the message over the native port.
 3. Host's `Runner` binds the agent to that session id and calls
    `agent.chat(text)`. If no Copilot session is open for the id, the
    agent calls the SDK's `resumeSession(id, ...)` (or
@@ -115,9 +114,9 @@ the user's perspective it streams in real time.
 Browy delegates session storage to the GitHub Copilot CLI's session
 machinery (in `~/.copilot/`). The host uses the id the extension
 mints for a chat (`sp-…` in the side panel, `dt-…` in the DevTools
-panel) as the Copilot session id. The extension keeps the current one
-in `chrome.storage.local`, so reopening a panel resumes the same
-Copilot session.
+panel) as the Copilot session id. During a browser session each window
+remembers its own side-panel chat. After a browser restart the first
+panel uses the last chat saved in `chrome.storage.local`.
 
 The agent also has its own scratch surfaces:
 

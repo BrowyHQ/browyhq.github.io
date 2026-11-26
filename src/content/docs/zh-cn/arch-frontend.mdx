@@ -66,10 +66,10 @@ extension/
 
 ## 存储
 
-扩展自己的状态存在 `chrome.storage.local`：
+每个窗口的侧边栏通过 `chrome.storage.session` 中的 `browy.sessionId.<windowId>` 记住自己的对话。扩展还用 `chrome.storage.local` 保存以下内容：
 
-- **当前对话**：侧边栏是 `browy.sessionId`，每个被检查标签页的 DevTools 面板是 `browy.dt.sessionId.<tabId>`。这个 id 也是这段对话的 Copilot 会话 id。
-- **对话显示缓存**：`browy.chat.<id>`（渲染好的 HTML）、`browy.chatMeta.<id>` → `{id, title, updated, preview}` 和 `browy.chatIndex`（id 列表，最新的在前）
+- **当前对话**：浏览器重启后，第一个侧边栏通过 `browy.sessionId` 恢复对话。每个被检查标签页的 DevTools 面板使用 `browy.dt.sessionId.<tabId>`。这个 id 也是这段对话的 Copilot 会话 id。
+- **对话显示缓存**：`browy.view.<id>` 保存最近显示的几轮对话，`browy.viewIndex` 保存缓存的对话列表。
 - **设置**：`settings.tools`（按工具的开关）
 - **界面标记**：`browy.firstSendDone`（你发出第一条消息后隐藏入门提示）和 `browy.hostUpdateSnoozeUntil`（暂时隐藏后端更新提示条）
 
