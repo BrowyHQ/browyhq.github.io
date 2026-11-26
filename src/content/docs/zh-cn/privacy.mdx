@@ -20,6 +20,7 @@ Chrome Web Store 和 Microsoft Edge Add-ons 商店页面引用的隐私政策。
 |---|---|
 | 智能体观察到的页面内容（DOM 快照、截图、控制台 / 网络日志、JS 执行结果） | 模型需要看到屏幕上的内容才能行动。和在终端里用 `gh copilot` 走的是同一条数据通道。 |
 | 你的对话消息 | 这些是给模型的 prompt。 |
+| 你在设置里保存的浏览器指引 | Browy 向 Copilot 发送消息时会附上这些指引。不想发送指引时，把这一栏留空即可。 |
 | 工具调用结果（比如 "navigated to X"、"clicked element 7"） | 模型需要知道结果才能规划下一步。 |
 
 GitHub 对 Copilot 数据的处理由
@@ -36,7 +37,8 @@ Browy 本身从不连接它。
 </TabItem>
 <TabItem label="发给其他任何人">
 
-扩展不加载第三方脚本，也不调用任何第三方服务，除了本地的 Copilot CLI。
+扩展不加载第三方脚本。你让 Browy 下载链接时，浏览器会使用当前登录状态向该网站请求文件。
+你让 Browy 附上本地文件时，目标网页就能读取它，有些网站在提交表单之前就会开始上传。
 
 </TabItem>
 </Tabs>
@@ -46,7 +48,8 @@ Browy 本身从不连接它。
 | 数据 | 位置 | 生命周期 |
 |---|---|---|
 | 对话历史 | 完整记录：GitHub Copilot SDK 在你电脑上 `~/.copilot/` 下的会话存储。显示缓存：`chrome.storage.local`（按 profile 隔离的扩展存储） | 在侧边栏的历史记录里删除该对话为止，两处会一起删除。卸载扩展只会清掉缓存 |
-| 设置（模型、推理强度、主题、上次使用的标签页） | `chrome.storage.local` | 卸载扩展为止 |
+| 浏览器指引和工具开关 | 当前浏览器配置的 `chrome.storage.local` | 修改、清空或卸载扩展为止 |
+| 选定的模型 | 本地后端的 `~/.browy/data/prefs.json` | 更换模型或删除偏好设置文件为止 |
 | 原生主机日志 | `~/.browseragent/native-host.log`（超过 5 MB 时轮转，保留一份旧副本 `.1`） | 删除 `~/.browseragent/` 目录为止；卸载不会删除它 |
 | 智能体临时磁盘 + 键值记忆 | `~/.browy/data/files/` 和 `~/.browy/data/notes.json` | 你删为止；跨对话保留 |
 | GitHub Copilot 会话状态，包括 Browy 的对话记录 | `~/.copilot/`（由 Copilot CLI 管理，不由 Browy 管理） | 看 Copilot CLI 自己的行为；在 Browy 里删除对话会删掉对应的会话 |
@@ -54,7 +57,7 @@ Browy 本身从不连接它。
 ## 由你决定要分享什么
 
 智能体读取的页面内容，包括 DOM 快照、控制台输出、网络日志、截图，
-来自当前激活的标签页，原封不动地发给模型。你决定智能体作用在哪个
+来自 Browy 正在操作的标签页，原封不动地发给模型。你决定智能体作用在哪个
 标签页、对话里输入什么、设置里启用了哪些工具。
 
 这里也包括高级用户*主动*想发送的东西：后端测试用的 API key、OAuth
