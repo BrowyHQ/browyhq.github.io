@@ -60,7 +60,8 @@ in [`src/agent/tool-policy.ts`](https://github.com/BrowyHQ/browy/blob/main/src/a
 | `select_index` | Pick a `<select>` option by index. |
 | `check_index` | Toggle a checkbox by index. |
 | `set_radio_index` | Set a radio group by index. |
-| `upload_index` | Attach a file to an `<input type=file>` by index. |
+| `upload_index` | Attach named local files to an input by index. For a button that creates its file input on click, use `open_picker: true`. |
+| `handle_dialog` | Inspect an alert, confirmation, text prompt or beforeunload dialog, then accept or dismiss its ID. It does not answer browser permissions or system prompts. |
 | `press_keys` | Send keystrokes (`Tab`, `Enter`, `Ctrl+A`…). |
 | `press_key` | Press a single key. |
 | `fill_form` / `submit_form` | Bulk-fill a form, then submit. |
@@ -74,8 +75,8 @@ in [`src/agent/tool-policy.ts`](https://github.com/BrowyHQ/browy/blob/main/src/a
 
 | Tool | What it does |
 |---|---|
-| `list_tabs` | List open tabs (index, URL, title). |
-| `switch_tab` | Bring a tab to the foreground and target it for subsequent calls. |
+| `list_tabs` | Refresh the open tabs across browser windows, including popup windows. |
+| `switch_tab` | Target a listed tab. Use `background: true` to leave the tab you're looking at alone. |
 | `new_tab` | Open a new tab. |
 | `close_tab` | Close the tab Browy is working in, or one by index from `list_tabs`. |
 
@@ -97,8 +98,9 @@ in [`src/agent/tool-policy.ts`](https://github.com/BrowyHQ/browy/blob/main/src/a
 | `get_console_logs` | Recent console messages and exceptions. |
 | `get_cookies` / `set_cookie` | Read or write cookies for the current origin. |
 | `replay_request` | Re-issue a captured request with optional header / body overrides. |
-| `download_file` | Trigger a file download. |
-| `upload_file` | Upload a file via a file picker. |
+| `download_file` | Download an HTTP or HTTPS link through your signed-in browser. Returns a download ID. |
+| `download_status` | Check a download started by this chat. A completed download includes its saved path. |
+| `upload_file` | Attach named files to an input by selector, or use the `chooser_id` from an earlier click without reopening the picker. |
 
 </TabItem>
 <TabItem label="Disk + memory">
@@ -154,9 +156,12 @@ Common reasons to disable a tool:
   </Card>
 </CardGrid>
 
-Click **reset defaults** in the toolbar to undo every override at once
-(browser tools back on, host tools back off). Changes apply on the
-next chat (or after `/clear`).
+Click **reset defaults** to restore the tool switches (browser tools on, host tools off).
+With both parts of Browy updated, changes apply from your next message, even in an existing chat.
+
+Use **Settings → Browser guidelines** for instructions such as “Fill forms, but ask before submitting.”
+These are sent to Copilot from this browser profile. Clear the field to remove them. Guidelines steer
+the model; tool switches control which tools it receives.
 
 ## Host tools (opt-in)
 
