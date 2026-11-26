@@ -1,0 +1,36 @@
+---
+title: "Watch Browy fill 26 fields from the paper in the next tab"
+description: "Watch a 65-second browser demo, then try the same paper and form. Browy reads the author list in one tab and fills it into the other for you to review."
+head:
+  - tag: meta
+    attrs:
+      property: og:image
+      content: https://i.ytimg.com/vi/bnellxgwJwY/maxresdefault.jpg
+  - tag: meta
+    attrs:
+      name: twitter:image
+      content: https://i.ytimg.com/vi/bnellxgwJwY/maxresdefault.jpg
+---
+
+import { YouTube } from 'astro-embed';
+
+<figure class="browy-frame">
+  <YouTube id="bnellxgwJwY" title="Browy fills a 26-field paper submission form in real time" />
+  <figcaption>One prompt, two tabs. The form fill plays at real speed. <a href="https://youtu.be/bnellxgwJwY">Watch on YouTube.</a></figcaption>
+</figure>
+
+The paper lists eight authors. The submission form wants each first name, last name and affiliation in a separate box. In the recording, Browy reads the paper in the next tab, fills all 26 fields including the title and track, and leaves **Submit paper** untouched.
+
+## Try the same run
+
+1. [Install Browy](/install/) in Chrome, Edge, or Brave. The extension and local helper use your GitHub Copilot subscription.
+2. Open <a href="https://ar5iv.labs.arxiv.org/html/1706.03762" target="_blank" rel="noopener noreferrer">the paper</a>, then <a href="/demo/paper-form/" target="_blank" rel="noopener noreferrer">the demo form</a>. Both links open new tabs. Leave the form selected.
+3. Open Browy's side panel and type: **Fill this form from the paper in my other tab. Don't submit it.**
+
+Compare the author order and affiliations with the paper. You can edit any field yourself. This is a demo form; even its Submit button sends nothing.
+
+## Leave one chat running
+
+With the **0.1.19 extension and backend**, switch to another tab and choose **New chat**. The first chat keeps working. Open **Chats** to return to either task or stop it. Two chats that need the same starting tab wait their turn.
+
+For parallel chats, use the matching extension bundled with the [GitHub release](https://github.com/BrowyHQ/browy/releases/tag/v0.1.19). The [install guide](/install/) shows how to load it unpacked.

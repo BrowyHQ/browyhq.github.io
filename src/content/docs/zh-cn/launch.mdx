@@ -1,0 +1,36 @@
+---
+title: "看 Browy 根据另一个标签页里的论文填好 26 个字段"
+description: "看一段 65 秒的浏览器实录，再用同一篇论文和同一张表单试一次。Browy 从一个标签页读取作者名单，在另一个标签页填写表单，留给你核对。"
+head:
+  - tag: meta
+    attrs:
+      property: og:image
+      content: https://i.ytimg.com/vi/bnellxgwJwY/maxresdefault.jpg
+  - tag: meta
+    attrs:
+      name: twitter:image
+      content: https://i.ytimg.com/vi/bnellxgwJwY/maxresdefault.jpg
+---
+
+import { YouTube } from 'astro-embed';
+
+<figure class="browy-frame">
+  <YouTube id="bnellxgwJwY" title="Browy 实时填写有 26 个字段的论文投稿表单" />
+  <figcaption>一句指令，两个标签页。填表过程按原速播放。<a href="https://youtu.be/bnellxgwJwY">在 YouTube 上观看。</a></figcaption>
+</figure>
+
+论文有八位作者。投稿表单要求把每位作者的名、姓和所属机构分别填入不同的输入框。实录里，Browy 读完另一个标签页里的论文，连同标题和研究方向一共填了 26 个字段，没有点击 **Submit paper**。
+
+## 自己试一次
+
+1. 在 Chrome、Edge 或 Brave 中[安装 Browy](/zh-cn/install/)。扩展和本地助手使用你的 GitHub Copilot 订阅。
+2. 先打开<a href="https://ar5iv.labs.arxiv.org/html/1706.03762" target="_blank" rel="noopener noreferrer">论文</a>，再打开<a href="/demo/paper-form/" target="_blank" rel="noopener noreferrer">演示表单</a>。两个链接都会打开新标签页。让表单保持在前台。
+3. 打开 Browy 侧边栏，输入：**根据另一个标签页里的论文填写这张表单，不要提交。**
+
+对照论文核对作者顺序和所属机构。每个字段都可以自己修改。这是一张演示表单，即使点击提交，也不会发送数据。
+
+## 让两个对话同时工作
+
+使用 **0.1.19 版扩展和后端**时，切换到另一个标签页，点击 **New chat**，第一个任务会继续运行。在 **Chats** 里可以回到任一对话，单独停止它。如果两段对话都从同一个标签页开始，后发的任务会排队。
+
+要使用并行对话，请安装 [GitHub 发布包](https://github.com/BrowyHQ/browy/releases/tag/v0.1.19)附带的配套扩展。[安装指南](/zh-cn/install/)介绍了如何加载解压后的扩展。
